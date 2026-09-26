@@ -56,6 +56,7 @@
 | Forms       | Native `<form>` integration via `ElementInternals` (form-associated custom element)                     |
 | Versioning  | Changesets (independent versions per package)                                                           |
 | Docs        | VitePress in `docs/`, deployed to **teselia.caicesardev.com** (Cloudflare DNS → CNAME to a static host) |
+| Docs engine | VitePress `2.0.0-alpha` pinned exactly (1.x is frozen on Vite 5); aliases `@teselia/phone` to its source |
 | Tasks       | GitHub Issues + GitHub Projects                                                                         |
 | Testing     | Vitest (Node) for pure logic; Vitest browser mode + Playwright (Chromium, Firefox, WebKit) + `axe-core` |
 | Line ending | LF everywhere, enforced by `.gitattributes`                                                             |
@@ -102,5 +103,5 @@ Summary: `<tes-phone>`, `libphonenumber-js` (min metadata), country names via `I
 1. ~~Help me write `design/phone.md` (the "memoria") resolving the open decisions.~~ Done.
 2. ~~Scaffold the monorepo (pnpm workspaces, TS base config, Changesets, Vitest).~~ Done.
 3. ~~Scaffold `packages/phone` with Vite library mode (ESM + IIFE) and a minimal `defineCustomElement` component.~~ Done, including the form-association spike.
-4. Scaffold the VitePress docs site importing the local package.
+4. ~~Scaffold the VitePress docs site importing the local package.~~ Done.
 5. Turn the v1 scope into GitHub issues.
