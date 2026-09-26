@@ -354,7 +354,12 @@ Deliberately **not** added: Testing Library (the `userEvent` in Vitest browser m
 ## 7. Open questions
 
 1. **Collapsed combobox display.** What the country field shows when closed (`+34`, `ES +34` or `Spain (+34)`). The visible text *is* the accessible value, so no `aria-label` tricks. Decide this during the visual design, in week 2.
-2. **Popup positioning.** The listbox must not be clipped by ancestors with `overflow: hidden`. Evaluate the Popover API (top layer) with CSS anchor positioning against plain absolute positioning, and check current browser support before choosing.
+2. ~~**Popup positioning.**~~ ✅ Resolved in #6: **Popover API + CSS anchor positioning, no JavaScript positioning.**
+   - The listbox is a `popover="manual"` element. It renders in the top layer, so no ancestor `overflow: hidden` or `z-index` can clip or cover it. `manual` means no light dismiss and no focus move: the combobox controls opening and closing, and focus stays in the input.
+   - Placement is pure CSS, inside the same shadow root as the input (anchor names are tree-scoped): `anchor-name` on the input; `position-anchor`, `position-area: block-end span-inline-end`, `position-try-fallbacks: flip-block` and `min-inline-size: anchor-size(inline)` on the listbox; `inset: auto; margin: 0` to override the UA popover centering.
+   - Support verified on 2026-09-27 in Chromium 153, Firefox 155 and WebKit 26.6 (Playwright builds): Popover API, `:popover-open`, `anchor-name`, `position-anchor`, `position-area`, `position-try-fallbacks` and `anchor-size()` all supported. Previous major versions were not checked directly.
+   - **No JavaScript fallback.** A browser without anchor positioning still shows the listbox in the top layer, unclipped, just not aligned to the input. That is an acceptable degradation, and not worth the code.
+   - `popup-positioning.browser.test.ts` verifies, in all three engines: not clipped by `overflow: hidden`, opens below and aligned with the input, flips above when there's no room below, stays above `z-index: 2147483647`, and focus stays in the input. Mutation checks: removing the top layer, the anchor or the flip fallback each fail the matching tests. #11 reuses these styles in the component.
 3. **Bundle size budget.** Set a hard budget once `libphonenumber-js` is in. Baseline on 2026-09-27, with the minimal element and no `libphonenumber-js` yet:
    - ESM (Vue external): 3.0 KB, 1.4 KB gzip
    - IIFE (Vue bundled): 65.7 KB, 25.5 KB gzip. This is mostly the Vue runtime.
