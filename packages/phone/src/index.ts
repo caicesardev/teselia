@@ -1,7 +1,6 @@
 import { TesPhoneElement } from './element'
 
 export { TesPhoneElement }
-export type { FormCallbacks } from './element'
 
 export const TAG_NAME = 'tes-phone'
 
