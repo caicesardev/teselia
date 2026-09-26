@@ -58,7 +58,7 @@ This document records the decisions taken before writing code, the options that 
 
 - The list of regions and their calling codes comes from `libphonenumber-js` metadata.
 - Country names come from `Intl.DisplayNames(locale, { type: 'region' })`. The browser ships the translations, so there are **0 KB of translation files**.
-- The locale is resolved from the `lang` attribute on the host, then from the closest ancestor with `lang`, then from `document.documentElement.lang`, then from `navigator.language`.
+- The locale is resolved from the `lang` attribute on the host, then from the closest ancestor with `lang`, then from `document.documentElement.lang`, then from `navigator.language`, and finally `en`. Empty (`lang=""`, which means "unknown") and malformed tags are skipped. The chosen tag is canonicalized (`EN-gb` → `en-GB`). Implemented in `resolveLocale` (#9).
 - Sorting uses `Intl.Collator(locale)`. Filtering is case- and diacritic-insensitive (`normalize('NFD')`).
 - If `Intl.DisplayNames` returns nothing for a code (possible for non-standard codes such as `XK` or `AC`), the region code itself is displayed.
 - **UI strings** (labels, errors, announcements) ship in **English** and can be overridden with `text-*` attributes (see §4.1). Only country names are localized automatically.
