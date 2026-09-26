@@ -1,8 +1,10 @@
 import vue from '@vitejs/plugin-vue'
 import { defineConfig } from 'vite'
 
+const dependenciesLeftToConsumerBundler = ['vue', /^libphonenumber-js(\/|$)/]
+
 export default defineConfig(({ mode }) => {
-  const bundleVueForCdn = mode === 'iife'
+  const isSelfContainedCdnBuild = mode === 'iife'
 
   return {
     plugins: [
@@ -13,18 +15,20 @@ export default defineConfig(({ mode }) => {
         },
       }),
     ],
-    define: bundleVueForCdn ? { 'process.env.NODE_ENV': JSON.stringify('production') } : {},
+    define: isSelfContainedCdnBuild
+      ? { 'process.env.NODE_ENV': JSON.stringify('production') }
+      : {},
     build: {
-      emptyOutDir: !bundleVueForCdn,
+      emptyOutDir: !isSelfContainedCdnBuild,
       sourcemap: true,
       lib: {
         entry: 'src/index.ts',
         name: 'TeseliaPhone',
-        formats: bundleVueForCdn ? ['iife'] : ['es'],
-        fileName: () => (bundleVueForCdn ? 'tes-phone.iife.js' : 'tes-phone.js'),
+        formats: isSelfContainedCdnBuild ? ['iife'] : ['es'],
+        fileName: () => (isSelfContainedCdnBuild ? 'tes-phone.iife.js' : 'tes-phone.js'),
       },
       rolldownOptions: {
-        external: bundleVueForCdn ? [] : ['vue'],
+        external: isSelfContainedCdnBuild ? [] : dependenciesLeftToConsumerBundler,
       },
     },
   }

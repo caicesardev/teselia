@@ -47,6 +47,9 @@
     "build": "vite build && vite build --mode iife && vue-tsc -p tsconfig.build.json",
     "typecheck": "vue-tsc --noEmit"
   },
+  "dependencies": {
+    "libphonenumber-js": "^1.13.14"
+  },
   "peerDependencies": {
     "vue": "^3.5.0"
   },
