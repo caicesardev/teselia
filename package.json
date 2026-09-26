@@ -17,6 +17,7 @@
     "build": "pnpm --recursive --filter \"./packages/*\" build",
     "test": "vitest run",
     "test:watch": "vitest",
+    "typecheck": "pnpm --recursive typecheck",
     "docs:dev": "pnpm --filter ./docs dev",
     "docs:build": "pnpm --filter ./docs build",
     "changeset": "changeset",
