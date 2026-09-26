@@ -90,8 +90,10 @@ Summary: `<tes-phone>`, `libphonenumber-js` (min metadata), country names via `I
 ## How we work
 
 - Break work into small issues (1–2 hours each) with acceptance criteria.
-- Every session should end with something visible: a commit on `main`, an updated demo, a new green test.
+- Every session should end with something visible: a merged PR on `main`, an updated demo, a new green test.
 - Commits: Conventional Commits (`feat:`, `fix:`, `docs:`, `chore:`...).
+- Branching: trunk-based. `main` is the only long-lived branch and is always releasable. Work happens in short-lived branches named after the change (`feat/phone-combobox`, `chore/monorepo-scaffold`), merged into `main` through a pull request with squash merge. No `dev` branch.
+- TypeScript is pinned to `~6.0`: TypeScript 7 is the native (Go) compiler and ships no JavaScript API, which `vue-tsc` and declaration generators need. Revisit when the Vue tooling supports it.
 
 ## First steps
 
