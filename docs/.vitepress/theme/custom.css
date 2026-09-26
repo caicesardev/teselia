@@ -1,0 +1,11 @@
+:root {
+  --vp-button-brand-bg: var(--vp-c-brand-1);
+  --vp-button-brand-hover-bg: var(--vp-c-brand-2);
+  --vp-button-brand-active-bg: var(--vp-c-brand-2);
+}
+
+.dark {
+  --vp-button-brand-bg: var(--vp-c-brand-3);
+  --vp-button-brand-hover-bg: color-mix(in srgb, var(--vp-c-brand-3), black 15%);
+  --vp-button-brand-active-bg: color-mix(in srgb, var(--vp-c-brand-3), black 25%);
+}
