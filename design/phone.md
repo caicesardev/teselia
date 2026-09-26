@@ -43,7 +43,10 @@ This document records the decisions taken before writing code, the options that 
 ### D2. Validation and formatting: `libphonenumber-js` with `min` metadata
 
 - `libphonenumber-js` (MIT) is used as a regular **dependency**. It is bundled into the IIFE build and externalized in the ESM build.
-- The `min` metadata set is used. According to the library docs, `min` validation is less strict than `max`: it checks length and leading digits rather than every numbering range. That is an acceptable trade-off for a form input. **Verify this during implementation** and document the exact behaviour on the docs page.
+- The `min` metadata set is used. ✅ **Verified in #8** (`libphonenumber-js` 1.13.14), comparing `isValidPhoneNumber` from `min` and `max`:
+  - Both reject unassigned leading digits, e.g. `+34 1…` in Spain and area code `111` in the US, and both reject numbers that are too short.
+  - `min` does **not** know the exact length of each number type. It accepted `+49 1512345678` (a German mobile one digit short), which `max` rejects.
+  - So `min` catches typos in the prefix and in the overall length, but can accept a number with the wrong length for its specific range. That is an acceptable trade-off for a form input. Document it on the docs page.
 - It provides country data (`getCountries()`, calling codes), parsing, validation and as-you-type formatting from a single source, so there is no hand-maintained dataset.
 
 **Discarded:**
@@ -397,9 +400,18 @@ Deliberately **not** added: Testing Library (the `userEvent` in Vitest browser m
    - Support verified on 2026-09-27 in Chromium 153, Firefox 155 and WebKit 26.6 (Playwright builds): Popover API, `:popover-open`, `anchor-name`, `position-anchor`, `position-area`, `position-try-fallbacks` and `anchor-size()` all supported. Previous major versions were not checked directly.
    - **No JavaScript fallback.** A browser without anchor positioning still shows the listbox in the top layer, unclipped, just not aligned to the input. That is an acceptable degradation, and not worth the code.
    - `popup-positioning.browser.test.ts` verifies, in all three engines: not clipped by `overflow: hidden`, opens below and aligned with the input, flips above when there's no room below, stays above `z-index: 2147483647`, and focus stays in the input. Mutation checks: removing the top layer, the anchor or the flip fallback each fail the matching tests. #11 reuses these styles in the component.
-3. **Bundle size budget.** Set a hard budget once `libphonenumber-js` is in. Baseline on 2026-09-27, with the minimal element and no `libphonenumber-js` yet:
-   - ESM (Vue external): 3.0 KB, 1.4 KB gzip
-   - IIFE (Vue bundled): 65.7 KB, 25.5 KB gzip. This is mostly the Vue runtime.
+3. ~~**Bundle size budget.**~~ ✅ Set in #8. Measured on 2026-09-27 with `libphonenumber-js` 1.13.14 (`min`). The component does not use the country data yet, so the measurement used temporary entries that import exactly what v1 will use:
+
+   | Build | Component only | + country list | + full v1 usage¹ |
+   | --- | --- | --- | --- |
+   | ESM (Vue and `libphonenumber-js` external) | 1.8 KB gzip | 2.0 KB gzip | 2.1 KB gzip |
+   | IIFE (everything bundled) | 24.4 KB gzip | 46.4 KB gzip | 59.5 KB gzip |
+
+   ¹ Country list + `parsePhoneNumberFromString` + `isValidPhoneNumber` + `AsYouType`.
+
+   In the IIFE, the `min` metadata costs about 22 KB gzip and the parsing, validation and formatting code about 13 KB more. ESM consumers pay for `libphonenumber-js` through their own bundler, deduplicated with any other copy in the app.
+
+   **No hard budget.** The goal is to stay as small as is practical, without trading away maintainability or correctness. Prefer the platform (`Intl`, Popover API, CSS) over extra code, and don't hand-roll what a well-maintained dependency already does well. Measure and record the size here and in the README on every release, so any growth is visible and explained.
 4. ~~**`value` property semantics.**~~ ✅ Resolved in #5 by following native `<input>` semantics (see §4.1):
    - `value` is **not** a Vue prop, because Vue would define an instance accessor that shadows the class one. The element observes the `value` attribute itself (`observedAttributes` + `attributeChangedCallback`), which does not conflict with Vue: it tracks declared props with a `MutationObserver`.
    - The live value lives in a reactive `state` object owned by the element and read by the Vue component, so it works even when set before the element is connected.
