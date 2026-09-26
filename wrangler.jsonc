@@ -9,5 +9,6 @@
   },
   "workers_dev": true,
   "preview_urls": true,
+  "previews": {},
   "routes": [{ "pattern": "teselia.caicesardev.com", "custom_domain": true }]
 }
