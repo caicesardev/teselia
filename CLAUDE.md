@@ -75,7 +75,7 @@ teselia/
 ```
 
 - Do **not** create `packages/core` until there is real duplicated code between two components.
-- `packages/phone/package.json` essentials: `"files": ["dist"]`, `exports` with `"."` (ESM + types), `"./iife"` and `"./style.css"`; `unpkg`/`jsdelivr` pointing to the IIFE; `peerDependencies: { vue: "^3.5.0" }`; `publishConfig.access: "public"`; `repository.directory: "packages/phone"`; `homepage: https://teselia.caicesardev.com/phone`.
+- `packages/phone/package.json` essentials: `"files": ["dist"]`, `exports` with `"."` (ESM + types) and `"./iife"` (no `"./style.css"`: `.ce.vue` styles are inlined into the shadow root, so there is no external stylesheet; add one only if a light-DOM stylesheet becomes necessary, e.g. `:not(:defined)` FOUC rules); `unpkg`/`jsdelivr` pointing to the IIFE; `peerDependencies: { vue: "^3.5.0" }`; `publishConfig.access: "public"`; `repository.directory: "packages/phone"`; `homepage: https://teselia.caicesardev.com/phone`.
 - Internal deps (later) use `"workspace:^"`.
 - Root scripts: `build`, `test`, `docs:dev`, `docs:build`, `changeset`, `version-packages`, `release` (`pnpm build && changeset publish`).
 
@@ -92,13 +92,15 @@ Summary: `<tes-phone>`, `libphonenumber-js` (min metadata), country names via `I
 - Break work into small issues (1–2 hours each) with acceptance criteria.
 - Every session should end with something visible: a merged PR on `main`, an updated demo, a new green test.
 - Commits: Conventional Commits (`feat:`, `fix:`, `docs:`, `chore:`...).
+- Code style: self-documenting code with minimal or no comments. Prefer clear names and small functions; comment only a non-obvious *why* that code cannot express.
+- `main` is protected: every change lands through a pull request (squash merge only).
 - Branching: trunk-based. `main` is the only long-lived branch and is always releasable. Work happens in short-lived branches named after the change (`feat/phone-combobox`, `chore/monorepo-scaffold`), merged into `main` through a pull request with squash merge. No `dev` branch.
 - TypeScript is pinned to `~6.0`: TypeScript 7 is the native (Go) compiler and ships no JavaScript API, which `vue-tsc` and declaration generators need. Revisit when the Vue tooling supports it.
 
 ## First steps
 
 1. ~~Help me write `design/phone.md` (the "memoria") resolving the open decisions.~~ Done.
-2. Scaffold the monorepo (pnpm workspaces, TS base config, Changesets, Vitest).
-3. Scaffold `packages/phone` with Vite library mode (ESM + IIFE) and a minimal `defineCustomElement` component.
+2. ~~Scaffold the monorepo (pnpm workspaces, TS base config, Changesets, Vitest).~~ Done.
+3. ~~Scaffold `packages/phone` with Vite library mode (ESM + IIFE) and a minimal `defineCustomElement` component.~~ Done, including the form-association spike.
 4. Scaffold the VitePress docs site importing the local package.
 5. Turn the v1 scope into GitHub issues.
