@@ -148,3 +148,6 @@ vite.config.ts.timestamp-*
 # VitePress
 docs/.vitepress/cache/
 docs/.vitepress/dist/
+
+# Wrangler local state
+.wrangler/

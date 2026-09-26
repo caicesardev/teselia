@@ -55,7 +55,8 @@
 | Theming     | CSS custom properties + `::part()`                                                                      |
 | Forms       | Native `<form>` integration via `ElementInternals` (form-associated custom element)                     |
 | Versioning  | Changesets (independent versions per package)                                                           |
-| Docs        | VitePress in `docs/`, deployed to **teselia.caicesardev.com** (Cloudflare DNS → CNAME to a static host) |
+| Docs        | VitePress in `docs/`, deployed to **teselia.caicesardev.com**                                           |
+| Hosting     | Cloudflare Workers static assets via Workers Builds (Git integration): `main` → production, PRs → preview URLs. Config in `wrangler.jsonc` (assets dir, custom domain) |
 | Docs engine | VitePress `2.0.0-alpha` pinned exactly (1.x is frozen on Vite 5); aliases `@teselia/phone` to its source |
 | Tasks       | GitHub Issues + GitHub Projects                                                                         |
 | Testing     | Vitest (Node) for pure logic; Vitest browser mode + Playwright (Chromium, Firefox, WebKit) + `axe-core` |
