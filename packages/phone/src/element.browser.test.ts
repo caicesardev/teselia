@@ -27,6 +27,12 @@ function innerInput(el: TesPhoneElement): HTMLInputElement {
   return input
 }
 
+function formOf(container: HTMLElement): HTMLFormElement {
+  const form = container.querySelector('form')
+  if (!form) throw new Error('form not found')
+  return form
+}
+
 afterEach(() => {
   document.body.innerHTML = ''
 })
@@ -68,6 +74,96 @@ describe('<tes-phone> accessibility', () => {
 
     expect(results.violations).toEqual([])
   })
+
+  it('does not leak host attributes into the shadow root', async () => {
+    const el = await mounted(
+      render('<tes-phone name="phone" value="+34" label="Phone number"></tes-phone>'),
+    )
+
+    expect(el.shadowRoot?.querySelector('[name], .field[value]')).toBeNull()
+  })
+})
+
+describe('<tes-phone> value semantics', () => {
+  it('uses the value attribute as the initial value', async () => {
+    const el = await mounted(render('<tes-phone value="+34" label="Phone number"></tes-phone>'))
+
+    expect(el.value).toBe('+34')
+    expect(el.defaultValue).toBe('+34')
+    expect(innerInput(el).value).toBe('+34')
+  })
+
+  it('returns the live value typed by the user, not the attribute', async () => {
+    const el = await mounted(render('<tes-phone value="+34" label="Phone number"></tes-phone>'))
+
+    await userEvent.type(innerInput(el), '612')
+
+    expect(el.value).toBe('+34612')
+    expect(el.getAttribute('value')).toBe('+34')
+  })
+
+  it('updates the field and the form value when value is set', async () => {
+    const container = render(
+      '<form><tes-phone name="phone" label="Phone number"></tes-phone></form>',
+    )
+    const el = await mounted(container)
+
+    el.value = '+44207946'
+
+    await expect.poll(() => innerInput(el).value).toBe('+44207946')
+    expect(new FormData(formOf(container)).get('phone')).toBe('+44207946')
+    expect(el.getAttribute('value')).toBeNull()
+  })
+
+  it('accepts a value set before the element is connected', async () => {
+    const el = document.createElement('tes-phone')
+    el.setAttribute('label', 'Phone number')
+    el.value = '+351'
+
+    const container = render('')
+    container.append(el)
+    await waitForVueAsyncMount(el)
+
+    expect(innerInput(el).value).toBe('+351')
+  })
+
+  it('follows value attribute changes until the value is edited', async () => {
+    const el = await mounted(render('<tes-phone value="+34" label="Phone number"></tes-phone>'))
+
+    el.setAttribute('value', '+33')
+    await expect.poll(() => innerInput(el).value).toBe('+33')
+
+    await userEvent.type(innerInput(el), '6')
+    el.setAttribute('value', '+49')
+
+    expect(el.value).toBe('+336')
+    expect(el.defaultValue).toBe('+49')
+  })
+
+  it('reflects defaultValue to the value attribute', async () => {
+    const el = await mounted(render('<tes-phone label="Phone number"></tes-phone>'))
+
+    el.defaultValue = '+39'
+
+    expect(el.getAttribute('value')).toBe('+39')
+    await expect.poll(() => el.value).toBe('+39')
+  })
+
+  it('restores defaultValue on reset and follows the attribute again', async () => {
+    const container = render(
+      '<form><tes-phone name="phone" value="+34" label="Phone number"></tes-phone></form>',
+    )
+    const el = await mounted(container)
+
+    el.value = '+34999'
+    formOf(container).reset()
+
+    await expect.poll(() => innerInput(el).value).toBe('+34')
+    expect(el.value).toBe('+34')
+
+    el.setAttribute('value', '+52')
+    await expect.poll(() => el.value).toBe('+52')
+  })
 })
 
 describe('<tes-phone> form integration', () => {
@@ -76,12 +172,11 @@ describe('<tes-phone> form integration', () => {
       '<form><tes-phone name="phone" label="Phone number"></tes-phone></form>',
     )
     const el = await mounted(container)
-    const form = container.querySelector('form') as HTMLFormElement
 
     await userEvent.type(page.getByRole('textbox', { name: 'Phone number' }), '612345678')
 
-    expect(new FormData(form).get('phone')).toBe('612345678')
-    expect(el.form).toBe(form)
+    expect(new FormData(formOf(container)).get('phone')).toBe('612345678')
+    expect(el.form).toBe(formOf(container))
   })
 
   it('reports valueMissing when required and empty', async () => {
@@ -89,15 +184,14 @@ describe('<tes-phone> form integration', () => {
       '<form><tes-phone name="phone" label="Phone number" required></tes-phone></form>',
     )
     const el = await mounted(container)
-    const form = container.querySelector('form') as HTMLFormElement
 
     await expect.poll(() => el.validity.valueMissing).toBe(true)
-    expect(form.checkValidity()).toBe(false)
+    expect(formOf(container).checkValidity()).toBe(false)
 
     await userEvent.type(innerInput(el), '612345678')
 
     await expect.poll(() => el.validity.valid).toBe(true)
-    expect(form.checkValidity()).toBe(true)
+    expect(formOf(container).checkValidity()).toBe(true)
   })
 
   it('restores the initial value on form reset', async () => {
@@ -105,15 +199,14 @@ describe('<tes-phone> form integration', () => {
       '<form><tes-phone name="phone" label="Phone number" value="+34"></tes-phone></form>',
     )
     const el = await mounted(container)
-    const form = container.querySelector('form') as HTMLFormElement
 
     await userEvent.type(innerInput(el), '612')
-    expect(new FormData(form).get('phone')).toBe('+34612')
+    expect(new FormData(formOf(container)).get('phone')).toBe('+34612')
 
-    form.reset()
+    formOf(container).reset()
 
     await expect.poll(() => innerInput(el).value).toBe('+34')
-    expect(new FormData(form).get('phone')).toBe('+34')
+    expect(new FormData(formOf(container)).get('phone')).toBe('+34')
   })
 
   it('is disabled by a disabled fieldset and excluded from submission', async () => {
@@ -121,12 +214,11 @@ describe('<tes-phone> form integration', () => {
       '<form><fieldset><tes-phone name="phone" label="Phone number" value="1"></tes-phone></fieldset></form>',
     )
     const el = await mounted(container)
-    const form = container.querySelector('form') as HTMLFormElement
     const fieldset = container.querySelector('fieldset') as HTMLFieldSetElement
 
     fieldset.disabled = true
 
     await expect.poll(() => innerInput(el).disabled).toBe(true)
-    expect(new FormData(form).has('phone')).toBe(false)
+    expect(new FormData(formOf(container)).has('phone')).toBe(false)
   })
 })

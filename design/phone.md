@@ -161,7 +161,8 @@ Attributes use kebab-case and map to camelCase properties.
 | Attribute | Property | Type | Default | Description |
 | --- | --- | --- | --- | --- |
 | `name` | `name` | `string` | — | Form field name. |
-| `value` | `value` | `string` | `''` | E.164 value. When set, it selects the country and fills the national number. |
+| `value` | `defaultValue` | `string` | `''` | **Initial** E.164 value, like `<input value>`. Restored by `form.reset()`. Changing the attribute updates the live value only until the value has been edited. |
+| — | `value` | `string` | `''` | **Live** E.164 value. Setting it selects the country and fills the national number, marks the value as edited and does not touch the attribute. |
 | `label` | `label` | `string` | — | Visible label of the field. **Required**: a console warning is logged if it is missing. |
 | `hint` | `hint` | `string` | — | Help text below the field, linked via `aria-describedby`. |
 | `default-country` | `defaultCountry` | ISO 3166-1 alpha-2 | resolved (D7) | Initial country. |
@@ -209,7 +210,7 @@ All events bubble and are composed. `detail` is `{ value, country, valid }`.
   - `{ valueMissing: true }` → `text-required`
   - `{ typeMismatch: true }` → `text-invalid`, or `text-not-allowed` for an excluded country
   - The anchor is the number input, so `reportValidity()` focuses it.
-- `formResetCallback` restores the initial `value` attribute and the default country.
+- `formResetCallback` restores `defaultValue` (the `value` attribute) and the default country, and clears the "edited" flag.
 - `formDisabledCallback` covers disabled fieldsets.
 - `formStateRestoreCallback` handles back/forward cache and autofill restore.
 
@@ -217,7 +218,7 @@ All events bubble and are composed. `detail` is `{ value, country, valid }`.
 >
 > - It sets `static formAssociated = true` and calls `attachInternals()` in the constructor.
 > - The component reaches the host with `useHost()`.
-> - The form lifecycle callbacks (`formResetCallback`, `formDisabledCallback`) call hooks that the component registers during setup.
+> - The form lifecycle callbacks (`formResetCallback`, `formDisabledCallback`) update a reactive `state` object owned by the element, which the component reads (see §7.4).
 >
 > `shadowRootOptions: { delegatesFocus: true }` is supported natively by Vue 3.5. Browser tests pass in Chromium, Firefox and WebKit for form value, `valueMissing`, reset, disabled fieldset, focus delegation, accessible name and axe. See `packages/phone/src/element.ts`.
 
@@ -357,4 +358,9 @@ Deliberately **not** added: Testing Library (the `userEvent` in Vitest browser m
 3. **Bundle size budget.** Set a hard budget once `libphonenumber-js` is in. Baseline on 2026-09-27, with the minimal element and no `libphonenumber-js` yet:
    - ESM (Vue external): 3.0 KB, 1.4 KB gzip
    - IIFE (Vue bundled): 65.7 KB, 25.5 KB gzip. This is mostly the Vue runtime.
-4. **`value` property semantics.** Vue defines every declared prop as an accessor on the element, so `el.value` currently returns the `value` *attribute* (the initial value), not what the user typed. Native inputs split these into `defaultValue` and `value`. Decide how to expose the live value, for example a `defaultValue` prop and a `value` getter/setter on the class that override Vue's accessor. Resolve this before the public API is implemented.
+4. ~~**`value` property semantics.**~~ ✅ Resolved in #5 by following native `<input>` semantics (see §4.1):
+   - `value` is **not** a Vue prop, because Vue would define an instance accessor that shadows the class one. The element observes the `value` attribute itself (`observedAttributes` + `attributeChangedCallback`), which does not conflict with Vue: it tracks declared props with a `MutationObserver`.
+   - The live value lives in a reactive `state` object owned by the element and read by the Vue component, so it works even when set before the element is connected.
+   - A dirty flag mirrors the native "dirty value flag": user input or setting `value` marks it; `form.reset()` clears it.
+   - The component uses `inheritAttrs: false`. Otherwise host attributes that are not props (`name`, `value`) fall through to the root element inside the shadow root.
+   - Until #16, the value is the raw text. #16 normalizes it to E.164.

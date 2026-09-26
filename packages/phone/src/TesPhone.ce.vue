@@ -1,48 +1,38 @@
 <script setup lang="ts">
-import { onMounted, ref, useHost, useTemplateRef, watch } from 'vue'
+import { onMounted, useHost, useTemplateRef, watch } from 'vue'
 import type { TesPhoneElement } from './element'
 
+defineOptions({ inheritAttrs: false })
+
 const props = defineProps<{
-  value?: string
   label?: string
   required?: boolean
 }>()
 
-const host = useHost() as TesPhoneElement | null
+const host = useHost() as TesPhoneElement
+const { state, internals } = host
 const input = useTemplateRef<HTMLInputElement>('input')
-
-const current = ref(props.value ?? '')
-const disabled = ref(false)
 
 if (import.meta.env.DEV && !props.label) {
   console.warn('[tes-phone] The `label` attribute is required for an accessible name.')
 }
 
+function updateFromUserInput(event: Event): void {
+  state.value = (event.target as HTMLInputElement).value
+  state.dirty = true
+}
+
 function syncFormState(): void {
-  if (!host) return
-  const { internals } = host
+  internals.setFormValue(state.value)
 
-  internals.setFormValue(current.value)
-
-  if (props.required && current.value === '') {
+  if (props.required && state.value === '') {
     internals.setValidity({ valueMissing: true }, 'Enter a phone number', input.value ?? undefined)
   } else {
     internals.setValidity({})
   }
 }
 
-if (host) {
-  host.formCallbacks = {
-    reset: () => {
-      current.value = props.value ?? ''
-    },
-    disabled: (isDisabled) => {
-      disabled.value = isDisabled
-    },
-  }
-}
-
-watch([current, () => props.required], syncFormState)
+watch([() => state.value, () => props.required], syncFormState)
 onMounted(syncFormState)
 </script>
 
@@ -52,14 +42,15 @@ onMounted(syncFormState)
     <input
       id="number"
       ref="input"
-      v-model="current"
+      :value="state.value"
       part="number"
       type="tel"
       inputmode="tel"
       autocomplete="tel"
       dir="ltr"
       :required="required"
-      :disabled="disabled"
+      :disabled="state.disabledByForm"
+      @input="updateFromUserInput"
     />
   </div>
 </template>
