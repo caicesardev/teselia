@@ -1,3 +1,22 @@
+<template>
+  <div class="field" part="field">
+    <label for="number" part="label">{{ label }}</label>
+    <input
+      id="number"
+      ref="input"
+      :value="state.value"
+      part="number"
+      type="tel"
+      inputmode="tel"
+      autocomplete="tel"
+      dir="ltr"
+      :required="required"
+      :disabled="state.disabledByForm"
+      @input="updateFromUserInput"
+    />
+  </div>
+</template>
+
 <script setup lang="ts">
 import { onMounted, useHost, useTemplateRef, watch } from 'vue'
 import type { TesPhoneElement } from './element'
@@ -36,29 +55,26 @@ watch([() => state.value, () => props.required], syncFormState)
 onMounted(syncFormState)
 </script>
 
-<template>
-  <div class="field" part="field">
-    <label for="number" part="label">{{ label }}</label>
-    <input
-      id="number"
-      ref="input"
-      :value="state.value"
-      part="number"
-      type="tel"
-      inputmode="tel"
-      autocomplete="tel"
-      dir="ltr"
-      :required="required"
-      :disabled="state.disabledByForm"
-      @input="updateFromUserInput"
-    />
-  </div>
-</template>
-
 <style>
 :host {
+  --_text: var(--tes-color-text, light-dark(#1f2328, #e8eaee));
+  --_muted: var(--tes-color-muted, light-dark(#59636e, #a3adba));
+  --_bg: var(--tes-color-bg, light-dark(#ffffff, #16181d));
+  --_border: var(--tes-color-border, light-dark(#7d8590, #7f8a99));
+  --_accent: var(--tes-color-accent, light-dark(#0b5fcc, #7aa7ff));
+  --_on-accent: var(--tes-color-on-accent, light-dark(#ffffff, #0d1117));
+  --_hover: var(--tes-color-hover, light-dark(#eef3fb, #232a36));
+  --_focus: var(--tes-color-focus, light-dark(#0b5fcc, #7aa7ff));
+  --_error: var(--tes-color-error, light-dark(#c4232b, #ff8a80));
+  --_radius: var(--tes-radius, 0.375rem);
+  --_space: var(--tes-space, 0.5rem);
+  --_popup-max-height: var(--tes-popup-max-height, 18rem);
+  --_control-height: 2.75rem;
+
   display: inline-block;
-  font: inherit;
+  color: var(--_text);
+  font-family: var(--tes-font-family);
+  font-size: var(--tes-font-size);
 }
 
 :host([hidden]) {
@@ -67,17 +83,26 @@ onMounted(syncFormState)
 
 .field {
   display: grid;
-  gap: 0.25rem;
+  gap: calc(var(--_space) / 2);
+}
+
+label {
+  font-weight: 500;
 }
 
 input {
+  box-sizing: border-box;
+  min-block-size: var(--_control-height);
+  padding-inline: calc(var(--_space) * 1.5);
+  border: 1px solid var(--_border);
+  border-radius: var(--_radius);
+  background: var(--_bg);
+  color: var(--_text);
   font: inherit;
-  min-block-size: 2.75rem;
-  padding-inline: 0.75rem;
 }
 
 input:focus-visible {
-  outline: 2px solid var(--tes-color-focus, Highlight);
+  outline: 2px solid var(--_focus);
   outline-offset: 2px;
 }
 </style>
