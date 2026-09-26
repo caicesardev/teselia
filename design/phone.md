@@ -120,6 +120,25 @@ No IP geolocation and no network requests (see non-goals).
 
 See §3 and §6.
 
+### D9. Visual design
+
+Decided in #7.
+
+- **Collapsed country display: `Spain +34`** (localized country name + calling code).
+  - The visible text *is* the accessible value of the combobox, so what sighted users see is exactly what screen readers announce ("Country code, combobox, Spain +34").
+  - A calling code alone is ambiguous (`+1` is shared by the US, Canada and others; `+44` by the UK, Jersey, Guernsey and the Isle of Man), and there are no flags in v1 (D4).
+  - ISO codes (`ES +34`) were discarded because screen readers pronounce them as words (`IT` → "it", `IN` → "in").
+  - Long names are truncated with a visual ellipsis. The full name stays in the value, so assistive technology reads it completely.
+- **Style: sober and native-looking**, so it blends into any site and is easy to theme:
+  - 1px border
+  - 6px radius
+  - 44px control height
+  - 2px focus outline with a 2px offset
+  - inherited font
+- **Theme follows the page's `color-scheme`.** Defaults use `light-dark()`, so the component looks right on light and dark pages without configuration. A page that doesn't opt into dark (`color-scheme: normal`) gets the light palette.
+
+Default token values and contrast ratios: §4.4.
+
 ---
 
 ## 3. v1 scope
@@ -144,7 +163,7 @@ See §3 and §6.
 - Extensions (`ext. 123`).
 - Choosing the metadata set (`min` / `max` / `mobile`).
 - External `<label for>` / `aria-describedby` pointing at the host being mirrored into the shadow root (see §5.4). Use the `label` and `hint` attributes instead.
-- Built-in dark theme. The tokens make it possible; a preset may come later.
+- Theme presets beyond the light and dark defaults (D9). Tokens make any palette possible.
 - Server-side rendering / Declarative Shadow DOM.
 - Framework wrappers (React, Vue SFC export, and so on).
 - Custom country datasets or custom names per country.
@@ -226,22 +245,40 @@ All events bubble and are composed. `detail` is `{ value, country, valid }`.
 
 Tokens use the suite-wide `--tes-` prefix, so one set of variables themes every Teselia component. That is a naming convention only; there is no shared package (see the "no `packages/core`" rule).
 
-| Property | Purpose |
-| --- | --- |
-| `--tes-font-family` | Font family (inherits by default). |
-| `--tes-font-size` | Base font size. |
-| `--tes-color-text` | Text color. |
-| `--tes-color-muted` | Hint and secondary text. |
-| `--tes-color-bg` | Field and popup background. |
-| `--tes-color-border` | Field border. |
-| `--tes-color-accent` | Highlighted option and accents. |
-| `--tes-color-focus` | Focus indicator. |
-| `--tes-color-error` | Error border and message. |
-| `--tes-radius` | Corner radius. |
-| `--tes-space` | Base spacing unit. |
-| `--tes-popup-max-height` | Maximum height of the listbox. |
+| Property | Purpose | Light default | Dark default |
+| --- | --- | --- | --- |
+| `--tes-font-family` | Font family | inherited | inherited |
+| `--tes-font-size` | Base font size | inherited | inherited |
+| `--tes-color-text` | Text color | `#1f2328` | `#e8eaee` |
+| `--tes-color-muted` | Hint and secondary text | `#59636e` | `#a3adba` |
+| `--tes-color-bg` | Field and popup background | `#ffffff` | `#16181d` |
+| `--tes-color-border` | Field border | `#7d8590` | `#7f8a99` |
+| `--tes-color-accent` | Selected option and accents | `#0b5fcc` | `#7aa7ff` |
+| `--tes-color-on-accent` | Text on the accent color | `#ffffff` | `#0d1117` |
+| `--tes-color-hover` | Hovered / highlighted option background | `#eef3fb` | `#232a36` |
+| `--tes-color-focus` | Focus indicator | `#0b5fcc` | `#7aa7ff` |
+| `--tes-color-error` | Error border and message | `#c4232b` | `#ff8a80` |
+| `--tes-radius` | Corner radius | `0.375rem` | `0.375rem` |
+| `--tes-space` | Base spacing unit | `0.5rem` | `0.5rem` |
+| `--tes-popup-max-height` | Maximum height of the listbox | `18rem` | `18rem` |
 
-Default values must meet the contrast requirements in §5.1.
+- **How the defaults work.** The component reads each public token through a private variable with a fallback, for example `--_border: var(--tes-color-border, light-dark(#7d8590, #7f8a99))`. Because the host never sets `--tes-*` itself, consumers can define tokens on any ancestor (including `:root`) or on the element, and they always win.
+- **Fonts.** The font tokens resolve to `inherit` when unset: an unset `var()` behaves as `unset`, and font properties inherit.
+
+**Contrast of the defaults** (WCAG 2.2: text ≥ 4.5:1, non-text ≥ 3:1):
+
+| Pair | Light | Dark | Minimum |
+| --- | --- | --- | --- |
+| text / bg | 15.80 | 14.74 | 4.5 |
+| muted / bg | 6.11 | 7.82 | 4.5 |
+| error / bg | 5.80 | 7.78 | 4.5 |
+| on-accent / accent | 5.96 | 7.93 | 4.5 |
+| text / hover | 14.18 | 11.98 | 4.5 |
+| border / bg | 3.73 | 5.07 | 3 |
+| focus / bg | 5.96 | 7.44 | 3 |
+| accent / bg | 5.96 | 7.44 | 3 |
+
+`design-tokens.browser.test.ts` resolves the real colors inside the shadow root in both schemes and asserts every pair in all three engines, so a future palette change cannot silently break contrast. The focus ring sits outside the field (2px offset), on the page background: the ratios assume a page background close to the token background.
 
 ### 4.5 Parts
 
@@ -353,7 +390,7 @@ Deliberately **not** added: Testing Library (the `userEvent` in Vitest browser m
 
 ## 7. Open questions
 
-1. **Collapsed combobox display.** What the country field shows when closed (`+34`, `ES +34` or `Spain (+34)`). The visible text *is* the accessible value, so no `aria-label` tricks. Decide this during the visual design, in week 2.
+1. ~~**Collapsed combobox display.**~~ ✅ Resolved in #7: `Spain +34`. See D9.
 2. ~~**Popup positioning.**~~ ✅ Resolved in #6: **Popover API + CSS anchor positioning, no JavaScript positioning.**
    - The listbox is a `popover="manual"` element. It renders in the top layer, so no ancestor `overflow: hidden` or `z-index` can clip or cover it. `manual` means no light dismiss and no focus move: the combobox controls opening and closing, and focus stays in the input.
    - Placement is pure CSS, inside the same shadow root as the input (anchor names are tree-scoped): `anchor-name` on the input; `position-anchor`, `position-area: block-end span-inline-end`, `position-try-fallbacks: flip-block` and `min-inline-size: anchor-size(inline)` on the listbox; `inset: auto; margin: 0` to override the UA popover centering.

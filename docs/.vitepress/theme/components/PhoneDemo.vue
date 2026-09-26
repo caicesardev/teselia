@@ -1,18 +1,3 @@
-<script setup lang="ts">
-import { ref } from 'vue'
-
-const submitted = ref<Record<string, FormDataEntryValue> | null>(null)
-
-function showSubmittedData(event: SubmitEvent): void {
-  const form = event.target as HTMLFormElement
-  submitted.value = Object.fromEntries(new FormData(form))
-}
-
-function clearSubmittedData(): void {
-  submitted.value = null
-}
-</script>
-
 <template>
   <form class="demo" @submit.prevent="showSubmittedData" @reset="clearSubmittedData">
     <tes-phone name="phone" label="Phone number" required />
@@ -30,6 +15,21 @@ function clearSubmittedData(): void {
     </output>
   </form>
 </template>
+
+<script setup lang="ts">
+import { ref } from 'vue'
+
+const submitted = ref<Record<string, FormDataEntryValue> | null>(null)
+
+function showSubmittedData(event: SubmitEvent): void {
+  const form = event.target as HTMLFormElement
+  submitted.value = Object.fromEntries(new FormData(form))
+}
+
+function clearSubmittedData(): void {
+  submitted.value = null
+}
+</script>
 
 <style scoped>
 .demo {

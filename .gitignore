@@ -151,3 +151,6 @@ docs/.vitepress/dist/
 
 # Wrangler local state
 .wrangler/
+
+# Claude Code local config (launch.json for the preview server)
+.claude/
