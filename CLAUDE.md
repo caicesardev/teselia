@@ -95,7 +95,8 @@ Summary: `<tes-phone>`, `libphonenumber-js` (min metadata), country names via `I
 - Every session should end with something visible: a merged PR on `main`, an updated demo, a new green test.
 - Commits: Conventional Commits (`feat:`, `fix:`, `docs:`, `chore:`...).
 - Code style: self-documenting code with minimal or no comments. Prefer clear names and small functions; comment only a non-obvious *why* that code cannot express.
-- `main` is protected: every change lands through a pull request (squash merge only).
+- `main` is protected: every change lands through a pull request (squash merge only), and the `Verify` CI check (typecheck, builds, tests in Chromium/Firefox/WebKit) must pass with the branch up to date.
+- v1 roadmap: pinned issue #31 and the `v1.0.0` milestone. Pick the next open issue from the roadmap, in order.
 - Branching: trunk-based. `main` is the only long-lived branch and is always releasable. Work happens in short-lived branches named after the change (`feat/phone-combobox`, `chore/monorepo-scaffold`), merged into `main` through a pull request with squash merge. No `dev` branch.
 - TypeScript is pinned to `~6.0`: TypeScript 7 is the native (Go) compiler and ships no JavaScript API, which `vue-tsc` and declaration generators need. Revisit when the Vue tooling supports it.
 
