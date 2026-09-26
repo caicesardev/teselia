@@ -197,7 +197,10 @@ All events bubble and are composed. `detail` is `{ value, country, valid }`.
 | `change` | When a change is committed: the number field loses focus, or a country is selected. |
 | `countrychange` | When the country changes, from the user, paste/autofill or a `value` update. |
 
-> ⚠️ **Implementation note:** the native `input` event from the inner `<input>` is `composed`, so it crosses the shadow boundary on its own. Stop the inner events and re-dispatch our own, so consumers never receive duplicated `input` events. Also check how Vue's `defineCustomElement` shapes `detail` for emitted events: the documented contract above is what consumers must get.
+> **Implementation notes:**
+>
+> - The native `input` event from the inner `<input>` is `composed`, so it crosses the shadow boundary on its own. Stop the inner events and re-dispatch our own, so consumers never receive duplicated `input` events.
+> - **Do not use Vue's `emit()` for public events.** In a custom element, Vue dispatches emitted events as a `CustomEvent` that does not bubble, is not composed, and has `detail` set to the **array** of emit arguments (verified in `@vue/runtime-dom` 3.5.43). Events are therefore dispatched directly from the host (`useHost()`) with `new CustomEvent(name, { bubbles: true, composed: true, detail })`.
 
 ### 4.3 Form integration
 
@@ -210,7 +213,13 @@ All events bubble and are composed. `detail` is `{ value, country, valid }`.
 - `formDisabledCallback` covers disabled fieldsets.
 - `formStateRestoreCallback` handles back/forward cache and autofill restore.
 
-> ⚠️ **Technical risk (spike in week 1):** Vue's `defineCustomElement` does not expose `formAssociated` as an option. The planned approach is to extend the returned class, set `static formAssociated = true`, call `attachInternals()` in the constructor, and reach the host from the component with `useHost()`. Validate this before building UI on top of it.
+> ✅ **Spike validated (2026-09-27).** Vue's `defineCustomElement` does not expose `formAssociated` as an option. The generated class is extended instead:
+>
+> - It sets `static formAssociated = true` and calls `attachInternals()` in the constructor.
+> - The component reaches the host with `useHost()`.
+> - The form lifecycle callbacks (`formResetCallback`, `formDisabledCallback`) call hooks that the component registers during setup.
+>
+> `shadowRootOptions: { delegatesFocus: true }` is supported natively by Vue 3.5. Browser tests pass in Chromium, Firefox and WebKit for form value, `valueMissing`, reset, disabled fieldset, focus delegation, accessible name and axe. See `packages/phone/src/element.ts`.
 
 ### 4.4 CSS custom properties
 
@@ -345,4 +354,7 @@ Deliberately **not** added: Testing Library (the `userEvent` in Vitest browser m
 
 1. **Collapsed combobox display.** What the country field shows when closed (`+34`, `ES +34` or `Spain (+34)`). The visible text *is* the accessible value, so no `aria-label` tricks. Decide this during the visual design, in week 2.
 2. **Popup positioning.** The listbox must not be clipped by ancestors with `overflow: hidden`. Evaluate the Popover API (top layer) with CSS anchor positioning against plain absolute positioning, and check current browser support before choosing.
-3. **Bundle size budget.** Set a hard budget after the week 1 measurement, not before.
+3. **Bundle size budget.** Set a hard budget once `libphonenumber-js` is in. Baseline on 2026-09-27, with the minimal element and no `libphonenumber-js` yet:
+   - ESM (Vue external): 3.0 KB, 1.4 KB gzip
+   - IIFE (Vue bundled): 65.7 KB, 25.5 KB gzip. This is mostly the Vue runtime.
+4. **`value` property semantics.** Vue defines every declared prop as an accessor on the element, so `el.value` currently returns the `value` *attribute* (the initial value), not what the user typed. Native inputs split these into `defaultValue` and `value`. Decide how to expose the live value, for example a `defaultValue` prop and a `value` getter/setter on the class that override Vue's accessor. Resolve this before the public API is implemented.

@@ -1,0 +1,62 @@
+{
+  "name": "@teselia/phone",
+  "version": "0.0.0",
+  "description": "Accessible international phone input with country calling code, shipped as a framework-agnostic Web Component. WCAG 2.2 AA by default.",
+  "keywords": [
+    "phone",
+    "phone-input",
+    "tel",
+    "international",
+    "e164",
+    "web-component",
+    "custom-element",
+    "accessibility",
+    "a11y",
+    "wcag",
+    "vue"
+  ],
+  "license": "MIT",
+  "author": "caicesardev",
+  "homepage": "https://teselia.caicesardev.com/phone",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/caicesardev/teselia.git",
+    "directory": "packages/phone"
+  },
+  "bugs": {
+    "url": "https://github.com/caicesardev/teselia/issues"
+  },
+  "type": "module",
+  "sideEffects": true,
+  "files": [
+    "dist"
+  ],
+  "types": "./dist/index.d.ts",
+  "module": "./dist/tes-phone.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/tes-phone.js"
+    },
+    "./iife": "./dist/tes-phone.iife.js",
+    "./package.json": "./package.json"
+  },
+  "unpkg": "./dist/tes-phone.iife.js",
+  "jsdelivr": "./dist/tes-phone.iife.js",
+  "scripts": {
+    "build": "vite build && vite build --mode iife && vue-tsc -p tsconfig.build.json",
+    "typecheck": "vue-tsc --noEmit"
+  },
+  "peerDependencies": {
+    "vue": "^3.5.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.9",
+    "vite": "^8.3.1",
+    "vue": "^3.5.43",
+    "vue-tsc": "^3.3.11"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
