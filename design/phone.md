@@ -107,6 +107,13 @@ Keyboard implementation notes (#12):
 - `Enter` and `Escape` call `preventDefault` while the listbox is open. `Escape` also stops propagation, so closing the listbox inside a dialog doesn't close the dialog.
 - The highlighted option is scrolled into view (`block: 'nearest'`). It is shown with a hover background plus a 2px inset ring, in `on-accent` when it is also the selected country.
 
+Pointer implementation notes (#13):
+
+- **`delegatesFocus` is load-bearing.** Pressing a non-focusable part of the shadow tree (an option, the listbox padding, the chevron) keeps focus in the combobox, so `blur` never closes the listbox before the `click` lands. No `mousedown` `preventDefault` is needed. Removing `delegatesFocus` breaks pointer selection, and the browser tests catch it.
+- Clicking the combobox opens the listbox with the current country highlighted and in view. The focusing press is intercepted (`mousedown` → `preventDefault` → `focus()`), so the text is selected in every engine and typing replaces it. WebKit otherwise places the caret where you clicked.
+- The chevron toggles the listbox. It is `aria-hidden` and not focusable, because clicking the field and the keyboard already provide the same function.
+- Hover on options is visual only. It does not move `aria-activedescendant`.
+
 - A mouse or touch click on an option selects it.
 - Clicking outside the component closes the popup without changing the selection.
 
