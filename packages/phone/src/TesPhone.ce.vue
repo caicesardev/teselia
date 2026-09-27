@@ -255,6 +255,8 @@ function filterByTypedText(event: Event): void {
 }
 
 function handleComboboxKeydown(event: KeyboardEvent): void {
+  if (query.value === null && editsText(event)) startSearchFromEmptyText(event)
+
   switch (event.key) {
     case 'ArrowDown':
       event.preventDefault()
@@ -275,6 +277,22 @@ function handleComboboxKeydown(event: KeyboardEvent): void {
       if (isOpen.value) event.stopPropagation()
       closeAndRestoreSelection()
       break
+  }
+}
+
+function editsText(event: KeyboardEvent): boolean {
+  const isPrintable = event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey
+  return isPrintable || event.key === 'Backspace' || event.key === 'Delete'
+}
+
+function startSearchFromEmptyText(event: KeyboardEvent): void {
+  const input = event.target as HTMLInputElement
+  input.value = ''
+  if (event.key === 'Backspace' || event.key === 'Delete') {
+    event.preventDefault()
+    query.value = ''
+    highlightedCode.value = null
+    openPopup()
   }
 }
 
