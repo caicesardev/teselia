@@ -280,6 +280,10 @@ All events bubble and are composed. `detail` is `{ value, country, valid }`.
 - `formResetCallback` restores `defaultValue` (the `value` attribute) and the default country, and clears the "edited" flag.
 - `formDisabledCallback` covers disabled fieldsets.
 - `formStateRestoreCallback` handles back/forward cache and autofill restore.
+- Implemented in #21:
+  - `setFormValue(e164, state)` saves the typed text and country as JSON (`form-state.ts`). In `restore` mode both come back exactly as they were. In `autocomplete` mode the browser provides a value, which is treated as E.164. Malformed state, or an unsupported country code, is ignored.
+  - `readonly`: both controls get `readonly`. The combobox ignores keys, clicks and the chevron, and the value is still submitted. The HTML spec bars a form-associated element with `readonly` from constraint validation, so `willValidate` is `false`, exactly like a native readonly input. `readOnly` reflects to the attribute.
+  - `disabled` (attribute, property or fieldset) goes through `formDisabledCallback` and disables both controls.
 
 > ✅ **Spike validated (2026-09-27).** Vue's `defineCustomElement` does not expose `formAssociated` as an option. The generated class is extended instead:
 >
