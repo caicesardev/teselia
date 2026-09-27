@@ -289,6 +289,11 @@ All events bubble and are composed. `detail` is `{ value, country, valid }`.
   - `setFormValue(e164, state)` saves the typed text and country as JSON (`src/core/form-state.ts`). In `restore` mode both come back exactly as they were. In `autocomplete` mode the browser provides a value, which is treated as E.164. Malformed state, or an unsupported country code, is ignored.
   - `readonly`: both controls get `readonly`. The combobox ignores keys, clicks and the chevron, and the value is still submitted. The HTML spec bars a form-associated element with `readonly` from constraint validation, so `willValidate` is `false`, exactly like a native readonly input. `readOnly` reflects to the attribute.
   - `disabled` (attribute, property or fieldset) goes through `formDisabledCallback` and disables both controls.
+- **Implicit submission** (found in manual keyboard testing, #26). The inner `<input>` lives in the shadow root, which has no form, so the browser does not submit on `Enter`. `useImplicitSubmission` replicates the HTML algorithm for the number field:
+  - It clicks the form's default button: the first submit button in `form.elements`, which includes buttons associated through the `form` attribute. Click handlers run, and a disabled button ignores `click()`, as in the spec.
+  - Without a submit button, it calls `form.requestSubmit()` only when no other field blocks implicit submission (text-like `<input>` types).
+  - `change` is committed first and not repeated on blur, matching native inputs.
+  - `Enter` in the country combobox still only picks a country.
 
 > ✅ **Spike validated (2026-09-27).** Vue's `defineCustomElement` does not expose `formAssociated` as an option. The generated class is extended instead:
 >

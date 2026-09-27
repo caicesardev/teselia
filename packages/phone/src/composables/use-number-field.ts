@@ -16,10 +16,11 @@ interface NumberFieldOptions {
   isAllowed: (code: CountryCode) => boolean
   announcer: Announcer
   dispatchPublicEvent: DispatchPublicEvent
+  submitOwnerForm: () => void
 }
 
 export function useNumberField(options: NumberFieldOptions) {
-  const { props, state, locale, isAllowed, announcer, dispatchPublicEvent } = options
+  const { props, state, locale, isAllowed, announcer, dispatchPublicEvent, submitOwnerForm } = options
 
   const excludedCountry = ref<CountryCode | null>(null)
   let textBeforeEditing = ''
@@ -79,9 +80,21 @@ export function useNumberField(options: NumberFieldOptions) {
     textBeforeEditing = state.nationalInput
   }
 
+  function commitChange(): void {
+    if (state.nationalInput === textBeforeEditing) return
+    textBeforeEditing = state.nationalInput
+    dispatchPublicEvent('change')
+  }
+
   function commitEditing(): void {
     if (state.numberTouched) state.errorsVisible = true
-    if (state.nationalInput !== textBeforeEditing) dispatchPublicEvent('change')
+    commitChange()
+  }
+
+  function submitOnEnter(event: KeyboardEvent): void {
+    if (event.isComposing) return
+    commitChange()
+    submitOwnerForm()
   }
 
   watch(
@@ -92,5 +105,5 @@ export function useNumberField(options: NumberFieldOptions) {
     { immediate: true },
   )
 
-  return { excludedCountry, updateFromUserInput, rememberTextBeforeEditing, commitEditing }
+  return { excludedCountry, updateFromUserInput, rememberTextBeforeEditing, commitEditing, submitOnEnter }
 }

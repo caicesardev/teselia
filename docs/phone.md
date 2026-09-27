@@ -239,6 +239,7 @@ Like on native inputs, setting `value` from code fires neither `input` nor `chan
 - `required` and invalid numbers block submission and show the message from `text-required` or `text-invalid`.
 - `form.reset()` restores the `value` attribute and the default country.
 - A disabled `<fieldset>` disables the element.
+- `Enter` in the number field submits the form through its first submit button, as native inputs do. Nothing happens if that button is disabled.
 - The browser restores the value when the user navigates back to the page, and autofill works through `autocomplete="tel"`.
 
 Errors appear when the user leaves the number field after typing, or on submit. They update as the user fixes the number.
@@ -324,7 +325,7 @@ Current and previous major versions of Chrome, Edge, Firefox and Safari.
 
 ### Keyboard
 
-The country field is a combobox: type to filter the list, or use the arrow keys to browse it. The number field is a regular text field.
+The country field is a combobox: type to filter the list, or use the arrow keys to browse it. The number field is a regular text field, and `Enter` in it submits the form, like in a native input.
 
 | Key | List closed | List open |
 | --- | --- | --- |
