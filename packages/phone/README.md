@@ -44,7 +44,7 @@ Attributes, events, styling, and examples for Vue and React are in the [document
 
 | Build | gzip |
 | --- | --- |
-| npm (ESM), component code only | 8.7 KB |
+| npm (ESM), component code only | 9.0 KB |
 | npm (ESM), with `libphonenumber-js`, minified, in an app that already has Vue | 43 KB |
 | CDN (IIFE), everything including Vue | 67 KB |
 
