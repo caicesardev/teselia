@@ -26,12 +26,20 @@ export function listbox(el: TesPhoneElement): HTMLElement {
   return el.shadowRoot?.querySelector('[role="listbox"]') as HTMLElement
 }
 
+export function popup(el: TesPhoneElement): HTMLElement {
+  return el.shadowRoot?.querySelector('[popover]') as HTMLElement
+}
+
+export function liveRegion(el: TesPhoneElement): HTMLElement {
+  return el.shadowRoot?.querySelector('[role="status"]') as HTMLElement
+}
+
 export function options(el: TesPhoneElement): HTMLElement[] {
   return Array.from(listbox(el).querySelectorAll<HTMLElement>('[role="option"]'))
 }
 
 export function isExpanded(el: TesPhoneElement): boolean {
-  return combobox(el).getAttribute('aria-expanded') === 'true' && listbox(el).matches(':popover-open')
+  return combobox(el).getAttribute('aria-expanded') === 'true' && popup(el).matches(':popover-open')
 }
 
 export function activeDescendant(el: TesPhoneElement): string | null {
