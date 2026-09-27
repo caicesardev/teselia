@@ -1,6 +1,6 @@
 import { getCountries } from 'libphonenumber-js/min'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { listCountries } from './countries'
+import { listCountries, parseCountryCodes } from './countries'
 
 afterEach(() => {
   vi.restoreAllMocks()
@@ -54,5 +54,24 @@ describe('listCountries', () => {
     })
 
     expect(listCountries('en')).toContainEqual({ code: 'XK', callingCode: '383', name: 'XK' })
+  })
+})
+
+describe('parseCountryCodes', () => {
+  it('parses comma or space separated codes, case-insensitively', () => {
+    expect(parseCountryCodes('es, PT fr').codes).toEqual(['ES', 'PT', 'FR'])
+  })
+
+  it('keeps the first occurrence of duplicated codes', () => {
+    expect(parseCountryCodes('ES,PT,es').codes).toEqual(['ES', 'PT'])
+  })
+
+  it('reports unsupported codes as invalid, as written', () => {
+    expect(parseCountryCodes('ES,XX,Spain')).toEqual({ codes: ['ES'], invalid: ['XX', 'Spain'] })
+  })
+
+  it('returns nothing for a missing or empty value', () => {
+    expect(parseCountryCodes(undefined)).toEqual({ codes: [], invalid: [] })
+    expect(parseCountryCodes(' , ')).toEqual({ codes: [], invalid: [] })
   })
 })
