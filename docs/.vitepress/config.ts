@@ -10,6 +10,7 @@ export default defineConfig({
   title: 'Teselia',
   description:
     'Accessible micro components built with Vue 3, shipped as framework-agnostic Web Components. WCAG 2.2 AA by default.',
+  head: [['link', { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' }]],
   cleanUrls: true,
   lastUpdated: true,
   sitemap: { hostname: 'https://teselia.caicesardev.com' },

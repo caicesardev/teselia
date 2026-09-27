@@ -35,12 +35,12 @@
       </div>
     </dl>
 
-    <output class="result" aria-live="polite">
+    <div class="result" role="status">
       <template v-if="submitted">
         <span class="result-label">FormData</span>
         <code>{{ JSON.stringify(submitted) }}</code>
       </template>
-    </output>
+    </div>
   </form>
 </template>
 
