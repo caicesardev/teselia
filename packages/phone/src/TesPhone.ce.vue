@@ -563,6 +563,21 @@ watch(
   { flush: 'sync' },
 )
 watch(() => state.country, reformatForCountry, { immediate: true })
+
+type CustomState = 'invalid' | 'open' | 'empty'
+
+function setCustomState(name: CustomState, active: boolean): void {
+  const states = internals.states
+  if (!states) return
+  if (active) states.add(name)
+  else states.delete(name)
+}
+
+watchEffect(() => {
+  setCustomState('invalid', visibleError.value !== null)
+  setCustomState('open', isOpen.value)
+  setCustomState('empty', state.nationalInput.trim() === '')
+})
 watch(isOpen, syncPopover)
 watch(query, announceResultsOnceTypingPauses)
 onBeforeUnmount(() => clearTimeout(pendingAnnouncement))
