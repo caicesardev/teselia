@@ -89,7 +89,7 @@ describe('country combobox pointer: selecting', () => {
     expect(el.shadowRoot?.activeElement).toBe(combobox(el))
   })
 
-  it('keeps the typed number when the country changes', async () => {
+  it('keeps the typed digits, reformatted for the new country, when the country changes', async () => {
     const el = await renderPhone('default-country="ES" lang="en"')
     await userEvent.type(numberInput(el), '612345678')
 
@@ -97,7 +97,7 @@ describe('country combobox pointer: selecting', () => {
     await userEvent.click(option(el, 'PT'))
 
     expect(el.country).toBe('PT')
-    expect(numberInput(el).value).toBe('612345678')
+    expect(numberInput(el).value).toBe('612 345 678')
   })
 
   it('stays open when the popup padding (not an option) is pressed', async () => {

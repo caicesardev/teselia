@@ -19,13 +19,13 @@ afterEach(() => {
 })
 
 describe('international numbers in the number field', () => {
-  it('selects the country of a pasted number and keeps only the national part', async () => {
+  it('selects the country of a pasted number and shows it in national format', async () => {
     const el = await renderPhone('default-country="ES" lang="en"')
 
     await userEvent.fill(numberInput(el), '+44 20 7946 0958')
 
     expect(el.country).toBe('GB')
-    expect(numberInput(el).value).toBe('2079460958')
+    expect(numberInput(el).value).toBe('020 7946 0958')
     expect(el.value).toBe('+442079460958')
     expect(combobox(el).value).toBe('United Kingdom +44')
   })
@@ -45,7 +45,7 @@ describe('international numbers in the number field', () => {
 
     expect(el.country).toBe('GB')
     expect(el.value).toBe('+442079460958')
-    expect(numberInput(el).value).toBe('2079460958')
+    expect(numberInput(el).value).toBe('020 7946 0958')
   })
 
   it('treats a leading 00 as the international prefix', async () => {
@@ -73,7 +73,7 @@ describe('international numbers in the number field', () => {
     await new Promise((resolve) => setTimeout(resolve, 300))
 
     expect(el.country).toBe('ES')
-    expect(numberInput(el).value).toBe('612345678')
+    expect(numberInput(el).value).toBe('612 34 56 78')
     expect(liveRegion(el).textContent?.trim()).toBe('')
   })
 
