@@ -74,7 +74,10 @@ This document records the decisions taken before writing code, the options that 
 
 This follows the WAI-ARIA APG *Combobox with Listbox Popup* pattern, using list autocomplete (`aria-autocomplete="list"`).
 
-- The user types to filter by **country name**, **ISO code** (`es`, `gb`) or **calling code** (`34`, `+34`).
+- The user types to filter by **country name**, **ISO code** (`es`, `gb`) or **calling code** (`34`, `+34`). Implemented in `filterCountries` (#10):
+  - Name matching ignores case and diacritics (`espana` finds España).
+  - Digits, with or without `+`, match calling codes **by prefix**, so the list narrows as the user types (`3` → +30…+39, `34` → Spain).
+  - Name results are **ranked**: exact ISO code first, then names starting with the query, then names with a word starting with it, then names containing it. Within a rank, the alphabetical order is kept (`ir` → Iran, Iraq, Ireland before Kiribati).
 - The input and the listbox live in the **same shadow root**, so `aria-controls` and `aria-activedescendant` resolve correctly.
 - All options are rendered (about 240), with no virtualization. That is cheap enough, and it keeps `aria-setsize`/position information correct.
 - **Preferred countries** (`preferred-countries`) are shown first, in a `role="group"` labelled "Suggested". They are **not duplicated** in the full list below, because duplicates confuse screen reader counts.
