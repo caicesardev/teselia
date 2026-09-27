@@ -1,41 +1,15 @@
-import axe from 'axe-core'
 import { getCountries } from 'libphonenumber-js/min'
+import type { TesPhoneElement } from './index'
 import { afterEach, describe, expect, it } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
-import type { TesPhoneElement } from './index'
-import './index'
-
-async function renderPhone(attributes: string): Promise<TesPhoneElement> {
-  const container = document.createElement('main')
-  container.innerHTML = `<tes-phone label="Phone number" ${attributes}></tes-phone>`
-  document.body.append(container)
-
-  const el = container.querySelector('tes-phone') as TesPhoneElement
-  await expect.poll(() => el.shadowRoot?.querySelector('[role="combobox"]')).toBeTruthy()
-  return el
-}
-
-function combobox(el: TesPhoneElement): HTMLInputElement {
-  return el.shadowRoot?.querySelector('[role="combobox"]') as HTMLInputElement
-}
-
-function listbox(el: TesPhoneElement): HTMLElement {
-  return el.shadowRoot?.querySelector('[role="listbox"]') as HTMLElement
-}
-
-function options(el: TesPhoneElement): HTMLElement[] {
-  return Array.from(listbox(el).querySelectorAll<HTMLElement>('[role="option"]'))
-}
-
-async function typeInCombobox(el: TesPhoneElement, text: string): Promise<void> {
-  combobox(el).focus()
-  await userEvent.keyboard(text)
-}
-
-async function expectNoAxeViolations(el: TesPhoneElement): Promise<void> {
-  const results = await axe.run(el.parentElement as HTMLElement)
-  expect(results.violations).toEqual([])
-}
+import {
+  combobox,
+  expectNoAxeViolations,
+  listbox,
+  options,
+  renderPhone,
+  typeInCombobox,
+} from './testing/phone'
 
 afterEach(() => {
   document.body.innerHTML = ''

@@ -20,6 +20,7 @@
           spellcheck="false"
           part="country"
           @focus="selectTextSoTypingReplacesIt"
+          @keydown="handleComboboxKeydown"
           @input="filterByTypedText"
           @blur="closeAndRestoreSelection"
         />
@@ -51,6 +52,7 @@
         role="option"
         :aria-selected="country.code === state.country ? 'true' : 'false'"
         :part="country.code === state.country ? 'option option-selected' : 'option'"
+        :class="{ highlighted: country.code === highlightedCode }"
       >
         <span class="option-name">{{ country.name }}</span> <span class="option-code">+{{ country.callingCode }}</span>
       </li>
@@ -59,10 +61,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, useHost, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, useHost, useTemplateRef, watch } from 'vue'
 import { type Country, type CountryCode, listCountries } from './countries'
 import type { TesPhoneElement } from './element'
 import { filterCountries } from './filter'
+import { type Direction, nextHighlight } from './highlight'
 import { resolveDefaultCountry, resolveLocale } from './locale'
 
 defineOptions({ inheritAttrs: false })
@@ -142,7 +145,62 @@ function selectTextSoTypingReplacesIt(event: FocusEvent): void {
 
 function filterByTypedText(event: Event): void {
   query.value = (event.target as HTMLInputElement).value
+  highlightedCode.value = null
+  openIfThereAreOptions()
+}
+
+function handleComboboxKeydown(event: KeyboardEvent): void {
+  switch (event.key) {
+    case 'ArrowDown':
+      event.preventDefault()
+      if (event.altKey) openIfThereAreOptions()
+      else moveHighlight(1)
+      break
+    case 'ArrowUp':
+      event.preventDefault()
+      moveHighlight(-1)
+      break
+    case 'Enter':
+      if (isOpen.value) {
+        event.preventDefault()
+        selectHighlightedCountry()
+      }
+      break
+    case 'Escape':
+      if (isOpen.value) event.stopPropagation()
+      closeAndRestoreSelection()
+      break
+  }
+}
+
+function openIfThereAreOptions(): void {
   isOpen.value = visibleCountries.value.length > 0
+}
+
+function moveHighlight(direction: Direction): void {
+  const codes = visibleCountries.value.map((country) => country.code)
+
+  if (!isOpen.value) {
+    openIfThereAreOptions()
+    const selected = state.country || null
+    highlightedCode.value =
+      selected && codes.includes(selected) ? selected : nextHighlight(codes, null, direction)
+  } else {
+    highlightedCode.value = nextHighlight(codes, highlightedCode.value, direction)
+  }
+
+  void nextTick(scrollHighlightedOptionIntoView)
+}
+
+function scrollHighlightedOptionIntoView(): void {
+  if (!highlightedOptionId.value) return
+  host.shadowRoot?.getElementById(highlightedOptionId.value)?.scrollIntoView({ block: 'nearest' })
+}
+
+function selectHighlightedCountry(): void {
+  if (!highlightedCode.value) return
+  state.country = highlightedCode.value
+  closeAndRestoreSelection()
 }
 
 function closeAndRestoreSelection(): void {
@@ -312,5 +370,15 @@ input:focus-visible {
 
 [role='option'][aria-selected='true'] .option-code {
   color: inherit;
+}
+
+[role='option'].highlighted {
+  background: var(--_hover);
+  box-shadow: inset 0 0 0 2px var(--_focus);
+}
+
+[role='option'][aria-selected='true'].highlighted {
+  background: var(--_accent);
+  box-shadow: inset 0 0 0 2px var(--_on-accent);
 }
 </style>
