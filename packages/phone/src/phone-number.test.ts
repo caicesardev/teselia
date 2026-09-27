@@ -46,9 +46,9 @@ describe('interpretPhoneNumber', () => {
 })
 
 describe('splitE164', () => {
-  it('splits an E.164 value into country and national number', () => {
-    expect(splitE164('+34612345678')).toEqual({ country: 'ES', nationalNumber: '612345678' })
-    expect(splitE164('+442079460958')).toEqual({ country: 'GB', nationalNumber: '2079460958' })
+  it('splits an E.164 value into country and formatted national number', () => {
+    expect(splitE164('+34612345678')).toEqual({ country: 'ES', nationalNumber: '612 34 56 78' })
+    expect(splitE164('+442079460958')).toEqual({ country: 'GB', nationalNumber: '020 7946 0958' })
   })
 
   it('returns nothing when the country cannot be determined', () => {

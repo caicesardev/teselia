@@ -91,7 +91,7 @@ describe('<tes-phone> value semantics', () => {
     expect(el.value).toBe('+34612345678')
     expect(el.defaultValue).toBe('+34612345678')
     expect(el.country).toBe('ES')
-    expect(innerInput(el).value).toBe('612345678')
+    expect(innerInput(el).value).toBe('612 34 56 78')
   })
 
   it('returns the live value typed by the user, not the attribute', async () => {
@@ -111,7 +111,7 @@ describe('<tes-phone> value semantics', () => {
 
     el.value = '+442079460958'
 
-    await expect.poll(() => innerInput(el).value).toBe('2079460958')
+    await expect.poll(() => innerInput(el).value).toBe('020 7946 0958')
     expect(el.country).toBe('GB')
     expect(new FormData(formOf(container)).get('phone')).toBe('+442079460958')
     expect(el.getAttribute('value')).toBeNull()
@@ -126,7 +126,7 @@ describe('<tes-phone> value semantics', () => {
     container.append(el)
     await waitForVueAsyncMount(el)
 
-    expect(innerInput(el).value).toBe('912345678')
+    expect(innerInput(el).value).toBe('912 345 678')
     expect(el.country).toBe('PT')
   })
 
@@ -163,7 +163,7 @@ describe('<tes-phone> value semantics', () => {
     formOf(container).reset()
 
     await expect.poll(() => el.value).toBe('+34612345678')
-    expect(innerInput(el).value).toBe('612345678')
+    expect(innerInput(el).value).toBe('612 34 56 78')
 
     el.setAttribute('value', '+34611111111')
     await expect.poll(() => el.value).toBe('+34611111111')

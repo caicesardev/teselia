@@ -62,14 +62,14 @@ describe('E.164 form value', () => {
     expect(submitted(form)).toBe('')
   })
 
-  it('recomputes the value when the country changes, keeping the digits', async () => {
+  it('recomputes the value when the country changes, keeping the digits reformatted', async () => {
     const { el, form } = await renderInForm('default-country="ES" lang="en"')
     await userEvent.type(numberInput(el), '912345678')
 
     await typeInCombobox(el, 'portugal')
     await userEvent.keyboard('{ArrowDown}{Enter}')
 
-    expect(numberInput(el).value).toBe('912345678')
+    expect(numberInput(el).value).toBe('912 345 678')
     expect(submitted(form)).toBe('+351912345678')
   })
 })

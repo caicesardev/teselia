@@ -125,6 +125,7 @@ import type { TesPhoneElement } from './element'
 import { filterCountries } from './filter'
 import { type Direction, nextHighlight } from './highlight'
 import { resolveDefaultCountry, resolveLocale } from './locale'
+import { type FormattedInput, formatForDisplay, formatWhileTyping } from './format'
 import { interpretPhoneNumber, splitE164 } from './phone-number'
 
 defineOptions({ inheritAttrs: false })
@@ -384,27 +385,54 @@ function closeAndRestoreSelection(): void {
 }
 
 function updateFromUserInput(event: Event): void {
-  state.nationalInput = (event.target as HTMLInputElement).value
+  const input = event.target as HTMLInputElement
+  const previous = state.nationalInput
+  state.nationalInput = input.value
   state.dirty = true
   state.numberTouched = true
-  adoptCountryOfInternationalNumber()
+
+  if (adoptCountryOfInternationalNumber()) {
+    showInNumberField(input, { text: state.nationalInput, caret: state.nationalInput.length })
+  } else {
+    showInNumberField(
+      input,
+      formatWhileTyping({
+        previous,
+        raw: input.value,
+        caret: input.selectionStart ?? input.value.length,
+        inputType: (event as InputEvent).inputType,
+        country: state.country,
+      }),
+    )
+  }
+
   dispatchPublicEvent('input')
+}
+
+function showInNumberField(input: HTMLInputElement, formatted: FormattedInput): void {
+  input.value = formatted.text
+  input.setSelectionRange(formatted.caret, formatted.caret)
+  state.nationalInput = formatted.text
+}
+
+function reformatForCountry(): void {
+  state.nationalInput = formatForDisplay(state.nationalInput, state.country)
 }
 
 const INTERNATIONAL_PREFIX = /^\s*(\+|00)/
 const excludedCountry = ref<CountryCode | null>(null)
 
-function adoptCountryOfInternationalNumber(): void {
+function adoptCountryOfInternationalNumber(): boolean {
   excludedCountry.value = null
-  if (!INTERNATIONAL_PREFIX.test(state.nationalInput)) return
+  if (!INTERNATIONAL_PREFIX.test(state.nationalInput)) return false
 
   const split = splitE164(state.nationalInput.trim().replace(/^00/, '+'))
-  if (!split) return
+  if (!split) return false
 
   const allowed = onlyCountries.value.codes
   if (allowed.length > 0 && !allowed.includes(split.country)) {
     excludedCountry.value = split.country
-    return
+    return false
   }
 
   state.nationalInput = split.nationalNumber
@@ -412,6 +440,7 @@ function adoptCountryOfInternationalNumber(): void {
     state.country = split.country
     announce(props.textCountryChanged.replace('{country}', describeCountry(split.country, locale.value)))
   }
+  return true
 }
 
 let valueBeforeEditing = ''
@@ -525,6 +554,7 @@ watch(
   () => dispatchPublicEvent('countrychange'),
   { flush: 'sync' },
 )
+watch(() => state.country, reformatForCountry, { immediate: true })
 watch(isOpen, syncPopover)
 watch(query, announceResultsOnceTypingPauses)
 onBeforeUnmount(() => clearTimeout(pendingAnnouncement))

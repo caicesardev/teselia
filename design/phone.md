@@ -189,7 +189,12 @@ Default token values and contrast ratios: §4.4.
   - A number from a country excluded by `only-countries` keeps the current country and reports `typeMismatch` with `text-not-allowed`, using the #17 visibility rules.
 - **Default country from the browser locale** (D7).
 - **`preferred-countries` and `only-countries`.**
-- **Format as you type** with `AsYouType`, preserving the caret position. ⚠️ **Cut line:** if it is not solid, including caret handling and screen reader behaviour, by **2026-10-18**, it moves to `1.1` and v1 ships without it.
+- **Format as you type** with `AsYouType`, preserving the caret position. ✅ Implemented in #20, well before the cut line:
+  - `formatWhileTyping()` is a pure function: it counts the digits before the caret, formats, and places the caret after the same digit in the formatted text.
+  - When `Backspace` or `Delete` only removes a separator, the digit before (or after) it is removed instead, so the caret never gets stuck on a space.
+  - Text with letters or unexpected symbols is left as typed, and validation reports it.
+  - With `min` metadata, `AsYouType` formats national numbers only as users actually write them, including the national prefix (`020 7946 0958` in the UK, `06 12 34 56 78` in France). So numbers set from E.164 or detected from a paste are shown in national format, with that prefix. The digits are reformatted when the country changes.
+  - Reformatting never touches the live region. ⚠️ **Cut line:** if it is not solid, including caret handling and screen reader behaviour, by **2026-10-18**, it moves to `1.1` and v1 ships without it.
 - **Theming** through CSS custom properties, `::part()` and custom states (§4.4–4.6).
 - **Support for `forced-colors`, `prefers-reduced-motion` and basic RTL.** Layout uses logical properties, and the number input is always `dir="ltr"`.
 

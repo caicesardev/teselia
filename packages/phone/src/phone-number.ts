@@ -30,5 +30,5 @@ export interface SplitE164 {
 export function splitE164(value: string): SplitE164 | null {
   const parsed = parsePhoneNumberFromString(value)
   if (!parsed?.country) return null
-  return { country: parsed.country, nationalNumber: parsed.nationalNumber }
+  return { country: parsed.country, nationalNumber: parsed.formatNational() }
 }
