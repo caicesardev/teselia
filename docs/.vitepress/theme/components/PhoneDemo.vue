@@ -1,6 +1,12 @@
 <template>
   <form class="demo" @submit.prevent="showSubmittedData" @reset="clearSubmittedData">
-    <tes-phone name="phone" label="Phone number" preferred-countries="ES,PT,FR,GB" required />
+    <tes-phone
+      name="phone"
+      label="Phone number"
+      hint="We will only use it to contact you about your order."
+      preferred-countries="ES,PT,FR,GB"
+      required
+    />
 
     <div class="actions">
       <button type="submit">Submit</button>

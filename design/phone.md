@@ -230,6 +230,7 @@ Attributes use kebab-case and map to camelCase properties.
 | `text-suggested` | `textSuggested` | `string` | `'Suggested'` | Label of the preferred countries group. |
 | `text-required` | `textRequired` | `string` | `'Enter a phone number'` | Error when the field is required and empty. |
 | `text-invalid` | `textInvalid` | `string` | `'Enter a valid phone number for {country}'` | Error when the number is invalid. |
+| `text-country-required` | `textCountryRequired` | `string` | `'Select a country code'` | Error when no country is selected and the number is not international (e.g. a misconfigured `only-countries`). Anchored to the combobox. |
 | `text-not-allowed` | `textNotAllowed` | `string` | `'Numbers from {country} are not accepted'` | Error when a pasted number belongs to a country excluded by `only-countries`. |
 | `text-no-results` | `textNoResults` | `string` | `'No countries found'` | Shown when the filter matches nothing. |
 | `text-results` | `textResults` | `string` | `'Countries available: {count}'` | Live region announcement while filtering. The "label: number" form avoids plural rules ("1 countries") in every language. |
@@ -370,6 +371,14 @@ Current and previous major versions of Chrome, Edge, Firefox and Safari. The req
 - Once an error is shown, it updates live as the user fixes the input, and it clears as soon as the value is valid.
 - An error sets `aria-invalid="true"` on the number input and shows the message in the `error` part, which is referenced from `aria-describedby`.
 - Changing the country keeps the digits already typed and revalidates them.
+
+Implementation notes (#17):
+
+- **"Interacted"** means the user typed in the number field. Tabbing through an empty required field shows nothing until submit, so users are not scolded for fields they have not reached yet.
+- **Submit, `reportValidity()` and `checkValidity()`** all fire `invalid` on the host, which reveals the inline error. The browser's native validation bubble is **kept**: it moves focus to the anchor, which is what users of native inputs expect. The inline message adds persistent context.
+- The error element is always rendered with `aria-live="polite"`, so an error revealed on blur, after focus has moved on, is still announced. `aria-describedby` references it only while it has a message, and the hint comes first when there is one.
+- **No country selected** (only possible with a misconfigured `only-countries` or a locale without a region) reports `valueMissing` with `text-country-required`, anchored to the combobox. "Enter a valid phone number for …" would make no sense there.
+- In the invalid state, the border goes from 1px to 2px in the error color, so the state is not conveyed by color alone (WCAG 1.4.1). The message text is the primary cue.
 
 ### 5.4 Known Shadow DOM limitations (documented, not solved in v1)
 
