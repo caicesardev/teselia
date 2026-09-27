@@ -25,7 +25,7 @@
           @mousedown="focusWithoutPlacingCaret"
           @click="openFromPointer"
           @keydown="handleComboboxKeydown"
-          @input="filterByTypedText"
+          @input.stop="filterByTypedText"
           @blur="closeAndRestoreSelection"
         />
         <span class="toggle" aria-hidden="true" @click="toggleFromChevron">
@@ -48,8 +48,9 @@
         :aria-invalid="visibleError?.anchor === 'number' ? 'true' : undefined"
         :aria-describedby="numberDescribedBy"
         :disabled="state.disabledByForm"
-        @input="updateFromUserInput"
-        @blur="revealErrorsAfterEditing"
+        @focus="rememberValueBeforeEditing"
+        @input.stop="updateFromUserInput"
+        @blur="commitNumberEditing"
       />
     </div>
 
@@ -340,8 +341,13 @@ function selectHighlightedCountry(): void {
 }
 
 function selectCountry(code: CountryCode): void {
+  const changed = code !== state.country
   state.country = code
   closeAndRestoreSelection()
+  if (!changed) return
+  state.dirty = true
+  dispatchPublicEvent('input')
+  dispatchPublicEvent('change')
 }
 
 function focusWithoutPlacingCaret(event: MouseEvent): void {
@@ -371,10 +377,31 @@ function updateFromUserInput(event: Event): void {
   state.nationalInput = (event.target as HTMLInputElement).value
   state.dirty = true
   state.numberTouched = true
+  dispatchPublicEvent('input')
 }
 
-function revealErrorsAfterEditing(): void {
+let valueBeforeEditing = ''
+
+function rememberValueBeforeEditing(): void {
+  valueBeforeEditing = state.nationalInput
+}
+
+function commitNumberEditing(): void {
   if (state.numberTouched) state.errorsVisible = true
+  if (state.nationalInput !== valueBeforeEditing) dispatchPublicEvent('change')
+}
+
+type PublicEventName = 'input' | 'change' | 'countrychange'
+
+function dispatchPublicEvent(name: PublicEventName): void {
+  const { e164, valid } = interpretPhoneNumber(state.nationalInput, state.country)
+  host.dispatchEvent(
+    new CustomEvent(name, {
+      bubbles: true,
+      composed: true,
+      detail: { value: e164, country: state.country, valid },
+    }),
+  )
 }
 
 interface ValidationError {
@@ -447,6 +474,11 @@ function announceResultsOnceTypingPauses(currentQuery: string | null): void {
 }
 
 watchEffect(syncFormState, { flush: 'post' })
+watch(
+  () => state.country,
+  () => dispatchPublicEvent('countrychange'),
+  { flush: 'sync' },
+)
 watch(isOpen, syncPopover)
 watch(query, announceResultsOnceTypingPauses)
 onBeforeUnmount(() => clearTimeout(pendingAnnouncement))

@@ -255,7 +255,12 @@ All events bubble and are composed. `detail` is `{ value, country, valid }`.
 > **Implementation notes:**
 >
 > - The native `input` event from the inner `<input>` is `composed`, so it crosses the shadow boundary on its own. Stop the inner events and re-dispatch our own, so consumers never receive duplicated `input` events.
-> - **Do not use Vue's `emit()` for public events.** In a custom element, Vue dispatches emitted events as a `CustomEvent` that does not bubble, is not composed, and has `detail` set to the **array** of emit arguments (verified in `@vue/runtime-dom` 3.5.43). Events are therefore dispatched directly from the host (`useHost()`) with `new CustomEvent(name, { bubbles: true, composed: true, detail })`.
+> - **Implemented in #18:**
+  - Inner `input` events are stopped at their source (`@input.stop`) on both the number field and the country search, so consumers only receive our `CustomEvent`s.
+  - `input` and `change` fire only for **user** changes, like native inputs. Setting `value` from code fires neither.
+  - `change` fires when the number field loses focus with a different text than when it gained it, and when the user picks a *different* country. Re-selecting the current country fires nothing.
+  - `countrychange` fires on every country change, including code and `form.reset()`. It is dispatched synchronously, so it precedes the `input`/`change` of a country pick. The element updates the digits before the country, so `detail.value` is already consistent when it fires.
+- **Do not use Vue's `emit()` for public events.** In a custom element, Vue dispatches emitted events as a `CustomEvent` that does not bubble, is not composed, and has `detail` set to the **array** of emit arguments (verified in `@vue/runtime-dom` 3.5.43). Events are therefore dispatched directly from the host (`useHost()`) with `new CustomEvent(name, { bubbles: true, composed: true, detail })`.
 
 ### 4.3 Form integration
 

@@ -104,7 +104,8 @@ describe('country combobox pointer: selecting', () => {
     const el = await renderPhone('default-country="ES"')
     await userEvent.click(combobox(el))
 
-    await userEvent.click(popup(el), { position: { x: 2, y: 2 } })
+    const paddingAwayFromRoundedCorners = { x: 3, y: popup(el).getBoundingClientRect().height / 2 }
+    await userEvent.click(popup(el), { position: paddingAwayFromRoundedCorners })
 
     expect(isExpanded(el)).toBe(true)
     expect(el.shadowRoot?.activeElement).toBe(combobox(el))
