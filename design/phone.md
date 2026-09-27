@@ -223,7 +223,7 @@ Attributes use kebab-case and map to camelCase properties.
 | `text-invalid` | `textInvalid` | `string` | `'Enter a valid phone number for {country}'` | Error when the number is invalid. |
 | `text-not-allowed` | `textNotAllowed` | `string` | `'Numbers from {country} are not accepted'` | Error when a pasted number belongs to a country excluded by `only-countries`. |
 | `text-no-results` | `textNoResults` | `string` | `'No countries found'` | Shown when the filter matches nothing. |
-| `text-results` | `textResults` | `string` | `'{count} countries available'` | Live region announcement while filtering. |
+| `text-results` | `textResults` | `string` | `'Countries available: {count}'` | Live region announcement while filtering. The "label: number" form avoids plural rules ("1 countries") in every language. |
 | `text-country-changed` | `textCountryChanged` | `string` | `'Country set to {country}'` | Announced when paste or autofill changes the country. |
 
 Supported placeholders: `{country}` (localized name plus calling code) and `{count}`.
@@ -307,7 +307,7 @@ Tokens use the suite-wide `--tes-` prefix, so one set of variables themes every 
 
 ### 4.5 Parts
 
-`label`, `group`, `country`, `listbox`, `option`, `option-selected` (added alongside `option`), `number`, `hint`, `error`. The `flag` part is **reserved** for 1.x.
+`label`, `group`, `country`, `popup` (the popover container), `listbox`, `option`, `option-selected` (added alongside `option`), `no-results`, `number`, `hint`, `error`. The `flag` part is **reserved** for 1.x.
 
 ### 4.6 Custom states
 
@@ -345,7 +345,12 @@ Current and previous major versions of Chrome, Edge, Firefox and Safari. The req
 ### 5.2 Live region announcements
 
 - There is one visually hidden `aria-live="polite"` region inside the shadow root.
-- **While filtering:** `text-results` (for example "12 countries available"), debounced at about 500 ms. `text-no-results` is announced when nothing matches.
+- **While filtering:** `text-results` (for example "Countries available: 12"), once typing pauses for 500 ms, so only the final count is announced, not every keystroke. `text-no-results` is announced when nothing matches.
+  - The region is a `role="status"` element, always rendered, visually hidden but in the accessibility tree.
+  - It is emptied on every keystroke, so a new query with the same count is announced again. It is also emptied when the listbox closes.
+  - Counts are not announced while navigating with the arrow keys; the screen reader already reads each highlighted option.
+- **No results:** the popover stays open and shows `text-no-results` in the `no-results` part, next to the listbox. The listbox is `hidden` rather than rendered empty, and `aria-expanded` is `false` while there are no options (#14).
+- **Scrolling** happens on the listbox itself, not on the popover container. A scrollable container without a role is flagged by axe (`scrollable-region-focusable`); the listbox is the keyboard-operable widget.
 - **Paste or autofill changes the country:** `text-country-changed` (for example "Country set to United Kingdom (+44)").
 - **Format as you type:** no announcements. The screen reader already reads the input value, and extra announcements would be noise.
 

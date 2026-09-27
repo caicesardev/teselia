@@ -10,7 +10,7 @@
           role="combobox"
           :value="comboboxText"
           :aria-label="textCountry"
-          :aria-expanded="isOpen ? 'true' : 'false'"
+          :aria-expanded="isOpen && hasOptions ? 'true' : 'false'"
           aria-controls="countries"
           aria-autocomplete="list"
           :aria-activedescendant="highlightedOptionId"
@@ -48,27 +48,31 @@
       />
     </div>
 
-    <ul
-      id="countries"
-      ref="listbox"
-      role="listbox"
-      popover="manual"
-      :aria-label="textCountry"
-      part="listbox"
-    >
-      <li
-        v-for="country in visibleCountries"
-        :id="optionId(country.code)"
-        :key="country.code"
-        role="option"
-        :aria-selected="country.code === state.country ? 'true' : 'false'"
-        :part="country.code === state.country ? 'option option-selected' : 'option'"
-        :class="{ highlighted: country.code === highlightedCode }"
-        @click="selectCountry(country.code)"
+    <div id="popup" ref="popup" popover="manual" part="popup">
+      <ul
+        id="countries"
+        role="listbox"
+        :aria-label="textCountry"
+        :hidden="!hasOptions"
+        part="listbox"
       >
-        <span class="option-name">{{ country.name }}</span> <span class="option-code">+{{ country.callingCode }}</span>
-      </li>
-    </ul>
+        <li
+          v-for="country in visibleCountries"
+          :id="optionId(country.code)"
+          :key="country.code"
+          role="option"
+          :aria-selected="country.code === state.country ? 'true' : 'false'"
+          :part="country.code === state.country ? 'option option-selected' : 'option'"
+          :class="{ highlighted: country.code === highlightedCode }"
+          @click="selectCountry(country.code)"
+        >
+          <span class="option-name">{{ country.name }}</span> <span class="option-code">+{{ country.callingCode }}</span>
+        </li>
+      </ul>
+      <p v-if="!hasOptions" class="no-results" part="no-results">{{ textNoResults }}</p>
+    </div>
+
+    <div role="status" class="visually-hidden">{{ announcement }}</div>
   </div>
 </template>
 
@@ -88,17 +92,23 @@ const props = withDefaults(
     required?: boolean
     defaultCountry?: string
     textCountry?: string
+    textResults?: string
+    textNoResults?: string
   }>(),
   {
     textCountry: 'Country code',
+    textResults: 'Countries available: {count}',
+    textNoResults: 'No countries found',
   },
 )
+
+const ANNOUNCEMENT_DELAY_MS = 500
 
 const host = useHost() as TesPhoneElement
 const { state, internals } = host
 const combobox = useTemplateRef<HTMLInputElement>('combobox')
 const numberInput = useTemplateRef<HTMLInputElement>('number')
-const listbox = useTemplateRef<HTMLElement>('listbox')
+const popup = useTemplateRef<HTMLElement>('popup')
 
 if (import.meta.env.DEV && !props.label) {
   console.warn('[tes-phone] The `label` attribute is required for an accessible name.')
@@ -139,6 +149,7 @@ const selectedCountry = computed(() =>
 const visibleCountries = computed(() =>
   filterCountries(countries.value, query.value ?? '', locale.value),
 )
+const hasOptions = computed(() => visibleCountries.value.length > 0)
 const comboboxText = computed(() => query.value ?? displayOf(selectedCountry.value))
 const highlightedOptionId = computed(() =>
   highlightedCode.value ? optionId(highlightedCode.value) : undefined,
@@ -159,14 +170,14 @@ function selectTextSoTypingReplacesIt(event: FocusEvent): void {
 function filterByTypedText(event: Event): void {
   query.value = (event.target as HTMLInputElement).value
   highlightedCode.value = null
-  openIfThereAreOptions()
+  openPopup()
 }
 
 function handleComboboxKeydown(event: KeyboardEvent): void {
   switch (event.key) {
     case 'ArrowDown':
       event.preventDefault()
-      if (event.altKey) openIfThereAreOptions()
+      if (event.altKey) openPopup()
       else moveHighlight(1)
       break
     case 'ArrowUp':
@@ -186,15 +197,15 @@ function handleComboboxKeydown(event: KeyboardEvent): void {
   }
 }
 
-function openIfThereAreOptions(): void {
-  isOpen.value = visibleCountries.value.length > 0
+function openPopup(): void {
+  isOpen.value = true
 }
 
 function moveHighlight(direction: Direction): void {
   const codes = visibleCountries.value.map((country) => country.code)
 
   if (!isOpen.value) {
-    openIfThereAreOptions()
+    openPopup()
     const selected = state.country || null
     highlightedCode.value =
       selected && codes.includes(selected) ? selected : nextHighlight(codes, null, direction)
@@ -258,15 +269,32 @@ function syncFormState(): void {
 }
 
 function syncPopover(open: boolean): void {
-  const popup = listbox.value
-  if (!popup) return
-  const isShown = popup.matches(':popover-open')
-  if (open && !isShown) popup.showPopover()
-  if (!open && isShown) popup.hidePopover()
+  const element = popup.value
+  if (!element) return
+  const isShown = element.matches(':popover-open')
+  if (open && !isShown) element.showPopover()
+  if (!open && isShown) element.hidePopover()
+}
+
+const announcement = ref('')
+let pendingAnnouncement: ReturnType<typeof setTimeout> | undefined
+
+function announceResultsOnceTypingPauses(currentQuery: string | null): void {
+  clearTimeout(pendingAnnouncement)
+  announcement.value = ''
+  if (currentQuery === null) return
+
+  pendingAnnouncement = setTimeout(() => {
+    announcement.value = hasOptions.value
+      ? props.textResults.replace('{count}', String(visibleCountries.value.length))
+      : props.textNoResults
+  }, ANNOUNCEMENT_DELAY_MS)
 }
 
 watch([() => state.value, () => state.country, () => props.required], syncFormState)
 watch(isOpen, syncPopover)
+watch(query, announceResultsOnceTypingPauses)
+onBeforeUnmount(() => clearTimeout(pendingAnnouncement))
 onMounted(syncFormState)
 </script>
 
@@ -373,17 +401,40 @@ input:focus-visible {
   inset: auto;
   box-sizing: border-box;
   min-inline-size: anchor-size(inline);
-  max-block-size: var(--_popup-max-height);
   margin: 0;
   margin-block: calc(var(--_space) / 2);
   padding: calc(var(--_space) / 2);
-  overflow: auto;
   border: 1px solid var(--_border);
   border-radius: var(--_radius);
   background: var(--_bg);
   color: var(--_text);
-  list-style: none;
   box-shadow: 0 8px 24px rgb(0 0 0 / 0.16);
+}
+
+[role='listbox'] {
+  max-block-size: var(--_popup-max-height);
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+  list-style: none;
+}
+
+.no-results {
+  margin: 0;
+  padding: var(--_space);
+  color: var(--_muted);
+}
+
+.visually-hidden {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
 }
 
 [role='option'] {

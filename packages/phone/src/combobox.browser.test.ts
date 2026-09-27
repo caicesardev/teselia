@@ -7,6 +7,7 @@ import {
   expectNoAxeViolations,
   listbox,
   options,
+  popup,
   renderPhone,
   typeInCombobox,
 } from './testing/phone'
@@ -55,7 +56,7 @@ describe('country combobox: collapsed state', () => {
 
     expect(combobox(el).value).toBe('Spain +34')
     expect(combobox(el).getAttribute('aria-expanded')).toBe('false')
-    expect(listbox(el).matches(':popover-open')).toBe(false)
+    expect(popup(el).matches(':popover-open')).toBe(false)
     expect(el.country).toBe('ES')
   })
 
@@ -103,7 +104,7 @@ describe('country combobox: expanded by typing', () => {
     await typeInCombobox(el, 'united')
 
     expect(combobox(el).getAttribute('aria-expanded')).toBe('true')
-    expect(listbox(el).matches(':popover-open')).toBe(true)
+    expect(popup(el).matches(':popover-open')).toBe(true)
     expect(options(el).map((option) => option.id)).toEqual([
       'option-AE',
       'option-GB',
@@ -126,7 +127,7 @@ describe('country combobox: expanded by typing', () => {
     await userEvent.tab()
 
     expect(combobox(el).getAttribute('aria-expanded')).toBe('false')
-    expect(listbox(el).matches(':popover-open')).toBe(false)
+    expect(popup(el).matches(':popover-open')).toBe(false)
     expect(combobox(el).value).toBe('Spain +34')
   })
 

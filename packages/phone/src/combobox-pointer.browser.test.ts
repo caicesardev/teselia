@@ -9,6 +9,7 @@ import {
   listbox,
   numberInput,
   options,
+  popup,
   renderPhone,
   typeInCombobox,
 } from './testing/phone'
@@ -99,11 +100,11 @@ describe('country combobox pointer: selecting', () => {
     expect(numberInput(el).value).toBe('612345678')
   })
 
-  it('stays open when the listbox itself (not an option) is pressed', async () => {
+  it('stays open when the popup padding (not an option) is pressed', async () => {
     const el = await renderPhone('default-country="ES"')
     await userEvent.click(combobox(el))
 
-    await userEvent.click(listbox(el), { position: { x: 2, y: 2 } })
+    await userEvent.click(popup(el), { position: { x: 2, y: 2 } })
 
     expect(isExpanded(el)).toBe(true)
     expect(el.shadowRoot?.activeElement).toBe(combobox(el))
