@@ -2,9 +2,7 @@
 
 Accessible international phone input with country calling code. It submits a single normalized value to any native `<form>`.
 
-::: warning In development
-`@teselia/phone` is not published yet. Version `1.0.0` is planned for **October 24, 2026**. The demo below runs the current build. Scope and decisions: [design document](https://github.com/caicesardev/teselia/blob/main/design/phone.md).
-:::
+Design decisions and the full accessibility specification are in the [design document](https://github.com/caicesardev/teselia/blob/main/design/phone.md).
 
 ## Demo
 
@@ -42,7 +40,7 @@ The npm build keeps Vue as a peer dependency, so apps that already use Vue don't
 | npm, in an app that already uses Vue | 43 KB |
 | CDN, including Vue | 67 KB |
 
-Most of it is the phone number metadata of [`libphonenumber-js`](https://gitlab.com/catamphetamine/libphonenumber-js), which the component needs to format and validate numbers of every country. The component's own code is 8.7 KB.
+Most of it is the phone number metadata of [`libphonenumber-js`](https://gitlab.com/catamphetamine/libphonenumber-js), which the component needs to format and validate numbers of every country. The component's own code is 9.0 KB.
 
 Importing the package registers the `<tes-phone>` element. If `tes-phone` is already taken on your page, register it under another name:
 

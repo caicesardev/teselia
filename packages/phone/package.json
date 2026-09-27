@@ -1,6 +1,6 @@
 {
   "name": "@teselia/phone",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Accessible international phone input with country calling code, shipped as a framework-agnostic Web Component. WCAG 2.2 AA by default.",
   "keywords": [
     "phone",
