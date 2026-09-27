@@ -14,7 +14,7 @@ Each component is a small, single-purpose form input that works in plain HTML, V
 
 ## Principles
 
-- **Accessible by default.** Designed against WCAG 2.2 AA, keyboard-first, tested in Chromium, Firefox and WebKit with axe-core, and manually with screen readers.
+- **Accessible by default.** Designed against WCAG 2.2 AA, keyboard-first, with automated tests in Chromium, Firefox and WebKit plus axe-core.
 - **Native forms.** Form-associated custom elements: validation, reset, disabled fieldsets and autofill work like on built-in inputs.
 - **Themeable.** CSS custom properties, `::part()` and custom states, with light and dark defaults.
 - **Documented decisions.** Each component has a design document in [`design/`](./design).
