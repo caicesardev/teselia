@@ -105,7 +105,7 @@ This follows the WAI-ARIA APG *Combobox with Listbox Popup* pattern, using list 
 
 Keyboard implementation notes (#12):
 
-- **`aria-selected` marks the chosen country; `aria-activedescendant` marks the highlighted option.** Screen readers announce the highlighted option as the highlight moves, and the current country as "selected". Some APG examples use `aria-selected` for the highlight instead. Validate this choice with NVDA and VoiceOver in #26 and #27.
+- **`aria-selected` marks the chosen country; `aria-activedescendant` marks the highlighted option.** Screen readers announce the highlighted option as the highlight moves, and the current country as "selected". Some APG examples use `aria-selected` for the highlight instead. Validated with NVDA in #26: the highlight is read as "sin seleccionar" / "seleccionado", which tells the two apart. VoiceOver (#27) is still pending.
 - **Arrow keys wrap around** at both ends. With about 245 options, and `Home`/`End` reserved for the caret, wrapping is the fastest way to reach the end of the list.
 - Typing clears the highlight: list autocomplete without automatic selection.
 - `Enter` and `Escape` call `preventDefault` while the listbox is open. `Escape` also stops propagation, so closing the listbox inside a dialog doesn't close the dialog.
@@ -431,7 +431,7 @@ Implementation notes (#17):
 | Windows High Contrast (`forced-colors`) | Edge | Windows |
 | 200 % and 400 % zoom, 320 px viewport | Chrome | any |
 
-Keyboard behaviour in WebKit is covered by the automated browser tests (§6.1). VoiceOver on macOS is **not** tested manually for v1 because no Mac is available; this gap is stated on the docs page.
+Keyboard behaviour in WebKit is covered by the automated browser tests (§6.1). VoiceOver on macOS is **not** tested manually for v1 because no Mac is available. VoiceOver on iOS was deferred to after 1.0.0 (#27). Both gaps are stated on the docs page.
 
 ---
 
@@ -443,7 +443,7 @@ Keyboard behaviour in WebKit is covered by the automated browser tests (§6.1). 
 - [x] Unit tests cover parsing, validation, default country resolution and filtering.
 - [x] Browser tests cover keyboard interaction, ARIA states, form submission/reset/validity and events, in Chromium, Firefox and WebKit.
 - [x] axe-core reports zero violations in every rendered state tested (closed, open, filtered, highlighted, suggested group, no results, invalid, disabled, readonly).
-- [ ] The manual testing matrix (§5.5) is completed, and results are recorded in the docs page.
+- [x] The manual testing matrix (§5.5) is completed, and results are recorded in the docs page. **Exception:** VoiceOver on iOS (#27) was deferred by the maintainer after 1.0.0. The docs page states that VoiceOver is untested.
 - [x] Bundle size (ESM excluding Vue, and IIFE including Vue; minified and gzip) is measured and published in the README and docs: 8.7 KB for the component code, 43 KB with `libphonenumber-js`, 67 KB for the IIFE with Vue (#56).
 - [x] The docs page (`teselia.caicesardev.com/phone`) has usage examples (HTML/CDN, Vue, React), API tables, a keyboard table, accessibility notes and known limitations (#54, #55).
 - [ ] `@teselia/phone@1.0.0` is published to npm (only after explicit approval).
