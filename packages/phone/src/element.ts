@@ -1,8 +1,8 @@
 import { getCountryCallingCode } from 'libphonenumber-js/min'
 import { defineCustomElement, reactive } from 'vue'
-import type { CountryCode } from './countries'
-import { parseSavedFormState } from './form-state'
-import { interpretPhoneNumber, splitE164 } from './phone-number'
+import type { CountryCode } from './core/countries'
+import { parseSavedFormState } from './core/form-state'
+import { interpretPhoneNumber, splitE164 } from './core/phone-number'
 import TesPhoneComponent from './TesPhone.ce.vue'
 
 export interface TesPhoneState {

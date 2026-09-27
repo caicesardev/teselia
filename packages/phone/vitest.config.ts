@@ -1,6 +1,6 @@
 import { playwright } from '@vitest/browser-playwright'
 import { defineConfig } from 'vitest/config'
-import { emulateMedia } from './src/testing/commands.ts'
+import { emulateMedia } from './test/support/commands.ts'
 
 export default defineConfig({
   test: {
@@ -10,8 +10,7 @@ export default defineConfig({
         test: {
           name: 'phone:unit',
           environment: 'node',
-          include: ['src/**/*.test.ts'],
-          exclude: ['src/**/*.browser.test.ts'],
+          include: ['test/unit/**/*.test.ts'],
         },
       },
       {
@@ -22,7 +21,7 @@ export default defineConfig({
         test: {
           name: 'phone:browser',
           fileParallelism: false,
-          include: ['src/**/*.browser.test.ts'],
+          include: ['test/browser/**/*.test.ts'],
           browser: {
             enabled: true,
             headless: true,

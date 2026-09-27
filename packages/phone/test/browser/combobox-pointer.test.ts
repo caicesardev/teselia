@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest'
 import { userEvent } from 'vitest/browser'
-import type { TesPhoneElement } from './index'
+import type { TesPhoneElement } from '../../src/index'
 import {
   activeDescendant,
   combobox,
@@ -12,7 +12,7 @@ import {
   popup,
   renderPhone,
   typeInCombobox,
-} from './testing/phone'
+} from '../support/phone'
 
 function option(el: TesPhoneElement, code: string): HTMLElement {
   return el.shadowRoot?.getElementById(`option-${code}`) as HTMLElement

@@ -1,7 +1,7 @@
 import axe from 'axe-core'
 import { afterEach, describe, expect, it } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
-import { TesPhoneElement, define } from './index'
+import { TesPhoneElement, define } from '../../src/index'
 
 function render(html: string): HTMLElement {
   const container = document.createElement('div')

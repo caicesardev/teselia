@@ -50,9 +50,9 @@
         :aria-describedby="numberDescribedBy"
         :disabled="state.disabledByForm"
         :readonly="readonly"
-        @focus="rememberValueBeforeEditing"
+        @focus="rememberTextBeforeEditing"
         @input.stop="updateFromUserInput"
-        @blur="commitNumberEditing"
+        @blur="commitEditing"
       />
     </div>
 
@@ -60,13 +60,7 @@
     <p id="error" class="error" part="error" aria-live="polite">{{ visibleError?.message }}</p>
 
     <div id="popup" ref="popup" popover="manual" part="popup">
-      <div
-        id="countries"
-        role="listbox"
-        :aria-label="textCountry"
-        :hidden="!hasOptions"
-        part="listbox"
-      >
+      <div id="countries" role="listbox" :aria-label="textCountry" :hidden="!hasOptions" part="listbox">
         <div
           v-for="section in sections"
           :key="section.key"
@@ -74,13 +68,7 @@
           :aria-labelledby="section.label ? `group-${section.key}` : undefined"
           :class="{ group: section.label }"
         >
-          <div
-            v-if="section.label"
-            :id="`group-${section.key}`"
-            role="presentation"
-            class="group-label"
-            part="group-label"
-          >
+          <div v-if="section.label" :id="`group-${section.key}`" role="presentation" class="group-label" part="group-label">
             {{ section.label }}
           </div>
           <div
@@ -105,69 +93,22 @@
 </template>
 
 <script setup lang="ts">
-import {
-  computed,
-  nextTick,
-  onBeforeUnmount,
-  onMounted,
-  ref,
-  useHost,
-  useTemplateRef,
-  watch,
-  watchEffect,
-} from 'vue'
-import {
-  type Country,
-  type CountryCode,
-  describeCountry,
-  listCountries,
-  parseCountryCodes,
-} from './countries'
+import { useHost, useTemplateRef } from 'vue'
+import { useAnnouncer } from './composables/use-announcer'
+import { useCountryCombobox } from './composables/use-country-combobox'
+import { useCountryList } from './composables/use-country-list'
+import { useCustomStates } from './composables/use-custom-states'
+import { useLocale } from './composables/use-locale'
+import { useNumberField } from './composables/use-number-field'
+import { usePublicEvents } from './composables/use-public-events'
+import { useValidation } from './composables/use-validation'
+import { resolveDefaultCountry } from './core/locale'
 import type { TesPhoneElement } from './element'
-import { serializeFormState } from './form-state'
-import { filterCountries } from './filter'
-import { type Direction, nextHighlight } from './highlight'
-import { resolveDefaultCountry, resolveLocale } from './locale'
-import { type FormattedInput, formatForDisplay, formatWhileTyping } from './format'
-import { interpretPhoneNumber, splitE164 } from './phone-number'
+import { TES_PHONE_DEFAULTS, type TesPhoneProps } from './props'
 
 defineOptions({ inheritAttrs: false })
 
-const props = withDefaults(
-  defineProps<{
-    label?: string
-    required?: boolean
-    readonly?: boolean
-    hint?: string
-    defaultCountry?: string
-    autocomplete?: string
-    preferredCountries?: string
-    onlyCountries?: string
-    textCountry?: string
-    textSuggested?: string
-    textResults?: string
-    textNoResults?: string
-    textRequired?: string
-    textInvalid?: string
-    textCountryRequired?: string
-    textCountryChanged?: string
-    textNotAllowed?: string
-  }>(),
-  {
-    autocomplete: 'tel',
-    textCountry: 'Country code',
-    textSuggested: 'Suggested',
-    textResults: 'Countries available: {count}',
-    textNoResults: 'No countries found',
-    textRequired: 'Enter a phone number',
-    textInvalid: 'Enter a valid phone number for {country}',
-    textCountryRequired: 'Select a country code',
-    textCountryChanged: 'Country set to {country}',
-    textNotAllowed: 'Numbers from {country} are not accepted',
-  },
-)
-
-const ANNOUNCEMENT_DELAY_MS = 500
+const props = withDefaults(defineProps<TesPhoneProps>(), TES_PHONE_DEFAULTS)
 
 const host = useHost() as TesPhoneElement
 const { state, internals } = host
@@ -179,641 +120,76 @@ if (import.meta.env.DEV && !props.label) {
   console.warn('[tes-phone] The `label` attribute is required for an accessible name.')
 }
 
-const langChanges = ref(0)
-const langObserver = new MutationObserver(() => langChanges.value++)
-onMounted(() => {
-  for (const target of [host, document.documentElement]) {
-    langObserver.observe(target, { attributes: true, attributeFilter: ['lang'] })
-  }
-})
-onBeforeUnmount(() => langObserver.disconnect())
-
-const locale = computed(() => {
-  void langChanges.value
-  return resolveLocale([
-    host.closest('[lang]')?.getAttribute('lang'),
-    document.documentElement.lang,
-    navigator.language,
-  ])
-})
-const onlyCountries = computed(() => parseCountryCodes(props.onlyCountries))
-const preferredCountries = computed(() => parseCountryCodes(props.preferredCountries))
-
-if (import.meta.env.DEV) {
-  watchEffect(() => {
-    for (const [attribute, parsed] of [
-      ['only-countries', onlyCountries.value],
-      ['preferred-countries', preferredCountries.value],
-    ] as const) {
-      if (parsed.invalid.length > 0) {
-        console.warn(`[tes-phone] Ignoring unsupported codes in \`${attribute}\`: ${parsed.invalid.join(', ')}`)
-      }
-    }
-  })
-}
-
-const countries = computed(() => {
-  const all = listCountries(locale.value)
-  const allowed = onlyCountries.value.codes
-  return allowed.length === 0 ? all : all.filter((country) => allowed.includes(country.code))
-})
+const locale = useLocale(host)
+const countryList = useCountryList(props, locale)
 
 state.defaultCountry = resolveDefaultCountry({
   defaultCountry: props.defaultCountry,
   navigatorLanguage: navigator.language,
-  onlyCountries: onlyCountries.value.codes,
-  preferredCountries: preferredCountries.value.codes,
+  onlyCountries: countryList.allowedCodes.value,
+  preferredCountries: countryList.preferredCodes.value,
 })
 if (!state.country) state.country = state.defaultCountry
 
-const query = ref<string | null>(null)
-const isOpen = ref(false)
-const highlightedCode = ref<CountryCode | null>(null)
+const announcer = useAnnouncer()
+const { announcement } = announcer
+const dispatchPublicEvent = usePublicEvents(host, state)
 
-const selectedCountry = computed(() =>
-  countries.value.find((country) => country.code === state.country),
-)
-interface ListboxSection {
-  key: string
-  label: string | null
-  countries: Country[]
-}
-
-const suggestedCountries = computed(() =>
-  preferredCountries.value.codes
-    .map((code) => countries.value.find((country) => country.code === code))
-    .filter((country): country is Country => country !== undefined),
-)
-
-const sections = computed<ListboxSection[]>(() => {
-  const isBrowsingFullList = !query.value
-  if (!isBrowsingFullList || suggestedCountries.value.length === 0) {
-    return [
-      { key: 'all', label: null, countries: filterCountries(countries.value, query.value ?? '', locale.value) },
-    ]
-  }
-
-  const suggested = suggestedCountries.value
-  return [
-    { key: 'suggested', label: props.textSuggested, countries: suggested },
-    { key: 'others', label: null, countries: countries.value.filter((country) => !suggested.includes(country)) },
-  ]
+const {
+  isOpen,
+  hasOptions,
+  sections,
+  comboboxText,
+  highlightedCode,
+  highlightedOptionId,
+  optionId,
+  selectCountry,
+  closeAndRestoreSelection,
+  selectTextSoTypingReplacesIt,
+  focusWithoutPlacingCaret,
+  openFromPointer,
+  handleKeydown: handleComboboxKeydown,
+  filterByTypedText,
+  toggleFromChevron,
+} = useCountryCombobox({
+  props,
+  state,
+  host,
+  locale,
+  countryList,
+  announcer,
+  combobox,
+  popup,
+  onCountryPicked: () => {
+    state.dirty = true
+    dispatchPublicEvent('input')
+    dispatchPublicEvent('change')
+  },
 })
 
-const visibleCountries = computed(() => sections.value.flatMap((section) => section.countries))
-const hasOptions = computed(() => visibleCountries.value.length > 0)
-const comboboxText = computed(() => query.value ?? displayOf(selectedCountry.value))
-const highlightedOptionId = computed(() =>
-  highlightedCode.value ? optionId(highlightedCode.value) : undefined,
-)
-
-function displayOf(country: Country | undefined): string {
-  return country ? `${country.name} +${country.callingCode}` : ''
-}
-
-function optionId(code: CountryCode): string {
-  return `option-${code}`
-}
-
-function selectTextSoTypingReplacesIt(event: FocusEvent): void {
-  ;(event.target as HTMLInputElement).select()
-}
-
-function filterByTypedText(event: Event): void {
-  query.value = (event.target as HTMLInputElement).value
-  highlightedCode.value = null
-  openPopup()
-}
-
-function handleComboboxKeydown(event: KeyboardEvent): void {
-  if (props.readonly) return
-
-  if (query.value === null && editsText(event)) startSearchFromEmptyText(event)
-
-  switch (event.key) {
-    case 'ArrowDown':
-      event.preventDefault()
-      if (event.altKey) openPopup()
-      else moveHighlight(1)
-      break
-    case 'ArrowUp':
-      event.preventDefault()
-      moveHighlight(-1)
-      break
-    case 'Enter':
-      if (isOpen.value) {
-        event.preventDefault()
-        selectHighlightedCountry()
-      }
-      break
-    case 'Escape':
-      if (isOpen.value) event.stopPropagation()
-      closeAndRestoreSelection()
-      break
-  }
-}
-
-function editsText(event: KeyboardEvent): boolean {
-  const isPrintable = event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey
-  return isPrintable || event.key === 'Backspace' || event.key === 'Delete'
-}
-
-function startSearchFromEmptyText(event: KeyboardEvent): void {
-  const input = event.target as HTMLInputElement
-  input.value = ''
-  if (event.key === 'Backspace' || event.key === 'Delete') {
-    event.preventDefault()
-    query.value = ''
-    highlightedCode.value = null
-    openPopup()
-  }
-}
-
-function openPopup(): void {
-  isOpen.value = true
-}
-
-function moveHighlight(direction: Direction): void {
-  const codes = visibleCountries.value.map((country) => country.code)
-
-  if (!isOpen.value) {
-    openPopup()
-    const selected = state.country || null
-    highlightedCode.value =
-      selected && codes.includes(selected) ? selected : nextHighlight(codes, null, direction)
-  } else {
-    highlightedCode.value = nextHighlight(codes, highlightedCode.value, direction)
-  }
-
-  void nextTick(scrollHighlightedOptionIntoView)
-}
-
-function scrollHighlightedOptionIntoView(): void {
-  if (!highlightedOptionId.value) return
-  host.shadowRoot?.getElementById(highlightedOptionId.value)?.scrollIntoView({ block: 'nearest' })
-}
-
-function selectHighlightedCountry(): void {
-  if (highlightedCode.value) selectCountry(highlightedCode.value)
-}
-
-function selectCountry(code: CountryCode): void {
-  const changed = code !== state.country
-  state.country = code
-  closeAndRestoreSelection()
-  if (!changed) return
-  state.dirty = true
-  dispatchPublicEvent('input')
-  dispatchPublicEvent('change')
-}
-
-function focusWithoutPlacingCaret(event: MouseEvent): void {
-  const input = event.target as HTMLInputElement
-  if (host.shadowRoot?.activeElement === input) return
-  event.preventDefault()
-  input.focus()
-}
-
-function openFromPointer(): void {
-  if (props.readonly) return
-  if (!isOpen.value) moveHighlight(1)
-}
-
-function toggleFromChevron(): void {
-  if (props.readonly) return
-  combobox.value?.focus()
-  if (isOpen.value) closeAndRestoreSelection()
-  else moveHighlight(1)
-}
-
-function closeAndRestoreSelection(): void {
-  query.value = null
-  highlightedCode.value = null
-  isOpen.value = false
-}
-
-function updateFromUserInput(event: Event): void {
-  const input = event.target as HTMLInputElement
-  const previous = state.nationalInput
-  state.nationalInput = input.value
-  state.dirty = true
-  state.numberTouched = true
-
-  if (adoptCountryOfInternationalNumber()) {
-    showInNumberField(input, { text: state.nationalInput, caret: state.nationalInput.length })
-  } else {
-    showInNumberField(
-      input,
-      formatWhileTyping({
-        previous,
-        raw: input.value,
-        caret: input.selectionStart ?? input.value.length,
-        inputType: (event as InputEvent).inputType,
-        country: state.country,
-      }),
-    )
-  }
-
-  dispatchPublicEvent('input')
-}
-
-function showInNumberField(input: HTMLInputElement, formatted: FormattedInput): void {
-  input.value = formatted.text
-  input.setSelectionRange(formatted.caret, formatted.caret)
-  state.nationalInput = formatted.text
-}
-
-function reformatForCountry(): void {
-  state.nationalInput = formatForDisplay(state.nationalInput, state.country)
-}
-
-const INTERNATIONAL_PREFIX = /^\s*(\+|00)/
-const excludedCountry = ref<CountryCode | null>(null)
-
-function adoptCountryOfInternationalNumber(): boolean {
-  excludedCountry.value = null
-  if (!INTERNATIONAL_PREFIX.test(state.nationalInput)) return false
-
-  const split = splitE164(state.nationalInput.trim().replace(/^00/, '+'))
-  if (!split) return false
-
-  const allowed = onlyCountries.value.codes
-  if (allowed.length > 0 && !allowed.includes(split.country)) {
-    excludedCountry.value = split.country
-    return false
-  }
-
-  state.nationalInput = split.nationalNumber
-  if (split.country !== state.country) {
-    state.country = split.country
-    announce(props.textCountryChanged.replace('{country}', describeCountry(split.country, locale.value)))
-  }
-  return true
-}
-
-let valueBeforeEditing = ''
-
-function rememberValueBeforeEditing(): void {
-  valueBeforeEditing = state.nationalInput
-}
-
-function commitNumberEditing(): void {
-  if (state.numberTouched) state.errorsVisible = true
-  if (state.nationalInput !== valueBeforeEditing) dispatchPublicEvent('change')
-}
-
-type PublicEventName = 'input' | 'change' | 'countrychange'
-
-function dispatchPublicEvent(name: PublicEventName): void {
-  const { e164, valid } = interpretPhoneNumber(state.nationalInput, state.country)
-  host.dispatchEvent(
-    new CustomEvent(name, {
-      bubbles: true,
-      composed: true,
-      detail: { value: e164, country: state.country, valid },
-    }),
-  )
-}
-
-interface ValidationError {
-  flag: 'valueMissing' | 'typeMismatch'
-  message: string
-  anchor: 'number' | 'country'
-}
-
-const phoneNumber = computed(() => interpretPhoneNumber(state.nationalInput, state.country))
-
-const validationError = computed<ValidationError | null>(() => {
-  if (state.nationalInput.trim() === '') {
-    return props.required ? { flag: 'valueMissing', message: props.textRequired, anchor: 'number' } : null
-  }
-  if (excludedCountry.value) {
-    const country = describeCountry(excludedCountry.value, locale.value)
-    return { flag: 'typeMismatch', message: props.textNotAllowed.replace('{country}', country), anchor: 'number' }
-  }
-  if (phoneNumber.value.valid) return null
-  if (!state.country && !phoneNumber.value.detectedCountry) {
-    return { flag: 'valueMissing', message: props.textCountryRequired, anchor: 'country' }
-  }
-  return {
-    flag: 'typeMismatch',
-    message: props.textInvalid.replace('{country}', displayOf(selectedCountry.value)),
-    anchor: 'number',
-  }
+const { excludedCountry, updateFromUserInput, rememberTextBeforeEditing, commitEditing } = useNumberField({
+  props,
+  state,
+  locale,
+  isAllowed: countryList.isAllowed,
+  announcer,
+  dispatchPublicEvent,
 })
 
-const visibleError = computed(() => (state.errorsVisible ? validationError.value : null))
-
-const numberDescribedBy = computed(() => {
-  const ids = [props.hint ? 'hint' : '', visibleError.value?.anchor === 'number' ? 'error' : '']
-  return ids.filter(Boolean).join(' ') || undefined
+const { visibleError, numberDescribedBy } = useValidation({
+  props,
+  host,
+  locale,
+  excludedCountry,
+  combobox,
+  numberInput,
 })
 
-function syncFormState(): void {
-  internals.setFormValue(phoneNumber.value.e164, serializeFormState(state))
-
-  const error = validationError.value
-  if (!error) {
-    internals.setValidity({})
-    return
-  }
-  const anchor = error.anchor === 'country' ? combobox.value : numberInput.value
-  internals.setValidity({ [error.flag]: true }, error.message, anchor ?? undefined)
-}
-
-function revealErrors(): void {
-  state.errorsVisible = true
-}
-
-function syncPopover(open: boolean): void {
-  const element = popup.value
-  if (!element) return
-  const isShown = element.matches(':popover-open')
-  if (open && !isShown) element.showPopover()
-  if (!open && isShown) element.hidePopover()
-}
-
-const announcement = ref('')
-let pendingAnnouncement: ReturnType<typeof setTimeout> | undefined
-
-function announce(message: string): void {
-  clearTimeout(pendingAnnouncement)
-  announcement.value = ''
-  void nextTick(() => {
-    announcement.value = message
-  })
-}
-
-function announceResultsOnceTypingPauses(currentQuery: string | null): void {
-  clearTimeout(pendingAnnouncement)
-  announcement.value = ''
-  if (currentQuery === null) return
-
-  pendingAnnouncement = setTimeout(() => {
-    announcement.value = hasOptions.value
-      ? props.textResults.replace('{count}', String(visibleCountries.value.length))
-      : props.textNoResults
-  }, ANNOUNCEMENT_DELAY_MS)
-}
-
-watchEffect(syncFormState, { flush: 'post' })
-watch(
-  () => state.country,
-  () => dispatchPublicEvent('countrychange'),
-  { flush: 'sync' },
-)
-watch(() => state.country, reformatForCountry, { immediate: true })
-
-type CustomState = 'invalid' | 'open' | 'empty'
-
-function setCustomState(name: CustomState, active: boolean): void {
-  const states = internals.states
-  if (!states) return
-  if (active) states.add(name)
-  else states.delete(name)
-}
-
-watchEffect(() => {
-  setCustomState('invalid', visibleError.value !== null)
-  setCustomState('open', isOpen.value)
-  setCustomState('empty', state.nationalInput.trim() === '')
-})
-watch(isOpen, syncPopover)
-watch(query, announceResultsOnceTypingPauses)
-onBeforeUnmount(() => clearTimeout(pendingAnnouncement))
-onMounted(() => host.addEventListener('invalid', revealErrors))
-onBeforeUnmount(() => host.removeEventListener('invalid', revealErrors))
+useCustomStates(internals, () => ({
+  invalid: visibleError.value !== null,
+  open: isOpen.value,
+  empty: state.nationalInput.trim() === '',
+}))
 </script>
 
-<style>
-:host {
-  --_text: var(--tes-color-text, light-dark(#1f2328, #e8eaee));
-  --_muted: var(--tes-color-muted, light-dark(#59636e, #a3adba));
-  --_bg: var(--tes-color-bg, light-dark(#ffffff, #16181d));
-  --_border: var(--tes-color-border, light-dark(#7d8590, #7f8a99));
-  --_accent: var(--tes-color-accent, light-dark(#0b5fcc, #7aa7ff));
-  --_on-accent: var(--tes-color-on-accent, light-dark(#ffffff, #0d1117));
-  --_hover: var(--tes-color-hover, light-dark(#eef3fb, #232a36));
-  --_focus: var(--tes-color-focus, light-dark(#0b5fcc, #7aa7ff));
-  --_error: var(--tes-color-error, light-dark(#c4232b, #ff8a80));
-  --_radius: var(--tes-radius, 0.375rem);
-  --_space: var(--tes-space, 0.5rem);
-  --_popup-max-height: var(--tes-popup-max-height, 18rem);
-  --_control-height: 2.75rem;
-
-  display: inline-block;
-  max-inline-size: 100%;
-  color: var(--_text);
-  font-family: var(--tes-font-family);
-  font-size: var(--tes-font-size);
-}
-
-:host([hidden]) {
-  display: none;
-}
-
-.field {
-  display: grid;
-  gap: calc(var(--_space) / 2);
-}
-
-label {
-  font-weight: 500;
-}
-
-.controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--_space);
-}
-
-.country {
-  position: relative;
-  flex: 1 1 8rem;
-  max-inline-size: 12rem;
-}
-
-#number {
-  flex: 999 1 10rem;
-  min-inline-size: 0;
-}
-
-input {
-  box-sizing: border-box;
-  inline-size: 100%;
-  min-block-size: var(--_control-height);
-  padding-inline: calc(var(--_space) * 1.5);
-  border: 1px solid var(--_border);
-  border-radius: var(--_radius);
-  background: var(--_bg);
-  color: var(--_text);
-  font: inherit;
-}
-
-input:focus-visible {
-  outline: 2px solid var(--_focus);
-  outline-offset: 2px;
-}
-
-input[aria-invalid='true'] {
-  border-color: var(--_error);
-  box-shadow: inset 0 0 0 1px var(--_error);
-}
-
-.hint,
-.error {
-  margin: 0;
-  font-size: 0.875em;
-}
-
-.hint {
-  color: var(--_muted);
-}
-
-.error {
-  color: var(--_error);
-  font-weight: 500;
-}
-
-#country {
-  anchor-name: --country;
-  padding-inline-end: calc(var(--_space) * 4);
-  text-overflow: ellipsis;
-}
-
-.toggle {
-  position: absolute;
-  inset-block: 0;
-  inset-inline-end: 0;
-  display: grid;
-  place-items: center;
-  inline-size: calc(var(--_space) * 4);
-  cursor: pointer;
-}
-
-.chevron {
-  inline-size: 1rem;
-  block-size: 1rem;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.5;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-[popover] {
-  position-anchor: --country;
-  position-area: block-end span-inline-end;
-  position-try-fallbacks: flip-block;
-  inset: auto;
-  box-sizing: border-box;
-  min-inline-size: anchor-size(inline);
-  margin: 0;
-  margin-block: calc(var(--_space) / 2);
-  padding: calc(var(--_space) / 2);
-  border: 1px solid var(--_border);
-  border-radius: var(--_radius);
-  background: var(--_bg);
-  color: var(--_text);
-  box-shadow: 0 8px 24px rgb(0 0 0 / 0.16);
-}
-
-[role='listbox'] {
-  max-block-size: var(--_popup-max-height);
-  margin: 0;
-  padding: 0;
-  overflow: auto;
-  list-style: none;
-}
-
-.group {
-  margin-block-end: calc(var(--_space) / 2);
-  padding-block-end: calc(var(--_space) / 2);
-  border-block-end: 1px solid var(--_border);
-}
-
-.group-label {
-  padding: calc(var(--_space) / 2) var(--_space);
-  color: var(--_muted);
-  font-size: 0.8125em;
-  font-weight: 600;
-}
-
-.no-results {
-  margin: 0;
-  padding: var(--_space);
-  color: var(--_muted);
-}
-
-.visually-hidden {
-  position: absolute;
-  inline-size: 1px;
-  block-size: 1px;
-  margin: -1px;
-  padding: 0;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-  border: 0;
-}
-
-[role='option'] {
-  display: flex;
-  gap: var(--_space);
-  justify-content: space-between;
-  align-items: center;
-  min-block-size: 2.5rem;
-  padding-inline: var(--_space);
-  border-radius: calc(var(--_radius) - 2px);
-  cursor: pointer;
-}
-
-[role='option']:hover {
-  background: var(--_hover);
-}
-
-.option-code {
-  color: var(--_muted);
-  font-variant-numeric: tabular-nums;
-}
-
-[role='option'][aria-selected='true'] {
-  background: var(--_accent);
-  color: var(--_on-accent);
-}
-
-[role='option'][aria-selected='true'] .option-code {
-  color: inherit;
-}
-
-[role='option'].highlighted {
-  background: var(--_hover);
-  box-shadow: inset 0 0 0 2px var(--_focus);
-}
-
-[role='option'][aria-selected='true'].highlighted {
-  background: var(--_accent);
-  box-shadow: inset 0 0 0 2px var(--_on-accent);
-}
-
-@media (forced-colors: active) {
-  [role='option'].highlighted {
-    outline: 2px solid Highlight;
-    outline-offset: -2px;
-  }
-
-  [role='option'][aria-selected='true'] {
-    forced-color-adjust: none;
-    background: SelectedItem;
-    color: SelectedItemText;
-  }
-
-  [role='option'][aria-selected='true'].highlighted {
-    outline-color: SelectedItemText;
-  }
-
-  input[aria-invalid='true'] {
-    border-width: 2px;
-  }
-}
-</style>
+<style src="./tes-phone.css"></style>

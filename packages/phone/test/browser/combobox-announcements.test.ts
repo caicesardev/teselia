@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest'
 import { userEvent } from 'vitest/browser'
-import type { TesPhoneElement } from './index'
+import type { TesPhoneElement } from '../../src/index'
 import {
   combobox,
   expectNoAxeViolations,
@@ -9,7 +9,7 @@ import {
   popup,
   renderPhone,
   typeInCombobox,
-} from './testing/phone'
+} from '../support/phone'
 
 const SETTLE_MS = 900
 const DEBOUNCED_ANNOUNCEMENT_ON_SLOW_CI = { timeout: 3000 }

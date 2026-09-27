@@ -1,16 +1,9 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "types": [
-      "vite/client"
-    ],
+    "types": ["vite/client"],
     "noEmit": true,
     "allowImportingTsExtensions": true
   },
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.vue",
-    "vite.config.ts",
-    "vitest.config.ts"
-  ]
+  "include": ["src/**/*.ts", "src/**/*.vue", "test/**/*.ts", "vite.config.ts", "vitest.config.ts"]
 }

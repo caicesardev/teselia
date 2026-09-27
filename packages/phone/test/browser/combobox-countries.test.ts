@@ -1,7 +1,7 @@
 import { getCountries } from 'libphonenumber-js/min'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
-import type { TesPhoneElement } from './index'
+import type { TesPhoneElement } from '../../src/index'
 import {
   activeDescendant,
   combobox,
@@ -10,7 +10,7 @@ import {
   options,
   renderPhone,
   typeInCombobox,
-} from './testing/phone'
+} from '../support/phone'
 
 function optionCodes(el: TesPhoneElement): string[] {
   return options(el).map((option) => option.id.replace('option-', ''))

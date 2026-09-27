@@ -285,7 +285,7 @@ All events bubble and are composed. `detail` is `{ value, country, valid }`.
 - `formDisabledCallback` covers disabled fieldsets.
 - `formStateRestoreCallback` handles back/forward cache and autofill restore.
 - Implemented in #21:
-  - `setFormValue(e164, state)` saves the typed text and country as JSON (`form-state.ts`). In `restore` mode both come back exactly as they were. In `autocomplete` mode the browser provides a value, which is treated as E.164. Malformed state, or an unsupported country code, is ignored.
+  - `setFormValue(e164, state)` saves the typed text and country as JSON (`src/core/form-state.ts`). In `restore` mode both come back exactly as they were. In `autocomplete` mode the browser provides a value, which is treated as E.164. Malformed state, or an unsupported country code, is ignored.
   - `readonly`: both controls get `readonly`. The combobox ignores keys, clicks and the chevron, and the value is still submitted. The HTML spec bars a form-associated element with `readonly` from constraint validation, so `willValidate` is `false`, exactly like a native readonly input. `readOnly` reflects to the attribute.
   - `disabled` (attribute, property or fieldset) goes through `formDisabledCallback` and disables both controls.
 
@@ -334,7 +334,7 @@ Tokens use the suite-wide `--tes-` prefix, so one set of variables themes every 
 | focus / bg | 5.96 | 7.44 | 3 |
 | accent / bg | 5.96 | 7.44 | 3 |
 
-`design-tokens.browser.test.ts` resolves the real colors inside the shadow root in both schemes and asserts every pair in all three engines, so a future palette change cannot silently break contrast. The focus ring sits outside the field (2px offset), on the page background: the ratios assume a page background close to the token background.
+`test/browser/design-tokens.test.ts` resolves the real colors inside the shadow root in both schemes and asserts every pair in all three engines, so a future palette change cannot silently break contrast. The focus ring sits outside the field (2px offset), on the page background: the ratios assume a page background close to the token background.
 
 ### 4.5 Parts
 
@@ -352,7 +352,7 @@ Implemented in #22:
 - `:state(open)` is set while the popover is open, including the "no results" state.
 - `:state(empty)` is set while the number field is blank.
 - If `ElementInternals.states` is missing, states are skipped silently. Everything else keeps working.
-- `theming.browser.test.ts` proves that page styles reach inner elements through `::part()`, and that `:state()` combined with `::part()` works from outside.
+- `test/browser/theming.test.ts` proves that page styles reach inner elements through `::part()`, and that `:state()` combined with `::part()` works from outside.
 
 ### 4.7 Browser support
 
@@ -473,7 +473,7 @@ Deliberately **not** added: Testing Library (the `userEvent` in Vitest browser m
    - Placement is pure CSS, inside the same shadow root as the input (anchor names are tree-scoped): `anchor-name` on the input; `position-anchor`, `position-area: block-end span-inline-end`, `position-try-fallbacks: flip-block` and `min-inline-size: anchor-size(inline)` on the listbox; `inset: auto; margin: 0` to override the UA popover centering.
    - Support verified on 2026-09-27 in Chromium 153, Firefox 155 and WebKit 26.6 (Playwright builds): Popover API, `:popover-open`, `anchor-name`, `position-anchor`, `position-area`, `position-try-fallbacks` and `anchor-size()` all supported. Previous major versions were not checked directly.
    - **No JavaScript fallback.** A browser without anchor positioning still shows the listbox in the top layer, unclipped, just not aligned to the input. That is an acceptable degradation, and not worth the code.
-   - `popup-positioning.browser.test.ts` verifies, in all three engines: not clipped by `overflow: hidden`, opens below and aligned with the input, flips above when there's no room below, stays above `z-index: 2147483647`, and focus stays in the input. Mutation checks: removing the top layer, the anchor or the flip fallback each fail the matching tests. #11 reuses these styles in the component.
+   - `test/browser/popup-positioning.test.ts` verifies, in all three engines: not clipped by `overflow: hidden`, opens below and aligned with the input, flips above when there's no room below, stays above `z-index: 2147483647`, and focus stays in the input. Mutation checks: removing the top layer, the anchor or the flip fallback each fail the matching tests. #11 reuses these styles in the component.
 3. ~~**Bundle size budget.**~~ ✅ Set in #8. Measured on 2026-09-27 with `libphonenumber-js` 1.13.14 (`min`). The component does not use the country data yet, so the measurement used temporary entries that import exactly what v1 will use:
 
    | Build | Component only | + country list | + full v1 usage¹ |

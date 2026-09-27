@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { interpretPhoneNumber, splitE164 } from './phone-number'
+import { interpretPhoneNumber, splitE164 } from '../../src/core/phone-number'
 
 describe('interpretPhoneNumber', () => {
   it('converts a national number to E.164 for the selected country', () => {

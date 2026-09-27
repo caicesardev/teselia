@@ -1,6 +1,6 @@
 import { getCountries } from 'libphonenumber-js/min'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { describeCountry, listCountries, parseCountryCodes } from './countries'
+import { describeCountry, listCountries, parseCountryCodes } from '../../src/core/countries'
 
 afterEach(() => {
   vi.restoreAllMocks()

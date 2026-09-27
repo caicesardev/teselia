@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { userEvent } from 'vitest/browser'
-import type { TesPhoneElement } from './index'
-import { combobox, isExpanded, numberInput, renderPhone } from './testing/phone'
+import type { TesPhoneElement } from '../../src/index'
+import { combobox, isExpanded, numberInput, renderPhone } from '../support/phone'
 
 async function renderInForm(attributes: string): Promise<{ el: TesPhoneElement; form: HTMLFormElement }> {
   const el = await renderPhone(`name="phone" lang="en" ${attributes}`, 'form')

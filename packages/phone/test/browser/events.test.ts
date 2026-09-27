@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest'
 import { userEvent } from 'vitest/browser'
-import type { TesPhoneElement } from './index'
-import { combobox, numberInput, renderPhone, typeInCombobox } from './testing/phone'
+import type { TesPhoneElement } from '../../src/index'
+import { combobox, numberInput, renderPhone, typeInCombobox } from '../support/phone'
 
 type PublicEventName = 'input' | 'change' | 'countrychange'
 
