@@ -53,6 +53,7 @@
         @focus="rememberTextBeforeEditing"
         @input.stop="updateFromUserInput"
         @blur="commitEditing"
+        @keydown.enter="submitOnEnter"
       />
     </div>
 
@@ -98,6 +99,7 @@ import { useAnnouncer } from './composables/use-announcer'
 import { useCountryCombobox } from './composables/use-country-combobox'
 import { useCountryList } from './composables/use-country-list'
 import { useCustomStates } from './composables/use-custom-states'
+import { useImplicitSubmission } from './composables/use-implicit-submission'
 import { useLocale } from './composables/use-locale'
 import { useNumberField } from './composables/use-number-field'
 import { usePublicEvents } from './composables/use-public-events'
@@ -167,14 +169,16 @@ const {
   },
 })
 
-const { excludedCountry, updateFromUserInput, rememberTextBeforeEditing, commitEditing } = useNumberField({
-  props,
-  state,
-  locale,
-  isAllowed: countryList.isAllowed,
-  announcer,
-  dispatchPublicEvent,
-})
+const { excludedCountry, updateFromUserInput, rememberTextBeforeEditing, commitEditing, submitOnEnter } =
+  useNumberField({
+    props,
+    state,
+    locale,
+    isAllowed: countryList.isAllowed,
+    announcer,
+    dispatchPublicEvent,
+    submitOwnerForm: useImplicitSubmission(internals),
+  })
 
 const { visibleError, numberDescribedBy } = useValidation({
   props,
