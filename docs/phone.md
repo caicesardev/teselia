@@ -390,8 +390,8 @@ Manual testing with assistive technology, before `1.0.0`:
 
 | Assistive technology | Browser | Result |
 | --- | --- | --- |
-| Keyboard only | Chrome, Firefox (Windows) | Pending |
-| NVDA | Firefox, Chrome (Windows) | Pending |
+| Keyboard only | Chrome, Firefox (Windows) | Passed. Testing led to `Enter` in the number field submitting the form, like a native input. |
+| NVDA | Firefox, Brave (Windows) | Passed. Testing fixed a repeated "Country set to…" announcement that Chromium skipped. Some Spanish voices read a list position such as "1 de 241" as a date; the component sends the right text. |
 | VoiceOver | Safari (iOS) | Pending |
 | High contrast mode | Edge (Windows) | Pending |
 | 200% and 400% zoom, 320px width, text spacing | Chrome | Pending |
