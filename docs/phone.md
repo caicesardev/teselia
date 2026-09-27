@@ -3,7 +3,7 @@
 Accessible international phone input with country calling code. It submits a single normalized value to any native `<form>`.
 
 ::: warning In development
-`@teselia/phone` is not published yet. Version `1.0.0` is planned for **October 24, 2026**. The demo below is an early build: you can already filter the country list by typing in the country field. Selecting a country with the keyboard or mouse, validation and formatting are coming next. Scope and decisions: [design document](https://github.com/caicesardev/teselia/blob/main/design/phone.md).
+`@teselia/phone` is not published yet. Version `1.0.0` is planned for **October 24, 2026**. The demo below is an early build: you can already filter the country list by typing in the country field and pick a country with the arrow keys and <kbd>Enter</kbd>. Mouse selection, validation and formatting are coming next. Scope and decisions: [design document](https://github.com/caicesardev/teselia/blob/main/design/phone.md).
 :::
 
 ## Demo

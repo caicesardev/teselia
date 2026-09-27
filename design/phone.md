@@ -99,6 +99,14 @@ This follows the WAI-ARIA APG *Combobox with Listbox Popup* pattern, using list 
 | `Home` / `End` | Moves the caret in the text | Moves the caret in the text |
 | `Tab` | Moves focus to the number field | Closes the popup **without** changing the selection, then moves focus |
 
+Keyboard implementation notes (#12):
+
+- **`aria-selected` marks the chosen country; `aria-activedescendant` marks the highlighted option.** Screen readers announce the highlighted option as the highlight moves, and the current country as "selected". Some APG examples use `aria-selected` for the highlight instead. Validate this choice with NVDA and VoiceOver in #26 and #27.
+- **Arrow keys wrap around** at both ends. With about 245 options, and `Home`/`End` reserved for the caret, wrapping is the fastest way to reach the end of the list.
+- Typing clears the highlight: list autocomplete without automatic selection.
+- `Enter` and `Escape` call `preventDefault` while the listbox is open. `Escape` also stops propagation, so closing the listbox inside a dialog doesn't close the dialog.
+- The highlighted option is scrolled into view (`block: 'nearest'`). It is shown with a hover background plus a 2px inset ring, in `on-accent` when it is also the selected country.
+
 - A mouse or touch click on an option selects it.
 - Clicking outside the component closes the popup without changing the selection.
 
