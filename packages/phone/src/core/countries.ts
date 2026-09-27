@@ -30,6 +30,10 @@ export function parseCountryCodes(value: string | null | undefined): ParsedCount
   return parsed
 }
 
+export function countryLabel(country: Country): string {
+  return `${country.name} +${country.callingCode}`
+}
+
 export function describeCountry(code: CountryCode, locale: string): string {
   const name = new Intl.DisplayNames([locale], { type: 'region', fallback: 'code' }).of(code) ?? code
   return `${name} +${getCountryCallingCode(code)}`

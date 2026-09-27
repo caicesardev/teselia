@@ -77,6 +77,23 @@ teselia/
 ```
 
 - Do **not** create `packages/core` until there is real duplicated code between two components.
+- Layout inside a component package (`packages/phone`):
+
+  ```
+  src/
+  ├── index.ts, element.ts   # public entry and the form-associated custom element class
+  ├── TesPhone.ce.vue        # template + wiring only
+  ├── tes-phone.css          # component styles (<style src>, inlined into the shadow root)
+  ├── props.ts               # props interface and default texts
+  ├── composables/           # one responsibility each (combobox, number field, validation, events…)
+  └── core/                  # pure, framework-free logic, unit tested in Node
+  test/
+  ├── unit/                  # Node tests for src/core
+  ├── browser/               # Vitest browser mode: Chromium, Firefox, WebKit (files run sequentially)
+  └── support/               # shared helpers and custom browser commands
+  ```
+
+  New logic goes into `core/` when it has no Vue or DOM dependency, otherwise into a focused composable. Keep the SFC thin.
 - `packages/phone/package.json` essentials: `"files": ["dist"]`, `exports` with `"."` (ESM + types) and `"./iife"` (no `"./style.css"`: `.ce.vue` styles are inlined into the shadow root, so there is no external stylesheet; add one only if a light-DOM stylesheet becomes necessary, e.g. `:not(:defined)` FOUC rules); `unpkg`/`jsdelivr` pointing to the IIFE; `peerDependencies: { vue: "^3.5.0" }`; `publishConfig.access: "public"`; `repository.directory: "packages/phone"`; `homepage: https://teselia.caicesardev.com/phone`.
 - Internal deps (later) use `"workspace:^"`.
 - Root scripts: `build`, `test`, `docs:dev`, `docs:build`, `changeset`, `version-packages`, `release` (`pnpm build && changeset publish`).
