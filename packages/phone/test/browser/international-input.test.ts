@@ -38,6 +38,25 @@ describe('international numbers in the number field', () => {
     await expect.poll(() => liveRegion(el).textContent?.trim(), ANNOUNCEMENT).toBe('Country set to United Kingdom +44')
   })
 
+  it('empties the live region for a moment before repeating the same announcement', async () => {
+    const el = await renderPhone('default-country="ES" lang="en"')
+    await userEvent.fill(numberInput(el), '+44 20 7946 0958')
+    await expect.poll(() => liveRegion(el).textContent?.trim(), ANNOUNCEMENT).toBe('Country set to United Kingdom +44')
+    el.value = '+34612345678'
+
+    const changes: { text: string; at: number }[] = []
+    new MutationObserver(() => {
+      changes.push({ text: liveRegion(el).textContent?.trim() ?? '', at: performance.now() })
+    }).observe(liveRegion(el), { childList: true, characterData: true, subtree: true })
+    await userEvent.fill(numberInput(el), '+44 20 7946 0958')
+    await expect.poll(() => changes.at(-1)?.text, ANNOUNCEMENT).toBe('Country set to United Kingdom +44')
+
+    const emptied = changes.find((change) => change.text === '')
+    const announced = changes.at(-1)
+    expect(emptied).toBeDefined()
+    expect((announced?.at ?? 0) - (emptied?.at ?? 0)).toBeGreaterThanOrEqual(50)
+  })
+
   it('follows a number typed with a leading +', async () => {
     const el = await renderPhone('default-country="ES" lang="en"')
 

@@ -397,6 +397,7 @@ Current and previous major versions of Chrome, Edge, Firefox and Safari. The req
 - **No results:** the popover stays open and shows `text-no-results` in the `no-results` part, next to the listbox. The listbox is `hidden` rather than rendered empty, and `aria-expanded` is `false` while there are no options (#14).
 - **Scrolling** happens on the listbox itself, not on the popover container. A scrollable container without a role is flagged by axe (`scrollable-region-focusable`); the listbox is the keyboard-operable widget.
 - **Paste or autofill changes the country:** `text-country-changed` (for example "Country set to United Kingdom (+44)").
+  - The region is emptied, and the message is written 100 ms later. Emptying and refilling it in the same task is enough for Firefox, but Chromium batches accessibility updates per frame. A repeated message (paste a UK number, go back to Spain, paste again) then never reached NVDA in Brave. Found in manual NVDA testing (#26).
 - **Format as you type:** no announcements. The screen reader already reads the input value, and extra announcements would be noise.
 
 ### 5.3 Error messaging
