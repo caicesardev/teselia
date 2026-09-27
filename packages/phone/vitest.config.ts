@@ -1,5 +1,6 @@
 import { playwright } from '@vitest/browser-playwright'
 import { defineConfig } from 'vitest/config'
+import { emulateMedia } from './src/testing/commands.ts'
 
 export default defineConfig({
   test: {
@@ -26,6 +27,7 @@ export default defineConfig({
             enabled: true,
             headless: true,
             provider: playwright(),
+            commands: { emulateMedia },
             instances: [{ browser: 'chromium' }, { browser: 'firefox' }, { browser: 'webkit' }],
           },
         },

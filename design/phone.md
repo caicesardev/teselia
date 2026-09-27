@@ -196,7 +196,11 @@ Default token values and contrast ratios: §4.4.
   - With `min` metadata, `AsYouType` formats national numbers only as users actually write them, including the national prefix (`020 7946 0958` in the UK, `06 12 34 56 78` in France). So numbers set from E.164 or detected from a paste are shown in national format, with that prefix. The digits are reformatted when the country changes.
   - Reformatting never touches the live region. ⚠️ **Cut line:** if it is not solid, including caret handling and screen reader behaviour, by **2026-10-18**, it moves to `1.1` and v1 ships without it.
 - **Theming** through CSS custom properties, `::part()` and custom states (§4.4–4.6).
-- **Support for `forced-colors`, `prefers-reduced-motion` and basic RTL.** Layout uses logical properties, and the number input is always `dir="ltr"`.
+- **Support for `forced-colors`, `prefers-reduced-motion` and basic RTL.** Layout uses logical properties, and the number input is always `dir="ltr"`. Implemented in #23:
+  - Forced colors strips `box-shadow` and overrides backgrounds, which would hide the highlighted option (an inset ring) and the selected one (an accent background). A `forced-colors: active` block uses a `Highlight` outline for the highlight, `SelectedItem`/`SelectedItemText` for the selection, and a 2px border for the invalid state. Focus is an `outline`, which survives.
+  - Reduced motion: the component has no transitions or animations at all, and a test keeps it that way.
+  - RTL: in a `dir="rtl"` context the controls mirror (country on the right, chevron at its inline end), and the number stays left-to-right.
+  - Tests emulate `forced-colors` and `prefers-reduced-motion` through a custom Vitest browser command (`emulateMedia`, Playwright `page.emulateMedia`), which works in all three engines.
 
 ### Out (explicitly)
 
