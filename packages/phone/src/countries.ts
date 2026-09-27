@@ -30,6 +30,11 @@ export function parseCountryCodes(value: string | null | undefined): ParsedCount
   return parsed
 }
 
+export function describeCountry(code: CountryCode, locale: string): string {
+  const name = new Intl.DisplayNames([locale], { type: 'region', fallback: 'code' }).of(code) ?? code
+  return `${name} +${getCountryCallingCode(code)}`
+}
+
 export function listCountries(locale: string): Country[] {
   const regionNames = new Intl.DisplayNames([locale], { type: 'region', fallback: 'code' })
   const byLocalizedName = new Intl.Collator(locale).compare
