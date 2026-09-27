@@ -1,6 +1,7 @@
 import { getCountryCallingCode } from 'libphonenumber-js/min'
 import { defineCustomElement, reactive } from 'vue'
 import type { CountryCode } from './countries'
+import { parseSavedFormState } from './form-state'
 import { interpretPhoneNumber, splitE164 } from './phone-number'
 import TesPhoneComponent from './TesPhone.ce.vue'
 
@@ -88,6 +89,14 @@ export class TesPhoneElement extends VueTesPhone {
     this.toggleAttribute('disabled', value)
   }
 
+  get readOnly(): boolean {
+    return this.hasAttribute('readonly')
+  }
+
+  set readOnly(value: boolean) {
+    this.toggleAttribute('readonly', value)
+  }
+
   get form(): HTMLFormElement | null {
     return this.internals.form
   }
@@ -135,6 +144,20 @@ export class TesPhoneElement extends VueTesPhone {
 
   formDisabledCallback(disabled: boolean): void {
     this.state.disabledByForm = disabled
+  }
+
+  formStateRestoreCallback(saved: string | File | FormData | null, mode: 'restore' | 'autocomplete'): void {
+    if (typeof saved !== 'string') return
+
+    if (mode === 'autocomplete') {
+      this.applyValue(saved)
+    } else {
+      const restored = parseSavedFormState(saved)
+      if (!restored) return
+      this.state.nationalInput = restored.nationalInput
+      this.state.country = restored.country
+    }
+    this.state.dirty = true
   }
 
   private get interpreted() {

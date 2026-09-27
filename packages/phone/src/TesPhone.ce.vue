@@ -17,6 +17,7 @@
           :aria-invalid="visibleError?.anchor === 'country' ? 'true' : undefined"
           :aria-describedby="visibleError?.anchor === 'country' ? 'error' : undefined"
           :disabled="state.disabledByForm"
+          :readonly="readonly"
           autocomplete="off"
           autocapitalize="off"
           spellcheck="false"
@@ -48,6 +49,7 @@
         :aria-invalid="visibleError?.anchor === 'number' ? 'true' : undefined"
         :aria-describedby="numberDescribedBy"
         :disabled="state.disabledByForm"
+        :readonly="readonly"
         @focus="rememberValueBeforeEditing"
         @input.stop="updateFromUserInput"
         @blur="commitNumberEditing"
@@ -122,6 +124,7 @@ import {
   parseCountryCodes,
 } from './countries'
 import type { TesPhoneElement } from './element'
+import { serializeFormState } from './form-state'
 import { filterCountries } from './filter'
 import { type Direction, nextHighlight } from './highlight'
 import { resolveDefaultCountry, resolveLocale } from './locale'
@@ -134,6 +137,7 @@ const props = withDefaults(
   defineProps<{
     label?: string
     required?: boolean
+    readonly?: boolean
     hint?: string
     defaultCountry?: string
     autocomplete?: string
@@ -282,6 +286,8 @@ function filterByTypedText(event: Event): void {
 }
 
 function handleComboboxKeydown(event: KeyboardEvent): void {
+  if (props.readonly) return
+
   if (query.value === null && editsText(event)) startSearchFromEmptyText(event)
 
   switch (event.key) {
@@ -369,10 +375,12 @@ function focusWithoutPlacingCaret(event: MouseEvent): void {
 }
 
 function openFromPointer(): void {
+  if (props.readonly) return
   if (!isOpen.value) moveHighlight(1)
 }
 
 function toggleFromChevron(): void {
+  if (props.readonly) return
   combobox.value?.focus()
   if (isOpen.value) closeAndRestoreSelection()
   else moveHighlight(1)
@@ -502,7 +510,7 @@ const numberDescribedBy = computed(() => {
 })
 
 function syncFormState(): void {
-  internals.setFormValue(phoneNumber.value.e164)
+  internals.setFormValue(phoneNumber.value.e164, serializeFormState(state))
 
   const error = validationError.value
   if (!error) {
