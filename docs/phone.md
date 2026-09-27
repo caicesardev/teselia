@@ -37,6 +37,13 @@ pnpm add @teselia/phone vue
 
 The npm build keeps Vue as a peer dependency, so apps that already use Vue don't ship it twice. The CDN build bundles Vue and needs nothing else.
 
+| Build | Size (gzip) |
+| --- | --- |
+| npm, in an app that already uses Vue | 43 KB |
+| CDN, including Vue | 67 KB |
+
+Most of it is the phone number metadata of [`libphonenumber-js`](https://gitlab.com/catamphetamine/libphonenumber-js), which the component needs to format and validate numbers of every country. The component's own code is 8.7 KB.
+
 Importing the package registers the `<tes-phone>` element. If `tes-phone` is already taken on your page, register it under another name:
 
 ```js

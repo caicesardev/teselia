@@ -433,13 +433,13 @@ Keyboard behaviour in WebKit is covered by the automated browser tests (§6.1). 
 
 ### Definition of done for `1.0.0`
 
-- [ ] Everything in §3 "In" is implemented, or has been explicitly moved to 1.1 at the cut line.
-- [ ] Unit tests cover parsing, validation, default country resolution and filtering.
-- [ ] Browser tests cover keyboard interaction, ARIA states, form submission/reset/validity and events, in Chromium, Firefox and WebKit.
-- [ ] axe-core reports zero violations in every rendered state tested (closed, open, filtered, invalid, disabled).
+- [x] Everything in §3 "In" is implemented, or has been explicitly moved to 1.1 at the cut line. Format as you type made the cut (#20).
+- [x] Unit tests cover parsing, validation, default country resolution and filtering.
+- [x] Browser tests cover keyboard interaction, ARIA states, form submission/reset/validity and events, in Chromium, Firefox and WebKit.
+- [x] axe-core reports zero violations in every rendered state tested (closed, open, filtered, highlighted, suggested group, no results, invalid, disabled, readonly).
 - [ ] The manual testing matrix (§5.5) is completed, and results are recorded in the docs page.
-- [ ] Bundle size (ESM excluding Vue, and IIFE including Vue; minified and gzip) is measured and published in the README and docs.
-- [ ] The docs page (`teselia.caicesardev.com/phone`) has usage examples (HTML/CDN, Vue, React), API tables, a keyboard table, accessibility notes and known limitations.
+- [x] Bundle size (ESM excluding Vue, and IIFE including Vue; minified and gzip) is measured and published in the README and docs: 8.7 KB for the component code, 43 KB with `libphonenumber-js`, 67 KB for the IIFE with Vue (#56).
+- [x] The docs page (`teselia.caicesardev.com/phone`) has usage examples (HTML/CDN, Vue, React), API tables, a keyboard table, accessibility notes and known limitations (#54, #55).
 - [ ] `@teselia/phone@1.0.0` is published to npm (only after explicit approval).
 
 ### 6.1 Testing strategy
