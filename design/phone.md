@@ -342,6 +342,14 @@ These are exposed through `ElementInternals.states`: `:state(invalid)`, `:state(
 
 For example: `tes-phone:state(invalid)::part(number) { … }`.
 
+Implemented in #22:
+
+- `:state(invalid)` follows the **visible** error, not raw validity, like `:user-invalid` on native inputs. A required empty field is not styled as invalid on page load, only after blur-after-editing or submit (§5.3).
+- `:state(open)` is set while the popover is open, including the "no results" state.
+- `:state(empty)` is set while the number field is blank.
+- If `ElementInternals.states` is missing, states are skipped silently. Everything else keeps working.
+- `theming.browser.test.ts` proves that page styles reach inner elements through `::part()`, and that `:state()` combined with `::part()` works from outside.
+
 ### 4.7 Browser support
 
 Current and previous major versions of Chrome, Edge, Firefox and Safari. The requirements are `ElementInternals`, `CustomStateSet` and `Intl.DisplayNames`.
