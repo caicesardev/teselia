@@ -1,6 +1,6 @@
 import { getCountries } from 'libphonenumber-js/min'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { listCountries, parseCountryCodes } from './countries'
+import { describeCountry, listCountries, parseCountryCodes } from './countries'
 
 afterEach(() => {
   vi.restoreAllMocks()
@@ -73,5 +73,12 @@ describe('parseCountryCodes', () => {
   it('returns nothing for a missing or empty value', () => {
     expect(parseCountryCodes(undefined)).toEqual({ codes: [], invalid: [] })
     expect(parseCountryCodes(' , ')).toEqual({ codes: [], invalid: [] })
+  })
+})
+
+describe('describeCountry', () => {
+  it('returns the localized name and calling code', () => {
+    expect(describeCountry('GB', 'en')).toBe('United Kingdom +44')
+    expect(describeCountry('DE', 'es')).toBe('Alemania +49')
   })
 })

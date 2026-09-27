@@ -184,6 +184,9 @@ Default token values and contrast ratios: §4.4.
 - **Validation** with visible, programmatically associated error messages (§5.3).
 - **Form association** through `ElementInternals`: value, validity, reset, state restore and `disabled` fieldsets.
 - **Paste and autofill detection.** A value starting with `+` or `00` is parsed, the matching country is selected and the national part stays in the field. Browser autofill with `autocomplete="tel"` goes through the same path.
+  - Implemented in #19. Detection runs on every  event of the number field, so paste, typing and browser autofill share one path. A leading  is rewritten to  before parsing, because the real international prefix varies by country ( in the US).
+  - The country switches only when the calling code identifies it unambiguously. The field is then reduced to the national digits, and  is announced through the live region. If the number already belongs to the selected country, the prefix is stripped silently.
+  - A number from a country excluded by  keeps the current country and reports  with , using the #17 visibility rules.
 - **Default country from the browser locale** (D7).
 - **`preferred-countries` and `only-countries`.**
 - **Format as you type** with `AsYouType`, preserving the caret position. ⚠️ **Cut line:** if it is not solid, including caret handling and screen reader behaviour, by **2026-10-18**, it moves to `1.1` and v1 ships without it.

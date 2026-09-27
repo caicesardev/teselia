@@ -114,12 +114,18 @@ import {
   watch,
   watchEffect,
 } from 'vue'
-import { type Country, type CountryCode, listCountries, parseCountryCodes } from './countries'
+import {
+  type Country,
+  type CountryCode,
+  describeCountry,
+  listCountries,
+  parseCountryCodes,
+} from './countries'
 import type { TesPhoneElement } from './element'
 import { filterCountries } from './filter'
 import { type Direction, nextHighlight } from './highlight'
 import { resolveDefaultCountry, resolveLocale } from './locale'
-import { interpretPhoneNumber } from './phone-number'
+import { interpretPhoneNumber, splitE164 } from './phone-number'
 
 defineOptions({ inheritAttrs: false })
 
@@ -139,6 +145,8 @@ const props = withDefaults(
     textRequired?: string
     textInvalid?: string
     textCountryRequired?: string
+    textCountryChanged?: string
+    textNotAllowed?: string
   }>(),
   {
     autocomplete: 'tel',
@@ -149,6 +157,8 @@ const props = withDefaults(
     textRequired: 'Enter a phone number',
     textInvalid: 'Enter a valid phone number for {country}',
     textCountryRequired: 'Select a country code',
+    textCountryChanged: 'Country set to {country}',
+    textNotAllowed: 'Numbers from {country} are not accepted',
   },
 )
 
@@ -377,7 +387,31 @@ function updateFromUserInput(event: Event): void {
   state.nationalInput = (event.target as HTMLInputElement).value
   state.dirty = true
   state.numberTouched = true
+  adoptCountryOfInternationalNumber()
   dispatchPublicEvent('input')
+}
+
+const INTERNATIONAL_PREFIX = /^\s*(\+|00)/
+const excludedCountry = ref<CountryCode | null>(null)
+
+function adoptCountryOfInternationalNumber(): void {
+  excludedCountry.value = null
+  if (!INTERNATIONAL_PREFIX.test(state.nationalInput)) return
+
+  const split = splitE164(state.nationalInput.trim().replace(/^00/, '+'))
+  if (!split) return
+
+  const allowed = onlyCountries.value.codes
+  if (allowed.length > 0 && !allowed.includes(split.country)) {
+    excludedCountry.value = split.country
+    return
+  }
+
+  state.nationalInput = split.nationalNumber
+  if (split.country !== state.country) {
+    state.country = split.country
+    announce(props.textCountryChanged.replace('{country}', describeCountry(split.country, locale.value)))
+  }
 }
 
 let valueBeforeEditing = ''
@@ -415,6 +449,10 @@ const phoneNumber = computed(() => interpretPhoneNumber(state.nationalInput, sta
 const validationError = computed<ValidationError | null>(() => {
   if (state.nationalInput.trim() === '') {
     return props.required ? { flag: 'valueMissing', message: props.textRequired, anchor: 'number' } : null
+  }
+  if (excludedCountry.value) {
+    const country = describeCountry(excludedCountry.value, locale.value)
+    return { flag: 'typeMismatch', message: props.textNotAllowed.replace('{country}', country), anchor: 'number' }
   }
   if (phoneNumber.value.valid) return null
   if (!state.country && !phoneNumber.value.detectedCountry) {
@@ -460,6 +498,14 @@ function syncPopover(open: boolean): void {
 
 const announcement = ref('')
 let pendingAnnouncement: ReturnType<typeof setTimeout> | undefined
+
+function announce(message: string): void {
+  clearTimeout(pendingAnnouncement)
+  announcement.value = ''
+  void nextTick(() => {
+    announcement.value = message
+  })
+}
 
 function announceResultsOnceTypingPauses(currentQuery: string | null): void {
   clearTimeout(pendingAnnouncement)
