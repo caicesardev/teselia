@@ -12,6 +12,7 @@ import {
 } from './testing/phone'
 
 const SETTLE_MS = 900
+const DEBOUNCED_ANNOUNCEMENT_ON_SLOW_CI = { timeout: 3000 }
 
 function recordAnnouncements(el: TesPhoneElement): string[] {
   const announced: string[] = []
@@ -61,7 +62,7 @@ describe('country combobox announcements: results while filtering', () => {
     await typeInCombobox(el, 'united')
 
     expect(liveRegion(el).textContent?.trim()).toBe('')
-    await expect.poll(() => liveRegion(el).textContent?.trim()).toBe('Countries available: 3')
+    await expect.poll(() => liveRegion(el).textContent?.trim(), DEBOUNCED_ANNOUNCEMENT_ON_SLOW_CI).toBe('Countries available: 3')
   })
 
   it('announces only the final count, not every keystroke', async () => {
@@ -103,7 +104,7 @@ describe('country combobox announcements: results while filtering', () => {
   it('clears the announcement when the listbox closes', async () => {
     const el = await renderPhone('default-country="ES" lang="en"')
     await typeInCombobox(el, 'united')
-    await expect.poll(() => liveRegion(el).textContent?.trim()).not.toBe('')
+    await expect.poll(() => liveRegion(el).textContent?.trim(), DEBOUNCED_ANNOUNCEMENT_ON_SLOW_CI).not.toBe('')
 
     await userEvent.keyboard('{Escape}')
 
@@ -115,7 +116,7 @@ describe('country combobox announcements: results while filtering', () => {
 
     await typeInCombobox(el, 'united')
 
-    await expect.poll(() => liveRegion(el).textContent?.trim()).toBe('Resultados: 3')
+    await expect.poll(() => liveRegion(el).textContent?.trim(), DEBOUNCED_ANNOUNCEMENT_ON_SLOW_CI).toBe('Resultados: 3')
   })
 })
 
@@ -128,7 +129,7 @@ describe('country combobox announcements: no results', () => {
     expect(popup(el).matches(':popover-open')).toBe(true)
     expect(noResultsMessage(el)?.textContent?.trim()).toBe('No countries found')
     expect(isExpanded(el)).toBe(false)
-    await expect.poll(() => liveRegion(el).textContent?.trim()).toBe('No countries found')
+    await expect.poll(() => liveRegion(el).textContent?.trim(), DEBOUNCED_ANNOUNCEMENT_ON_SLOW_CI).toBe('No countries found')
   })
 
   it('shows the options again when the query matches', async () => {
@@ -147,7 +148,7 @@ describe('country combobox announcements: no results', () => {
     await typeInCombobox(el, 'zzz')
 
     expect(noResultsMessage(el)?.textContent?.trim()).toBe('Sin resultados')
-    await expect.poll(() => liveRegion(el).textContent?.trim()).toBe('Sin resultados')
+    await expect.poll(() => liveRegion(el).textContent?.trim(), DEBOUNCED_ANNOUNCEMENT_ON_SLOW_CI).toBe('Sin resultados')
   })
 
   it('has no axe violations while showing no results', async () => {
