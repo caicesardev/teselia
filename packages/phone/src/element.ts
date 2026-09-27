@@ -125,8 +125,9 @@ export class TesPhoneElement extends VueTesPhone {
   }
 
   formResetCallback(): void {
-    this.state.country = this.state.defaultCountry
-    this.applyValue(this.defaultValue)
+    const split = splitE164(this.defaultValue)
+    this.state.nationalInput = split ? split.nationalNumber : this.defaultValue
+    this.state.country = split ? split.country : this.state.defaultCountry
     this.state.dirty = false
     this.state.numberTouched = false
     this.state.errorsVisible = false
@@ -143,8 +144,8 @@ export class TesPhoneElement extends VueTesPhone {
   private applyValue(value: string): void {
     const split = splitE164(value)
     if (split) {
-      this.state.country = split.country
       this.state.nationalInput = split.nationalNumber
+      this.state.country = split.country
     } else {
       this.state.nationalInput = value
     }
