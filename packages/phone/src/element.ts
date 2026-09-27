@@ -1,10 +1,13 @@
 import { defineCustomElement, reactive } from 'vue'
+import type { CountryCode } from './countries'
 import TesPhoneComponent from './TesPhone.ce.vue'
 
 export interface TesPhoneState {
   value: string
   dirty: boolean
   disabledByForm: boolean
+  country: CountryCode | ''
+  defaultCountry: CountryCode | ''
 }
 
 const VueTesPhone = defineCustomElement(TesPhoneComponent, {
@@ -17,7 +20,13 @@ export class TesPhoneElement extends VueTesPhone {
 
   readonly internals: ElementInternals
 
-  readonly state: TesPhoneState = reactive({ value: '', dirty: false, disabledByForm: false })
+  readonly state: TesPhoneState = reactive({
+    value: '',
+    dirty: false,
+    disabledByForm: false,
+    country: '',
+    defaultCountry: '',
+  })
 
   constructor(initialProps?: Record<string, unknown>) {
     super(initialProps)
@@ -39,6 +48,10 @@ export class TesPhoneElement extends VueTesPhone {
 
   set defaultValue(value: string) {
     this.setAttribute('value', value)
+  }
+
+  get country(): CountryCode | '' {
+    return this.state.country
   }
 
   get name(): string {
@@ -73,6 +86,12 @@ export class TesPhoneElement extends VueTesPhone {
     return this.internals.willValidate
   }
 
+  override focus(options?: FocusOptions): void {
+    const numberInput = this.shadowRoot?.querySelector<HTMLInputElement>('#number')
+    if (numberInput) numberInput.focus(options)
+    else super.focus(options)
+  }
+
   checkValidity(): boolean {
     return this.internals.checkValidity()
   }
@@ -90,6 +109,7 @@ export class TesPhoneElement extends VueTesPhone {
   formResetCallback(): void {
     this.state.value = this.defaultValue
     this.state.dirty = false
+    this.state.country = this.state.defaultCountry
   }
 
   formDisabledCallback(disabled: boolean): void {
