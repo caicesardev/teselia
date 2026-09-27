@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { userEvent } from 'vitest/browser'
 import type { TesPhoneElement } from '../../src/index'
-import { combobox, isExpanded, numberInput, renderPhone } from '../support/phone'
+import { combobox, expectNoAxeViolations, isExpanded, numberInput, renderPhone } from '../support/phone'
 
 async function renderInForm(attributes: string): Promise<{ el: TesPhoneElement; form: HTMLFormElement }> {
   const el = await renderPhone(`name="phone" lang="en" ${attributes}`, 'form')
@@ -51,6 +51,12 @@ describe('readonly', () => {
     expect(el.hasAttribute('readonly')).toBe(true)
     await expect.poll(() => numberInput(el).readOnly).toBe(true)
   })
+
+  it('has no axe violations', async () => {
+    const { el } = await renderInForm('value="+34612345678" hint="Mobile only" readonly')
+
+    await expectNoAxeViolations(el)
+  })
 })
 
 describe('disabled', () => {
@@ -72,6 +78,13 @@ describe('disabled', () => {
     el.disabled = false
     await expect.poll(() => combobox(el).disabled).toBe(false)
     expect(new FormData(form).get('phone')).toBe('+34612345678')
+  })
+
+  it('has no axe violations', async () => {
+    const { el } = await renderInForm('value="+34612345678" hint="Mobile only" disabled')
+    await expect.poll(() => numberInput(el).disabled).toBe(true)
+
+    await expectNoAxeViolations(el)
   })
 })
 
