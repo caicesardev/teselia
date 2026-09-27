@@ -10,7 +10,7 @@ import {
   options,
   renderPhone,
   typeInCombobox,
-} from './testing/phone'
+} from '../support/phone'
 
 async function focusCombobox(attributes = 'default-country="ES" lang="en"') {
   const el = await renderPhone(attributes)

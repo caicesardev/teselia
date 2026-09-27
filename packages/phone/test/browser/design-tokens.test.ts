@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest'
-import type { TesPhoneElement } from './index'
-import './index'
+import type { TesPhoneElement } from '../../src/index'
+import '../../src/index'
 
 type Rgb = [number, number, number]
 

@@ -1,5 +1,5 @@
 import { getCountries } from 'libphonenumber-js/min'
-import type { TesPhoneElement } from './index'
+import type { TesPhoneElement } from '../../src/index'
 import { afterEach, describe, expect, it } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
 import {
@@ -10,7 +10,7 @@ import {
   popup,
   renderPhone,
   typeInCombobox,
-} from './testing/phone'
+} from '../support/phone'
 
 afterEach(() => {
   document.body.innerHTML = ''

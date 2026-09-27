@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { listCountries } from './countries'
-import { filterCountries } from './filter'
+import { listCountries } from '../../src/core/countries'
+import { filterCountries } from '../../src/core/filter'
 
 const english = listCountries('en')
 const spanish = listCountries('es')

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { resolveDefaultCountry, resolveLocale } from './locale'
+import { resolveDefaultCountry, resolveLocale } from '../../src/core/locale'
 
 describe('resolveLocale', () => {
   it('uses the first candidate that is a valid language tag', () => {

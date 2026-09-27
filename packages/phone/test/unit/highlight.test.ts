@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { nextHighlight } from './highlight'
+import { nextHighlight } from '../../src/core/highlight'
 
 const items = ['a', 'b', 'c']
 

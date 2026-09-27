@@ -122,14 +122,14 @@ import {
   describeCountry,
   listCountries,
   parseCountryCodes,
-} from './countries'
+} from './core/countries'
 import type { TesPhoneElement } from './element'
-import { serializeFormState } from './form-state'
-import { filterCountries } from './filter'
-import { type Direction, nextHighlight } from './highlight'
-import { resolveDefaultCountry, resolveLocale } from './locale'
-import { type FormattedInput, formatForDisplay, formatWhileTyping } from './format'
-import { interpretPhoneNumber, splitE164 } from './phone-number'
+import { serializeFormState } from './core/form-state'
+import { filterCountries } from './core/filter'
+import { type Direction, nextHighlight } from './core/highlight'
+import { resolveDefaultCountry, resolveLocale } from './core/locale'
+import { type FormattedInput, formatForDisplay, formatWhileTyping } from './core/format'
+import { interpretPhoneNumber, splitE164 } from './core/phone-number'
 
 defineOptions({ inheritAttrs: false })
 

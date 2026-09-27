@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest'
 import { userEvent } from 'vitest/browser'
-import type { TesPhoneElement } from './index'
-import { combobox, liveRegion, numberInput, renderPhone, typeInCombobox } from './testing/phone'
+import type { TesPhoneElement } from '../../src/index'
+import { combobox, liveRegion, numberInput, renderPhone, typeInCombobox } from '../support/phone'
 
 async function focusNumberWithCaretAt(el: TesPhoneElement, position: number): Promise<HTMLInputElement> {
   const input = numberInput(el)

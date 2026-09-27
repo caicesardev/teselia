@@ -1,8 +1,8 @@
 import axe from 'axe-core'
 import { expect } from 'vitest'
 import { userEvent } from 'vitest/browser'
-import type { TesPhoneElement } from '../index'
-import '../index'
+import type { TesPhoneElement } from '../../src/index'
+import '../../src/index'
 
 export async function renderPhone(attributes: string, wrapperTag = 'main'): Promise<TesPhoneElement> {
   const container = document.createElement(wrapperTag)

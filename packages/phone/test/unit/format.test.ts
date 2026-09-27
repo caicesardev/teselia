@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { formatForDisplay, formatWhileTyping } from './format'
+import { formatForDisplay, formatWhileTyping } from '../../src/core/format'
 
 function typeAtEnd(previous: string, typed: string, country: 'ES' | 'US' | 'GB' | '' = 'ES') {
   const raw = previous + typed
