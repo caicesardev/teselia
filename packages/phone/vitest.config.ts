@@ -15,6 +15,9 @@ export default defineConfig({
       },
       {
         extends: './vite.config.ts',
+        optimizeDeps: {
+          include: ['libphonenumber-js/min', 'axe-core'],
+        },
         test: {
           name: 'phone:browser',
           include: ['src/**/*.browser.test.ts'],

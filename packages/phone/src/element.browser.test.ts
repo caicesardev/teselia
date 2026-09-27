@@ -18,11 +18,11 @@ async function mounted(container: HTMLElement): Promise<TesPhoneElement> {
 }
 
 async function waitForVueAsyncMount(el: TesPhoneElement): Promise<void> {
-  await expect.poll(() => el.shadowRoot?.querySelector('input')).toBeTruthy()
+  await expect.poll(() => el.shadowRoot?.querySelector<HTMLInputElement>('#number')).toBeTruthy()
 }
 
 function innerInput(el: TesPhoneElement): HTMLInputElement {
-  const input = el.shadowRoot?.querySelector('input')
+  const input = el.shadowRoot?.querySelector<HTMLInputElement>('#number')
   if (!input) throw new Error('inner input not found')
   return input
 }

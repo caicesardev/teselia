@@ -11,7 +11,7 @@ async function renderInScheme(colorScheme: 'light' | 'dark'): Promise<TesPhoneEl
   document.body.append(wrapper)
 
   const el = wrapper.querySelector('tes-phone') as TesPhoneElement
-  await expect.poll(() => el.shadowRoot?.querySelector('input')).toBeTruthy()
+  await expect.poll(() => el.shadowRoot?.querySelector<HTMLInputElement>('#number')).toBeTruthy()
   return el
 }
 
@@ -86,7 +86,7 @@ describe('design token overrides and sizing', () => {
     document.documentElement.style.setProperty('--tes-color-border', 'rgb(255, 0, 0)')
     const el = await renderInScheme('light')
 
-    const input = el.shadowRoot?.querySelector('input') as HTMLInputElement
+    const input = el.shadowRoot?.querySelector<HTMLInputElement>('#number') as HTMLInputElement
 
     expect(getComputedStyle(input).borderTopColor).toBe('rgb(255, 0, 0)')
   })
@@ -94,7 +94,7 @@ describe('design token overrides and sizing', () => {
   it('renders controls well above the 24 × 24 px minimum target size', async () => {
     const el = await renderInScheme('light')
 
-    const { height } = (el.shadowRoot?.querySelector('input') as HTMLInputElement).getBoundingClientRect()
+    const { height } = (el.shadowRoot?.querySelector<HTMLInputElement>('#number') as HTMLInputElement).getBoundingClientRect()
 
     expect(height).toBeGreaterThanOrEqual(44)
   })

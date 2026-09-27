@@ -59,6 +59,7 @@ This document records the decisions taken before writing code, the options that 
 - The list of regions and their calling codes comes from `libphonenumber-js` metadata.
 - Country names come from `Intl.DisplayNames(locale, { type: 'region' })`. The browser ships the translations, so there are **0 KB of translation files**.
 - The locale is resolved from the `lang` attribute on the host, then from the closest ancestor with `lang`, then from `document.documentElement.lang`, then from `navigator.language`, and finally `en`. Empty (`lang=""`, which means "unknown") and malformed tags are skipped. The chosen tag is canonicalized (`EN-gb` → `en-GB`). Implemented in `resolveLocale` (#9).
+- The locale is **reactive** (#11). A `MutationObserver` re-resolves it when `lang` changes on the element or on `<html>`, so SPAs that switch language, or that set `lang` after the component mounts (VitePress does this in dev), get updated country names.
 - Sorting uses `Intl.Collator(locale)`. Filtering is case- and diacritic-insensitive (`normalize('NFD')`).
 - If `Intl.DisplayNames` returns nothing for a code (possible for non-standard codes such as `XK` or `AC`), the region code itself is displayed.
 - **UI strings** (labels, errors, announcements) ship in **English** and can be overridden with `text-*` attributes (see §4.1). Only country names are localized automatically.
@@ -79,6 +80,9 @@ This follows the WAI-ARIA APG *Combobox with Listbox Popup* pattern, using list 
   - Digits, with or without `+`, match calling codes **by prefix**, so the list narrows as the user types (`3` → +30…+39, `34` → Spain).
   - Name results are **ranked**: exact ISO code first, then names starting with the query, then names with a word starting with it, then names containing it. Within a rank, the alphabetical order is kept (`ir` → Iran, Iraq, Ireland before Kiribati).
 - The input and the listbox live in the **same shadow root**, so `aria-controls` and `aria-activedescendant` resolve correctly.
+- Both controls sit in a `role="group"` labelled by the visible field label: "Phone number, group" → "Country code, combobox, Spain +34" → "Phone number, edit" (#11).
+- On focus, the combobox **selects its text**, so typing replaces "Spain +34" with the search query instead of appending to it (#11).
+- The two controls share one row and wrap onto two lines when there is no room (`flex-wrap`), with no horizontal overflow down to a 288px container (320px viewport).
 - All options are rendered (about 240), with no virtualization. That is cheap enough, and it keeps `aria-setsize`/position information correct.
 - **Preferred countries** (`preferred-countries`) are shown first, in a `role="group"` labelled "Suggested". They are **not duplicated** in the full list below, because duplicates confuse screen reader counts.
 
