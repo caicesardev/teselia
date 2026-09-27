@@ -49,26 +49,43 @@
     </div>
 
     <div id="popup" ref="popup" popover="manual" part="popup">
-      <ul
+      <div
         id="countries"
         role="listbox"
         :aria-label="textCountry"
         :hidden="!hasOptions"
         part="listbox"
       >
-        <li
-          v-for="country in visibleCountries"
-          :id="optionId(country.code)"
-          :key="country.code"
-          role="option"
-          :aria-selected="country.code === state.country ? 'true' : 'false'"
-          :part="country.code === state.country ? 'option option-selected' : 'option'"
-          :class="{ highlighted: country.code === highlightedCode }"
-          @click="selectCountry(country.code)"
+        <div
+          v-for="section in sections"
+          :key="section.key"
+          :role="section.label ? 'group' : 'none'"
+          :aria-labelledby="section.label ? `group-${section.key}` : undefined"
+          :class="{ group: section.label }"
         >
-          <span class="option-name">{{ country.name }}</span> <span class="option-code">+{{ country.callingCode }}</span>
-        </li>
-      </ul>
+          <div
+            v-if="section.label"
+            :id="`group-${section.key}`"
+            role="presentation"
+            class="group-label"
+            part="group-label"
+          >
+            {{ section.label }}
+          </div>
+          <div
+            v-for="country in section.countries"
+            :id="optionId(country.code)"
+            :key="country.code"
+            role="option"
+            :aria-selected="country.code === state.country ? 'true' : 'false'"
+            :part="country.code === state.country ? 'option option-selected' : 'option'"
+            :class="{ highlighted: country.code === highlightedCode }"
+            @click="selectCountry(country.code)"
+          >
+            <span class="option-name">{{ country.name }}</span> <span class="option-code">+{{ country.callingCode }}</span>
+          </div>
+        </div>
+      </div>
       <p v-if="!hasOptions" class="no-results" part="no-results">{{ textNoResults }}</p>
     </div>
 
@@ -77,8 +94,18 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, useHost, useTemplateRef, watch } from 'vue'
-import { type Country, type CountryCode, listCountries } from './countries'
+import {
+  computed,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  useHost,
+  useTemplateRef,
+  watch,
+  watchEffect,
+} from 'vue'
+import { type Country, type CountryCode, listCountries, parseCountryCodes } from './countries'
 import type { TesPhoneElement } from './element'
 import { filterCountries } from './filter'
 import { type Direction, nextHighlight } from './highlight'
@@ -91,12 +118,16 @@ const props = withDefaults(
     label?: string
     required?: boolean
     defaultCountry?: string
+    preferredCountries?: string
+    onlyCountries?: string
     textCountry?: string
+    textSuggested?: string
     textResults?: string
     textNoResults?: string
   }>(),
   {
     textCountry: 'Country code',
+    textSuggested: 'Suggested',
     textResults: 'Countries available: {count}',
     textNoResults: 'No countries found',
   },
@@ -131,11 +162,33 @@ const locale = computed(() => {
     navigator.language,
   ])
 })
-const countries = computed(() => listCountries(locale.value))
+const onlyCountries = computed(() => parseCountryCodes(props.onlyCountries))
+const preferredCountries = computed(() => parseCountryCodes(props.preferredCountries))
+
+if (import.meta.env.DEV) {
+  watchEffect(() => {
+    for (const [attribute, parsed] of [
+      ['only-countries', onlyCountries.value],
+      ['preferred-countries', preferredCountries.value],
+    ] as const) {
+      if (parsed.invalid.length > 0) {
+        console.warn(`[tes-phone] Ignoring unsupported codes in \`${attribute}\`: ${parsed.invalid.join(', ')}`)
+      }
+    }
+  })
+}
+
+const countries = computed(() => {
+  const all = listCountries(locale.value)
+  const allowed = onlyCountries.value.codes
+  return allowed.length === 0 ? all : all.filter((country) => allowed.includes(country.code))
+})
 
 state.defaultCountry = resolveDefaultCountry({
   defaultCountry: props.defaultCountry,
   navigatorLanguage: navigator.language,
+  onlyCountries: onlyCountries.value.codes,
+  preferredCountries: preferredCountries.value.codes,
 })
 if (!state.country) state.country = state.defaultCountry
 
@@ -146,9 +199,34 @@ const highlightedCode = ref<CountryCode | null>(null)
 const selectedCountry = computed(() =>
   countries.value.find((country) => country.code === state.country),
 )
-const visibleCountries = computed(() =>
-  filterCountries(countries.value, query.value ?? '', locale.value),
+interface ListboxSection {
+  key: string
+  label: string | null
+  countries: Country[]
+}
+
+const suggestedCountries = computed(() =>
+  preferredCountries.value.codes
+    .map((code) => countries.value.find((country) => country.code === code))
+    .filter((country): country is Country => country !== undefined),
 )
+
+const sections = computed<ListboxSection[]>(() => {
+  const isBrowsingFullList = !query.value
+  if (!isBrowsingFullList || suggestedCountries.value.length === 0) {
+    return [
+      { key: 'all', label: null, countries: filterCountries(countries.value, query.value ?? '', locale.value) },
+    ]
+  }
+
+  const suggested = suggestedCountries.value
+  return [
+    { key: 'suggested', label: props.textSuggested, countries: suggested },
+    { key: 'others', label: null, countries: countries.value.filter((country) => !suggested.includes(country)) },
+  ]
+})
+
+const visibleCountries = computed(() => sections.value.flatMap((section) => section.countries))
 const hasOptions = computed(() => visibleCountries.value.length > 0)
 const comboboxText = computed(() => query.value ?? displayOf(selectedCountry.value))
 const highlightedOptionId = computed(() =>
@@ -417,6 +495,19 @@ input:focus-visible {
   padding: 0;
   overflow: auto;
   list-style: none;
+}
+
+.group {
+  margin-block-end: calc(var(--_space) / 2);
+  padding-block-end: calc(var(--_space) / 2);
+  border-block-end: 1px solid var(--_border);
+}
+
+.group-label {
+  padding: calc(var(--_space) / 2) var(--_space);
+  color: var(--_muted);
+  font-size: 0.8125em;
+  font-weight: 600;
 }
 
 .no-results {

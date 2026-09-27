@@ -1,4 +1,9 @@
-import { type CountryCode, getCountries, getCountryCallingCode } from 'libphonenumber-js/min'
+import {
+  type CountryCode,
+  getCountries,
+  getCountryCallingCode,
+  isSupportedCountry,
+} from 'libphonenumber-js/min'
 
 export type { CountryCode }
 
@@ -6,6 +11,23 @@ export interface Country {
   code: CountryCode
   callingCode: string
   name: string
+}
+
+export interface ParsedCountryCodes {
+  codes: CountryCode[]
+  invalid: string[]
+}
+
+export function parseCountryCodes(value: string | null | undefined): ParsedCountryCodes {
+  const parsed: ParsedCountryCodes = { codes: [], invalid: [] }
+
+  for (const token of (value ?? '').split(/[\s,]+/).filter(Boolean)) {
+    const code = token.toUpperCase()
+    if (!isSupportedCountry(code)) parsed.invalid.push(token)
+    else if (!parsed.codes.includes(code)) parsed.codes.push(code)
+  }
+
+  return parsed
 }
 
 export function listCountries(locale: string): Country[] {

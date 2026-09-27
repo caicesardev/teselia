@@ -1,6 +1,6 @@
 <template>
   <form class="demo" @submit.prevent="showSubmittedData" @reset="clearSubmittedData">
-    <tes-phone name="phone" label="Phone number" required />
+    <tes-phone name="phone" label="Phone number" preferred-countries="ES,PT,FR,GB" required />
 
     <div class="actions">
       <button type="submit">Submit</button>

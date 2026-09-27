@@ -84,7 +84,11 @@ This follows the WAI-ARIA APG *Combobox with Listbox Popup* pattern, using list 
 - On focus, the combobox **selects its text**, so typing replaces "Spain +34" with the search query instead of appending to it (#11).
 - The two controls share one row and wrap onto two lines when there is no room (`flex-wrap`), with no horizontal overflow down to a 288px container (320px viewport).
 - All options are rendered (about 240), with no virtualization. That is cheap enough, and it keeps `aria-setsize`/position information correct.
-- **Preferred countries** (`preferred-countries`) are shown first, in a `role="group"` labelled "Suggested". They are **not duplicated** in the full list below, because duplicates confuse screen reader counts.
+- **Preferred countries** (`preferred-countries`) are shown first, in a `role="group"` labelled "Suggested". They are **not duplicated** in the full list below, because duplicates confuse screen reader counts. Implemented in #15:
+  - The group exists only while browsing the full list. While filtering, results are flat and ranked, and preferred countries appear at their natural rank.
+  - Each listbox section is a `<div>`: the suggested one has `role="group"` plus a `role="presentation"` label, and the rest has `role="none"`, so its options belong directly to the listbox. This avoids duplicating the option markup.
+  - `only-countries` restricts the list, the filter results, the suggested group and the default country (D7).
+  - Codes are parsed case-insensitively from comma- or space-separated lists. Unsupported codes are ignored, with a console warning during development.
 
 **Keyboard (country combobox):**
 
@@ -307,7 +311,7 @@ Tokens use the suite-wide `--tes-` prefix, so one set of variables themes every 
 
 ### 4.5 Parts
 
-`label`, `group`, `country`, `popup` (the popover container), `listbox`, `option`, `option-selected` (added alongside `option`), `no-results`, `number`, `hint`, `error`. The `flag` part is **reserved** for 1.x.
+`label`, `group`, `country`, `popup` (the popover container), `listbox`, `group-label` (the "Suggested" heading), `option`, `option-selected` (added alongside `option`), `no-results`, `number`, `hint`, `error`. The `flag` part is **reserved** for 1.x.
 
 ### 4.6 Custom states
 
