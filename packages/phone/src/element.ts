@@ -1,9 +1,11 @@
+import { getCountryCallingCode } from 'libphonenumber-js/min'
 import { defineCustomElement, reactive } from 'vue'
 import type { CountryCode } from './countries'
+import { interpretPhoneNumber, splitE164 } from './phone-number'
 import TesPhoneComponent from './TesPhone.ce.vue'
 
 export interface TesPhoneState {
-  value: string
+  nationalInput: string
   dirty: boolean
   disabledByForm: boolean
   country: CountryCode | ''
@@ -21,7 +23,7 @@ export class TesPhoneElement extends VueTesPhone {
   readonly internals: ElementInternals
 
   readonly state: TesPhoneState = reactive({
-    value: '',
+    nationalInput: '',
     dirty: false,
     disabledByForm: false,
     country: '',
@@ -34,11 +36,11 @@ export class TesPhoneElement extends VueTesPhone {
   }
 
   get value(): string {
-    return this.state.value
+    return this.interpreted.e164
   }
 
   set value(value: string) {
-    this.state.value = value
+    this.applyValue(value)
     this.state.dirty = true
   }
 
@@ -52,6 +54,18 @@ export class TesPhoneElement extends VueTesPhone {
 
   get country(): CountryCode | '' {
     return this.state.country
+  }
+
+  get callingCode(): string {
+    return this.state.country ? getCountryCallingCode(this.state.country) : ''
+  }
+
+  get nationalNumber(): string {
+    return this.interpreted.nationalNumber
+  }
+
+  get valid(): boolean {
+    return this.interpreted.valid
   }
 
   get name(): string {
@@ -102,17 +116,31 @@ export class TesPhoneElement extends VueTesPhone {
 
   attributeChangedCallback(name: string, _previous: string | null, next: string | null): void {
     if (name === 'value' && !this.state.dirty) {
-      this.state.value = next ?? ''
+      this.applyValue(next ?? '')
     }
   }
 
   formResetCallback(): void {
-    this.state.value = this.defaultValue
-    this.state.dirty = false
     this.state.country = this.state.defaultCountry
+    this.applyValue(this.defaultValue)
+    this.state.dirty = false
   }
 
   formDisabledCallback(disabled: boolean): void {
     this.state.disabledByForm = disabled
+  }
+
+  private get interpreted() {
+    return interpretPhoneNumber(this.state.nationalInput, this.state.country)
+  }
+
+  private applyValue(value: string): void {
+    const split = splitE164(value)
+    if (split) {
+      this.state.country = split.country
+      this.state.nationalInput = split.nationalNumber
+    } else {
+      this.state.nationalInput = value
+    }
   }
 }
