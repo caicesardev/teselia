@@ -20,6 +20,7 @@ export default defineConfig({
         },
         test: {
           name: 'phone:browser',
+          fileParallelism: false,
           include: ['src/**/*.browser.test.ts'],
           browser: {
             enabled: true,
