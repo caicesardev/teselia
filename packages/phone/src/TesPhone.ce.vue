@@ -14,6 +14,8 @@
           aria-controls="countries"
           aria-autocomplete="list"
           :aria-activedescendant="highlightedOptionId"
+          :aria-invalid="visibleError?.anchor === 'country' ? 'true' : undefined"
+          :aria-describedby="visibleError?.anchor === 'country' ? 'error' : undefined"
           :disabled="state.disabledByForm"
           autocomplete="off"
           autocapitalize="off"
@@ -43,10 +45,16 @@
         :autocomplete="autocomplete"
         dir="ltr"
         :required="required"
+        :aria-invalid="visibleError?.anchor === 'number' ? 'true' : undefined"
+        :aria-describedby="numberDescribedBy"
         :disabled="state.disabledByForm"
         @input="updateFromUserInput"
+        @blur="revealErrorsAfterEditing"
       />
     </div>
+
+    <p v-if="hint" id="hint" class="hint" part="hint">{{ hint }}</p>
+    <p id="error" class="error" part="error" aria-live="polite">{{ visibleError?.message }}</p>
 
     <div id="popup" ref="popup" popover="manual" part="popup">
       <div
@@ -118,6 +126,7 @@ const props = withDefaults(
   defineProps<{
     label?: string
     required?: boolean
+    hint?: string
     defaultCountry?: string
     autocomplete?: string
     preferredCountries?: string
@@ -126,6 +135,9 @@ const props = withDefaults(
     textSuggested?: string
     textResults?: string
     textNoResults?: string
+    textRequired?: string
+    textInvalid?: string
+    textCountryRequired?: string
   }>(),
   {
     autocomplete: 'tel',
@@ -133,6 +145,9 @@ const props = withDefaults(
     textSuggested: 'Suggested',
     textResults: 'Countries available: {count}',
     textNoResults: 'No countries found',
+    textRequired: 'Enter a phone number',
+    textInvalid: 'Enter a valid phone number for {country}',
+    textCountryRequired: 'Select a country code',
   },
 )
 
@@ -355,16 +370,57 @@ function closeAndRestoreSelection(): void {
 function updateFromUserInput(event: Event): void {
   state.nationalInput = (event.target as HTMLInputElement).value
   state.dirty = true
+  state.numberTouched = true
 }
 
-function syncFormState(): void {
-  internals.setFormValue(interpretPhoneNumber(state.nationalInput, state.country).e164)
+function revealErrorsAfterEditing(): void {
+  if (state.numberTouched) state.errorsVisible = true
+}
 
-  if (props.required && state.nationalInput.trim() === '') {
-    internals.setValidity({ valueMissing: true }, 'Enter a phone number', numberInput.value ?? undefined)
-  } else {
-    internals.setValidity({})
+interface ValidationError {
+  flag: 'valueMissing' | 'typeMismatch'
+  message: string
+  anchor: 'number' | 'country'
+}
+
+const phoneNumber = computed(() => interpretPhoneNumber(state.nationalInput, state.country))
+
+const validationError = computed<ValidationError | null>(() => {
+  if (state.nationalInput.trim() === '') {
+    return props.required ? { flag: 'valueMissing', message: props.textRequired, anchor: 'number' } : null
   }
+  if (phoneNumber.value.valid) return null
+  if (!state.country && !phoneNumber.value.detectedCountry) {
+    return { flag: 'valueMissing', message: props.textCountryRequired, anchor: 'country' }
+  }
+  return {
+    flag: 'typeMismatch',
+    message: props.textInvalid.replace('{country}', displayOf(selectedCountry.value)),
+    anchor: 'number',
+  }
+})
+
+const visibleError = computed(() => (state.errorsVisible ? validationError.value : null))
+
+const numberDescribedBy = computed(() => {
+  const ids = [props.hint ? 'hint' : '', visibleError.value?.anchor === 'number' ? 'error' : '']
+  return ids.filter(Boolean).join(' ') || undefined
+})
+
+function syncFormState(): void {
+  internals.setFormValue(phoneNumber.value.e164)
+
+  const error = validationError.value
+  if (!error) {
+    internals.setValidity({})
+    return
+  }
+  const anchor = error.anchor === 'country' ? combobox.value : numberInput.value
+  internals.setValidity({ [error.flag]: true }, error.message, anchor ?? undefined)
+}
+
+function revealErrors(): void {
+  state.errorsVisible = true
 }
 
 function syncPopover(open: boolean): void {
@@ -390,11 +446,12 @@ function announceResultsOnceTypingPauses(currentQuery: string | null): void {
   }, ANNOUNCEMENT_DELAY_MS)
 }
 
-watch([() => state.nationalInput, () => state.country, () => props.required], syncFormState)
+watchEffect(syncFormState, { flush: 'post' })
 watch(isOpen, syncPopover)
 watch(query, announceResultsOnceTypingPauses)
 onBeforeUnmount(() => clearTimeout(pendingAnnouncement))
-onMounted(syncFormState)
+onMounted(() => host.addEventListener('invalid', revealErrors))
+onBeforeUnmount(() => host.removeEventListener('invalid', revealErrors))
 </script>
 
 <style>
@@ -465,6 +522,26 @@ input {
 input:focus-visible {
   outline: 2px solid var(--_focus);
   outline-offset: 2px;
+}
+
+input[aria-invalid='true'] {
+  border-color: var(--_error);
+  box-shadow: inset 0 0 0 1px var(--_error);
+}
+
+.hint,
+.error {
+  margin: 0;
+  font-size: 0.875em;
+}
+
+.hint {
+  color: var(--_muted);
+}
+
+.error {
+  color: var(--_error);
+  font-weight: 500;
 }
 
 #country {

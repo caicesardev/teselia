@@ -10,6 +10,8 @@ export interface TesPhoneState {
   disabledByForm: boolean
   country: CountryCode | ''
   defaultCountry: CountryCode | ''
+  numberTouched: boolean
+  errorsVisible: boolean
 }
 
 const VueTesPhone = defineCustomElement(TesPhoneComponent, {
@@ -28,6 +30,8 @@ export class TesPhoneElement extends VueTesPhone {
     disabledByForm: false,
     country: '',
     defaultCountry: '',
+    numberTouched: false,
+    errorsVisible: false,
   })
 
   constructor(initialProps?: Record<string, unknown>) {
@@ -124,6 +128,8 @@ export class TesPhoneElement extends VueTesPhone {
     this.state.country = this.state.defaultCountry
     this.applyValue(this.defaultValue)
     this.state.dirty = false
+    this.state.numberTouched = false
+    this.state.errorsVisible = false
   }
 
   formDisabledCallback(disabled: boolean): void {
