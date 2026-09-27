@@ -379,21 +379,21 @@ It also adapts to Windows high contrast mode (`forced-colors`), has no animation
 
 - **External labels do not reach the inner fields.** A `<label for>` or `aria-labelledby` outside the component names the element but not the fields inside its shadow root, which are the ones that receive focus. Use the `label` attribute.
 - **External descriptions do not reach the inner fields either.** `aria-describedby` on the element is not read with the number field. Use the `hint` attribute.
-- **VoiceOver on macOS has not been tested.** VoiceOver on iOS, NVDA, the keyboard and high contrast mode are part of the manual testing below; Safari's keyboard behaviour is covered by automated tests in WebKit.
+- **VoiceOver has not been tested yet**, on macOS or iOS. NVDA, the keyboard and high contrast mode have been tested by hand (below), and Safari's keyboard behaviour is covered by automated tests in WebKit. Reports from VoiceOver users are very welcome in the [issue tracker](https://github.com/caicesardev/teselia/issues).
 - **Valid does not mean reachable.** Numbers are checked for the right length and prefixes of their country, not whether the line exists or whether it is a mobile or a landline.
 
 ### Testing
 
 Every change runs the automated suite in Chromium, Firefox and WebKit: keyboard and pointer interaction, screen reader attributes, announcements, contrast of the default colors in both themes, high contrast and reduced motion, and an [axe-core](https://github.com/dequelabs/axe-core) scan.
 
-Manual testing with assistive technology, before `1.0.0`:
+Manual testing with assistive technology:
 
 | Assistive technology | Browser | Result |
 | --- | --- | --- |
 | Keyboard only | Chrome, Firefox (Windows) | Passed. Testing led to `Enter` in the number field submitting the form, like a native input. |
 | NVDA | Firefox, Brave (Windows) | Passed. Testing fixed a repeated "Country set to…" announcement that Chromium skipped. Some Spanish voices read a list position such as "1 de 241" as a date; the component sends the right text. |
-| VoiceOver | Safari (iOS) | Pending |
-| High contrast mode | Edge (Windows) | Pending |
-| 200% and 400% zoom, 320px width, text spacing | Chrome | Pending |
+| VoiceOver | Safari (iOS) | Not tested yet |
+| High contrast mode | Edge (Windows) | Passed. Borders, focus, the highlighted and selected countries and the error state stay distinguishable. |
+| 200% and 400% zoom, 320px width, text spacing | Chrome | Passed. Checked at 640px and 320px wide (the width 200% and 400% zoom leave on a 1280px screen) and with the WCAG 1.4.12 text spacing override: nothing clipped and no horizontal scroll. |
 
 The full specification is in the [design document](https://github.com/caicesardev/teselia/blob/main/design/phone.md#5-accessibility-specification).
