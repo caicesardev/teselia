@@ -20,13 +20,17 @@
           spellcheck="false"
           part="country"
           @focus="selectTextSoTypingReplacesIt"
+          @mousedown="focusWithoutPlacingCaret"
+          @click="openFromPointer"
           @keydown="handleComboboxKeydown"
           @input="filterByTypedText"
           @blur="closeAndRestoreSelection"
         />
-        <svg class="chevron" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
-          <path d="M4 6l4 4 4-4" />
-        </svg>
+        <span class="toggle" aria-hidden="true" @click="toggleFromChevron">
+          <svg class="chevron" viewBox="0 0 16 16" focusable="false">
+            <path d="M4 6l4 4 4-4" />
+          </svg>
+        </span>
       </div>
 
       <input
@@ -44,7 +48,14 @@
       />
     </div>
 
-    <ul id="countries" ref="listbox" role="listbox" popover="manual" :aria-label="textCountry" part="listbox">
+    <ul
+      id="countries"
+      ref="listbox"
+      role="listbox"
+      popover="manual"
+      :aria-label="textCountry"
+      part="listbox"
+    >
       <li
         v-for="country in visibleCountries"
         :id="optionId(country.code)"
@@ -53,6 +64,7 @@
         :aria-selected="country.code === state.country ? 'true' : 'false'"
         :part="country.code === state.country ? 'option option-selected' : 'option'"
         :class="{ highlighted: country.code === highlightedCode }"
+        @click="selectCountry(country.code)"
       >
         <span class="option-name">{{ country.name }}</span> <span class="option-code">+{{ country.callingCode }}</span>
       </li>
@@ -84,6 +96,7 @@ const props = withDefaults(
 
 const host = useHost() as TesPhoneElement
 const { state, internals } = host
+const combobox = useTemplateRef<HTMLInputElement>('combobox')
 const numberInput = useTemplateRef<HTMLInputElement>('number')
 const listbox = useTemplateRef<HTMLElement>('listbox')
 
@@ -198,9 +211,29 @@ function scrollHighlightedOptionIntoView(): void {
 }
 
 function selectHighlightedCountry(): void {
-  if (!highlightedCode.value) return
-  state.country = highlightedCode.value
+  if (highlightedCode.value) selectCountry(highlightedCode.value)
+}
+
+function selectCountry(code: CountryCode): void {
+  state.country = code
   closeAndRestoreSelection()
+}
+
+function focusWithoutPlacingCaret(event: MouseEvent): void {
+  const input = event.target as HTMLInputElement
+  if (host.shadowRoot?.activeElement === input) return
+  event.preventDefault()
+  input.focus()
+}
+
+function openFromPointer(): void {
+  if (!isOpen.value) moveHighlight(1)
+}
+
+function toggleFromChevron(): void {
+  combobox.value?.focus()
+  if (isOpen.value) closeAndRestoreSelection()
+  else moveHighlight(1)
 }
 
 function closeAndRestoreSelection(): void {
@@ -232,7 +265,7 @@ function syncPopover(open: boolean): void {
   if (!open && isShown) popup.hidePopover()
 }
 
-watch([() => state.value, () => props.required], syncFormState)
+watch([() => state.value, () => state.country, () => props.required], syncFormState)
 watch(isOpen, syncPopover)
 onMounted(syncFormState)
 </script>
@@ -313,18 +346,24 @@ input:focus-visible {
   text-overflow: ellipsis;
 }
 
-.chevron {
+.toggle {
   position: absolute;
   inset-block: 0;
-  inset-inline-end: calc(var(--_space) * 1.25);
+  inset-inline-end: 0;
+  display: grid;
+  place-items: center;
+  inline-size: calc(var(--_space) * 4);
+  cursor: pointer;
+}
+
+.chevron {
   inline-size: 1rem;
-  block-size: 100%;
+  block-size: 1rem;
   fill: none;
   stroke: currentColor;
   stroke-width: 1.5;
   stroke-linecap: round;
   stroke-linejoin: round;
-  pointer-events: none;
 }
 
 [popover] {
@@ -355,7 +394,11 @@ input:focus-visible {
   min-block-size: 2.5rem;
   padding-inline: var(--_space);
   border-radius: calc(var(--_radius) - 2px);
-  cursor: default;
+  cursor: pointer;
+}
+
+[role='option']:hover {
+  background: var(--_hover);
 }
 
 .option-code {
