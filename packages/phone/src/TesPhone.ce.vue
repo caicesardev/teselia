@@ -795,4 +795,25 @@ input[aria-invalid='true'] {
   background: var(--_accent);
   box-shadow: inset 0 0 0 2px var(--_on-accent);
 }
+
+@media (forced-colors: active) {
+  [role='option'].highlighted {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+
+  [role='option'][aria-selected='true'] {
+    forced-color-adjust: none;
+    background: SelectedItem;
+    color: SelectedItemText;
+  }
+
+  [role='option'][aria-selected='true'].highlighted {
+    outline-color: SelectedItemText;
+  }
+
+  input[aria-invalid='true'] {
+    border-width: 2px;
+  }
+}
 </style>
