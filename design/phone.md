@@ -272,6 +272,7 @@ All events bubble and are composed. `detail` is `{ value, country, valid }`.
   - `input` and `change` fire only for **user** changes, like native inputs. Setting `value` from code fires neither.
   - `change` fires when the number field loses focus with a different text than when it gained it, and when the user picks a *different* country. Re-selecting the current country fires nothing.
   - `countrychange` fires on every country change, including code and `form.reset()`. It is dispatched synchronously, so it precedes the `input`/`change` of a country pick. The element updates the digits before the country, so `detail.value` is already consistent when it fires.
+- **Vue `v-model` works without extra code.** The Vue compiler treats a custom element like a native input (`vModelText`): it listens to `input` and reads and writes the `value` property. `test/browser/vue-v-model.test.ts` covers both directions (#24).
 - **Do not use Vue's `emit()` for public events.** In a custom element, Vue dispatches emitted events as a `CustomEvent` that does not bubble, is not composed, and has `detail` set to the **array** of emit arguments (verified in `@vue/runtime-dom` 3.5.43). Events are therefore dispatched directly from the host (`useHost()`) with `new CustomEvent(name, { bubbles: true, composed: true, detail })`.
 
 ### 4.3 Form integration
@@ -338,7 +339,7 @@ Tokens use the suite-wide `--tes-` prefix, so one set of variables themes every 
 
 ### 4.5 Parts
 
-`label`, `group`, `country`, `popup` (the popover container), `listbox`, `group-label` (the "Suggested" heading), `option`, `option-selected` (added alongside `option`), `no-results`, `number`, `hint`, `error`. The `flag` part is **reserved** for 1.x.
+`field` (the outer wrapper), `label`, `group`, `country`, `popup` (the popover container), `listbox`, `group-label` (the "Suggested" heading), `option`, `option-selected` (added alongside `option`), `no-results`, `number`, `hint`, `error`. The `flag` part is **reserved** for 1.x.
 
 ### 4.6 Custom states
 
