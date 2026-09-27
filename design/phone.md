@@ -129,6 +129,11 @@ Pointer implementation notes (#13):
 ### D6. Form value: E.164
 
 - The value submitted with the form is **E.164**, for example `+34612345678`. When the field is empty or the number cannot be parsed, the value is an empty string.
+- Implemented in #16:
+  - The element stores the text typed in the number field (`nationalInput`) and the selected country, and derives the E.164 value from both. Changing the country recomputes the value and keeps the digits.
+  - **Parseable but not (yet) valid numbers are submitted as E.164** (`612` → `+34612`), because it is still an unambiguous rendering of what the user typed. Validity is a separate concern: `typeMismatch` (#17) blocks submission and the `valid` property reports it.
+  - Spaces, punctuation and the `00` international prefix are accepted in the input (`612 34-56.78`, `0034…`).
+  - Setting `value` or the `value` attribute to an E.164 number selects its country and fills the national digits. If the country cannot be determined (e.g. `+44207946`), the text is kept as typed.
 - The national formatted number, country and validity are exposed as read-only properties and in event details. The backend doesn't need them, because E.164 is unambiguous.
 
 **Discarded:** submitting a second `country` entry (redundant) and submitting raw user input (it pushes parsing to every backend).
@@ -448,4 +453,4 @@ Deliberately **not** added: Testing Library (the `userEvent` in Vitest browser m
    - The live value lives in a reactive `state` object owned by the element and read by the Vue component, so it works even when set before the element is connected.
    - A dirty flag mirrors the native "dirty value flag": user input or setting `value` marks it; `form.reset()` clears it.
    - The component uses `inheritAttrs: false`. Otherwise host attributes that are not props (`name`, `value`) fall through to the root element inside the shadow root.
-   - Until #16, the value is the raw text. #16 normalizes it to E.164.
+   - Since #16, `value` and `defaultValue` are E.164 (D6).

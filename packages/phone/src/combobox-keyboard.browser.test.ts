@@ -258,3 +258,37 @@ describe('country combobox keyboard: highlight', () => {
     await expectNoAxeViolations(el)
   })
 })
+
+describe('country combobox keyboard: replacing the selected country', () => {
+  function collapseSelectionToEnd(input: HTMLInputElement): void {
+    input.setSelectionRange(input.value.length, input.value.length)
+  }
+
+  it('starts a new search even if the text was not selected on focus', async () => {
+    const el = await focusCombobox()
+    collapseSelectionToEnd(combobox(el))
+
+    await userEvent.keyboard('united')
+
+    expect(combobox(el).value).toBe('united')
+    expect(optionIds(el)).toEqual(['option-AE', 'option-GB', 'option-US'])
+  })
+
+  it('clears the selected country text on Backspace and shows every country', async () => {
+    const el = await focusCombobox()
+    collapseSelectionToEnd(combobox(el))
+
+    await userEvent.keyboard('{Backspace}')
+
+    expect(combobox(el).value).toBe('')
+    expect(isExpanded(el)).toBe(true)
+    expect(options(el).length).toBeGreaterThan(200)
+  })
+
+  it('keeps editing normally once a search has started', async () => {
+    const el = await focusCombobox()
+    await userEvent.keyboard('unitedx{Backspace}')
+
+    expect(combobox(el).value).toBe('united')
+  })
+})

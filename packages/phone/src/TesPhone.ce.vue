@@ -36,11 +36,11 @@
       <input
         id="number"
         ref="number"
-        :value="state.value"
+        :value="state.nationalInput"
         part="number"
         type="tel"
         inputmode="tel"
-        autocomplete="tel"
+        :autocomplete="autocomplete"
         dir="ltr"
         :required="required"
         :disabled="state.disabledByForm"
@@ -110,6 +110,7 @@ import type { TesPhoneElement } from './element'
 import { filterCountries } from './filter'
 import { type Direction, nextHighlight } from './highlight'
 import { resolveDefaultCountry, resolveLocale } from './locale'
+import { interpretPhoneNumber } from './phone-number'
 
 defineOptions({ inheritAttrs: false })
 
@@ -118,6 +119,7 @@ const props = withDefaults(
     label?: string
     required?: boolean
     defaultCountry?: string
+    autocomplete?: string
     preferredCountries?: string
     onlyCountries?: string
     textCountry?: string
@@ -126,6 +128,7 @@ const props = withDefaults(
     textNoResults?: string
   }>(),
   {
+    autocomplete: 'tel',
     textCountry: 'Country code',
     textSuggested: 'Suggested',
     textResults: 'Countries available: {count}',
@@ -252,6 +255,8 @@ function filterByTypedText(event: Event): void {
 }
 
 function handleComboboxKeydown(event: KeyboardEvent): void {
+  if (query.value === null && editsText(event)) startSearchFromEmptyText(event)
+
   switch (event.key) {
     case 'ArrowDown':
       event.preventDefault()
@@ -272,6 +277,22 @@ function handleComboboxKeydown(event: KeyboardEvent): void {
       if (isOpen.value) event.stopPropagation()
       closeAndRestoreSelection()
       break
+  }
+}
+
+function editsText(event: KeyboardEvent): boolean {
+  const isPrintable = event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey
+  return isPrintable || event.key === 'Backspace' || event.key === 'Delete'
+}
+
+function startSearchFromEmptyText(event: KeyboardEvent): void {
+  const input = event.target as HTMLInputElement
+  input.value = ''
+  if (event.key === 'Backspace' || event.key === 'Delete') {
+    event.preventDefault()
+    query.value = ''
+    highlightedCode.value = null
+    openPopup()
   }
 }
 
@@ -332,14 +353,14 @@ function closeAndRestoreSelection(): void {
 }
 
 function updateFromUserInput(event: Event): void {
-  state.value = (event.target as HTMLInputElement).value
+  state.nationalInput = (event.target as HTMLInputElement).value
   state.dirty = true
 }
 
 function syncFormState(): void {
-  internals.setFormValue(state.value)
+  internals.setFormValue(interpretPhoneNumber(state.nationalInput, state.country).e164)
 
-  if (props.required && state.value === '') {
+  if (props.required && state.nationalInput.trim() === '') {
     internals.setValidity({ valueMissing: true }, 'Enter a phone number', numberInput.value ?? undefined)
   } else {
     internals.setValidity({})
@@ -369,7 +390,7 @@ function announceResultsOnceTypingPauses(currentQuery: string | null): void {
   }, ANNOUNCEMENT_DELAY_MS)
 }
 
-watch([() => state.value, () => state.country, () => props.required], syncFormState)
+watch([() => state.nationalInput, () => state.country, () => props.required], syncFormState)
 watch(isOpen, syncPopover)
 watch(query, announceResultsOnceTypingPauses)
 onBeforeUnmount(() => clearTimeout(pendingAnnouncement))
