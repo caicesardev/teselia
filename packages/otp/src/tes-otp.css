@@ -1,3 +1,8 @@
+:host {
+  --_cell-size: var(--tes-otp-cell-size, 2.75rem);
+  --_cell-gap: var(--tes-otp-cell-gap, 0.5rem);
+}
+
 .field {
   display: grid;
   gap: calc(var(--_space) / 2);
@@ -7,19 +12,84 @@ label {
   font-weight: 500;
 }
 
-input {
+.code {
+  position: relative;
+  inline-size: fit-content;
+  max-inline-size: 100%;
+}
+
+.cells {
+  position: relative;
+  display: flex;
+  gap: var(--_cell-gap);
+  pointer-events: none;
+}
+
+.cell {
   box-sizing: border-box;
-  inline-size: 100%;
-  min-block-size: var(--_control-height);
-  padding-inline: calc(var(--_space) * 1.5);
+  display: grid;
+  place-items: center;
+  inline-size: var(--_cell-size);
+  block-size: var(--_cell-size);
   border: 1px solid var(--_border);
   border-radius: var(--_radius);
   background: var(--_bg);
-  color: var(--_text);
-  font: inherit;
+  font-size: 1.25em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
 }
 
-input:focus-visible {
+.cell.active {
   outline: 2px solid var(--_focus);
   outline-offset: 2px;
+}
+
+.caret {
+  inline-size: 1px;
+  block-size: 1.2em;
+  background: var(--_text);
+}
+
+#code {
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  inline-size: 100%;
+  block-size: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  caret-color: transparent;
+  font-size: max(1rem, 16px);
+  forced-color-adjust: none;
+}
+
+#code::selection {
+  background: transparent;
+  color: transparent;
+}
+
+/* Autofill paints the field background, which would show between the cells; the delay keeps it from ever applying. */
+#code:autofill {
+  transition: background-color 0s 600000s;
+}
+
+@media (forced-colors: active) {
+  .cell {
+    border-color: CanvasText;
+    background: Canvas;
+    color: CanvasText;
+  }
+
+  .cell.active {
+    outline-color: Highlight;
+  }
+
+  .caret {
+    background: CanvasText;
+  }
 }
