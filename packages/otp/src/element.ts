@@ -1,5 +1,6 @@
 import { defineCustomElement, reactive } from 'vue'
 import TesOtpComponent from './TesOtp.ce.vue'
+import { normalizeCode, resolveCodeOptions } from './core/code'
 
 export interface TesOtpState {
   value: string
@@ -33,7 +34,7 @@ export class TesOtpElement extends VueTesOtp {
   }
 
   set value(value: string) {
-    this.state.value = value
+    this.state.value = this.normalized(value)
     this.state.dirty = true
   }
 
@@ -87,16 +88,21 @@ export class TesOtpElement extends VueTesOtp {
 
   attributeChangedCallback(name: string, _previous: string | null, next: string | null): void {
     if (name === 'value' && !this.state.dirty) {
-      this.state.value = next ?? ''
+      this.state.value = this.normalized(next ?? '')
     }
   }
 
   formResetCallback(): void {
-    this.state.value = this.defaultValue
+    this.state.value = this.normalized(this.defaultValue)
     this.state.dirty = false
   }
 
   formDisabledCallback(disabled: boolean): void {
     this.state.disabledByForm = disabled
+  }
+
+  private normalized(raw: string): string {
+    const options = resolveCodeOptions({ length: this.getAttribute('length'), type: this.getAttribute('type') })
+    return normalizeCode(raw, options).value
   }
 }
