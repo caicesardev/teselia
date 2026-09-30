@@ -1,10 +1,10 @@
+import type { Announcer } from '@teselia/shared'
 import { type ComputedRef, ref, watch } from 'vue'
 import { type CountryCode, describeCountry } from '../core/countries'
 import { type FormattedInput, formatForDisplay, formatWhileTyping } from '../core/format'
 import { splitE164 } from '../core/phone-number'
 import type { TesPhoneState } from '../element'
 import type { ResolvedTesPhoneProps } from '../props'
-import type { Announcer } from './use-announcer'
 import type { DispatchPublicEvent } from './use-public-events'
 
 const INTERNATIONAL_PREFIX = /^\s*(\+|00)/

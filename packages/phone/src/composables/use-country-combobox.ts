@@ -1,10 +1,10 @@
+import type { Announcer } from '@teselia/shared'
 import { type ComputedRef, type Ref, computed, nextTick, ref, watch } from 'vue'
 import { type Country, type CountryCode, countryLabel } from '../core/countries'
 import { filterCountries } from '../core/filter'
 import { type Direction, nextHighlight } from '../core/highlight'
 import type { TesPhoneState } from '../element'
 import type { ResolvedTesPhoneProps } from '../props'
-import type { Announcer } from './use-announcer'
 import type { CountryList } from './use-country-list'
 
 export interface ListboxSection {

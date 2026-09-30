@@ -94,12 +94,10 @@
 </template>
 
 <script setup lang="ts">
+import { useAnnouncer, useCustomStates, useImplicitSubmission } from '@teselia/shared'
 import { useHost, useTemplateRef } from 'vue'
-import { useAnnouncer } from './composables/use-announcer'
 import { useCountryCombobox } from './composables/use-country-combobox'
 import { useCountryList } from './composables/use-country-list'
-import { useCustomStates } from './composables/use-custom-states'
-import { useImplicitSubmission } from './composables/use-implicit-submission'
 import { useLocale } from './composables/use-locale'
 import { useNumberField } from './composables/use-number-field'
 import { usePublicEvents } from './composables/use-public-events'
@@ -196,4 +194,5 @@ useCustomStates(internals, () => ({
 }))
 </script>
 
+<style src="@teselia/shared/base.css"></style>
 <style src="./tes-phone.css"></style>

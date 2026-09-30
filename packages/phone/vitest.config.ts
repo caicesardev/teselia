@@ -1,6 +1,6 @@
 import { playwright } from '@vitest/browser-playwright'
 import { defineConfig } from 'vitest/config'
-import { emulateMedia } from './test/support/commands.ts'
+import { emulateMedia } from '@teselia/shared/test/commands'
 
 export default defineConfig({
   test: {

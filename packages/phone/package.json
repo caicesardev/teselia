@@ -44,7 +44,7 @@
   "unpkg": "./dist/tes-phone.iife.js",
   "jsdelivr": "./dist/tes-phone.iife.js",
   "scripts": {
-    "build": "vite build && vite build --mode iife && vue-tsc -p tsconfig.build.json",
+    "build": "vite build && vite build --mode iife && vue-tsc -p tsconfig.build.json && node ../../scripts/check-public-types.mjs",
     "typecheck": "vue-tsc --noEmit"
   },
   "dependencies": {
@@ -54,6 +54,7 @@
     "vue": "^3.5.0"
   },
   "devDependencies": {
+    "@teselia/shared": "workspace:*",
     "@vitejs/plugin-vue": "^6.0.9",
     "vite": "^8.3.1",
     "vue": "^3.5.43",

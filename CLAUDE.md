@@ -72,11 +72,17 @@ teselia/
 ├── .changeset/
 ├── design/                 # design docs ("memoria") per component, e.g. design/phone.md
 ├── docs/                   # VitePress site (private package)
+├── scripts/                # repo scripts, e.g. check-public-types.mjs
 └── packages/
-    └── phone/              # @teselia/phone (published)
+    ├── phone/              # @teselia/phone (published)
+    ├── otp/                # @teselia/otp (published, in progress)
+    └── shared/             # @teselia/shared (private, bundled into each component)
 ```
 
-- Do **not** create `packages/core` until there is real duplicated code between two components.
+- **`packages/shared`** holds code used by two or more components: composables (announcer, custom states, implicit submission), `base.css` (tokens, host styles, `.visually-hidden`) and test support (`@teselia/shared/test`: axe helper, `emulateMedia` command). Move code there only when a second component needs it.
+  - It is **private and never published**. Components list it as a **devDependency** (`"workspace:*"`), and Vite bundles it into their builds. It must never become a runtime `dependency`.
+  - Types: its `exports` have a `teselia-source` condition. Each component's `tsconfig.json` sets `customConditions: ["teselia-source"]`, so typechecking and tests use the source. `tsconfig.build.json` resets it to `[]`, so declaration builds use `packages/shared/dist` (built first by `pnpm build`).
+  - Every component build ends with `node ../../scripts/check-public-types.mjs`. It fails if the published declarations reachable from `types` import anything consumers cannot install, such as `@teselia/shared`.
 - Layout inside a component package (`packages/phone`):
 
   ```
@@ -90,12 +96,11 @@ teselia/
   test/
   ├── unit/                  # Node tests for src/core
   ├── browser/               # Vitest browser mode: Chromium, Firefox, WebKit (files run sequentially)
-  └── support/               # shared helpers and custom browser commands
+  └── support/               # component helpers (generic ones live in @teselia/shared/test)
   ```
 
   New logic goes into `core/` when it has no Vue or DOM dependency, otherwise into a focused composable. Keep the SFC thin.
 - `packages/phone/package.json` essentials: `"files": ["dist"]`, `exports` with `"."` (ESM + types) and `"./iife"` (no `"./style.css"`: `.ce.vue` styles are inlined into the shadow root, so there is no external stylesheet; add one only if a light-DOM stylesheet becomes necessary, e.g. `:not(:defined)` FOUC rules); `unpkg`/`jsdelivr` pointing to the IIFE; `peerDependencies: { vue: "^3.5.0" }`; `publishConfig.access: "public"`; `repository.directory: "packages/phone"`; `homepage: https://teselia.caicesardev.com/phone`.
-- Internal deps (later) use `"workspace:^"`.
 - Root scripts: `build`, `test`, `docs:dev`, `docs:build`, `changeset`, `version-packages`, `release` (`pnpm build && changeset publish`).
 
 ## First component: `@teselia/phone`
@@ -119,7 +124,7 @@ Summary: `<tes-otp>`, one real `<input>` drawn as cells (not one input per chara
 - Commits: Conventional Commits (`feat:`, `fix:`, `docs:`, `chore:`...).
 - Code style: self-documenting code with minimal or no comments. Prefer clear names and small functions; comment only a non-obvious *why* that code cannot express.
 - `main` is protected: every change lands through a pull request (squash merge only), and the `Verify` CI check (typecheck, builds, tests in Chromium/Firefox/WebKit) must pass with the branch up to date.
-- v1 roadmap: pinned issue #31 and the `v1.0.0` milestone. Pick the next open issue from the roadmap, in order.
+- Current roadmap: pinned issue #84 and the `otp v1.0.0` milestone (phone's was #31 / `v1.0.0`, done). Pick the next open issue from the roadmap, in order.
 - Branching: trunk-based. `main` is the only long-lived branch and is always releasable. Work happens in short-lived branches named after the change (`feat/phone-combobox`, `chore/monorepo-scaffold`), merged into `main` through a pull request with squash merge. No `dev` branch.
 - TypeScript is pinned to `~6.0`: TypeScript 7 is the native (Go) compiler and ships no JavaScript API, which `vue-tsc` and declaration generators need. Revisit when the Vue tooling supports it.
 
