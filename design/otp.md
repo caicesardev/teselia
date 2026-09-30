@@ -74,12 +74,18 @@ The component renders **one `<input>`** that holds the whole code, and draws the
   - Anything longer than `length` is cut at `length`.
 - **Rejected characters** are dropped. For a typed key (not a paste), a polite announcement explains the rule once typing pauses: `text-invalid-character`, "Only digits are allowed". Otherwise a screen reader user would press a key and hear nothing change.
 
+- ✅ **Implemented in #70.**
+  - `normalizeCode` lives in `src/core/code.ts` and is unit tested. It applies NFKC, which turns full-width digits and letters into ASCII, maps Arabic-Indic and Extended Arabic-Indic digits by hand (NFKC leaves them alone), upper-cases, keeps `[0-9]` or `[A-Z0-9]`, and cuts at `length`. It also reports whether anything other than a separator was dropped, for the announcement in #77.
+  - Typing keeps the caret after the characters that were kept.
+  - The element normalizes `value`, the `value` attribute and the reset value. It reads `length` and `type` **from the attributes**: at upgrade, `attributeChangedCallback` runs before Vue has resolved its props, so `value="AB12" type="alphanumeric"` would lose its letters. Vue reflects props set as properties to attributes, which a test covers.
+  - Changing `length` or `type` re-normalizes the current value. Invalid values log a warning in development.
+
 **Discarded:** a `pattern` attribute with a regular expression per character. It is flexible but hard to explain, test and localize, and the two types cover real codes.
 
 ### D4. Length
 
 - `length` attribute, default `6`, an integer from `1` to `12`. Out-of-range or malformed values fall back to `6`, with a console warning in development.
-- The input gets `maxlength` equal to `length`.
+- ~~The input gets `maxlength` equal to `length`.~~ **No `maxlength`** (#70): it cuts pasted text *before* normalization, so a pasted `123 456` would lose its last digit. Normalization cuts at `length` instead, and the overwrite model (D2) keeps typing from growing the value. A test pastes through the real clipboard and fails in all three engines if `maxlength` comes back.
 
 ### D5. Completion and auto-submit
 

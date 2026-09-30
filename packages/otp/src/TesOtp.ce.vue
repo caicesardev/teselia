@@ -8,7 +8,9 @@
         ref="input"
         :value="state.value"
         type="text"
-        :maxlength="length"
+        :inputmode="options.type === 'numeric' ? 'numeric' : 'text'"
+        :autocapitalize="options.type === 'numeric' ? 'off' : 'characters'"
+        autocorrect="off"
         :autocomplete="autocomplete"
         :disabled="state.disabledByForm"
         spellcheck="false"
@@ -38,8 +40,10 @@
 <script setup lang="ts">
 import { computed, useHost, useTemplateRef, watchEffect } from 'vue'
 import { type Cell, useCells } from './composables/use-cells'
+import { useCodeInput } from './composables/use-code-input'
+import { useCodeOptions } from './composables/use-code-options'
 import type { TesOtpElement } from './element'
-import { DEFAULT_LENGTH, TES_OTP_DEFAULTS, type TesOtpProps } from './props'
+import { TES_OTP_DEFAULTS, type TesOtpProps } from './props'
 
 defineOptions({ inheritAttrs: false })
 
@@ -54,7 +58,8 @@ if (import.meta.env.DEV && !props.label) {
   console.warn('[tes-otp] The `label` attribute is required for an accessible name.')
 }
 
-const length = computed(() => DEFAULT_LENGTH)
+const options = useCodeOptions(props, state)
+const length = computed(() => options.value.length)
 
 const { cells, syncSelection, startTracking, stopTracking, moveBackOnArrowLeft, selectCellUnderPointer } = useCells({
   state,
@@ -63,11 +68,7 @@ const { cells, syncSelection, startTracking, stopTracking, moveBackOnArrowLeft, 
   cellElements,
 })
 
-function updateFromUserInput(event: Event): void {
-  state.value = (event.target as HTMLInputElement).value
-  state.dirty = true
-  syncSelection()
-}
+const { updateFromUserInput } = useCodeInput({ state, options, syncSelection })
 
 function cellPart(cell: Cell): string {
   return ['cell', cell.filled && 'cell-filled', cell.active && 'cell-active'].filter(Boolean).join(' ')
