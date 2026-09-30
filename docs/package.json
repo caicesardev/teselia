@@ -12,6 +12,7 @@
     "vue": "^3.5.43"
   },
   "dependencies": {
+    "@teselia/otp": "workspace:^",
     "@teselia/phone": "workspace:^"
   }
 }

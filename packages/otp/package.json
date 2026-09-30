@@ -1,0 +1,63 @@
+{
+  "name": "@teselia/otp",
+  "version": "0.0.0",
+  "description": "Accessible one-time code input (OTP), shipped as a framework-agnostic Web Component. One real input drawn as cells, so paste, SMS autofill and screen readers work. WCAG 2.2 AA by default.",
+  "keywords": [
+    "otp",
+    "otp-input",
+    "one-time-code",
+    "verification-code",
+    "2fa",
+    "web-component",
+    "custom-element",
+    "accessibility",
+    "a11y",
+    "wcag",
+    "vue"
+  ],
+  "license": "MIT",
+  "author": "caicesardev",
+  "homepage": "https://teselia.caicesardev.com/otp",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/caicesardev/teselia.git",
+    "directory": "packages/otp"
+  },
+  "bugs": {
+    "url": "https://github.com/caicesardev/teselia/issues"
+  },
+  "type": "module",
+  "sideEffects": true,
+  "files": [
+    "dist"
+  ],
+  "types": "./dist/index.d.ts",
+  "module": "./dist/tes-otp.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/tes-otp.js"
+    },
+    "./iife": "./dist/tes-otp.iife.js",
+    "./package.json": "./package.json"
+  },
+  "unpkg": "./dist/tes-otp.iife.js",
+  "jsdelivr": "./dist/tes-otp.iife.js",
+  "scripts": {
+    "build": "vite build && vite build --mode iife && vue-tsc -p tsconfig.build.json && node ../../scripts/check-public-types.mjs",
+    "typecheck": "vue-tsc --noEmit"
+  },
+  "peerDependencies": {
+    "vue": "^3.5.0"
+  },
+  "devDependencies": {
+    "@teselia/shared": "workspace:*",
+    "@vitejs/plugin-vue": "^6.0.9",
+    "vite": "^8.3.1",
+    "vue": "^3.5.43",
+    "vue-tsc": "^3.3.11"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

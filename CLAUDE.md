@@ -79,7 +79,7 @@ teselia/
     └── shared/             # @teselia/shared (private, bundled into each component)
 ```
 
-- **`packages/shared`** holds code used by two or more components: composables (announcer, custom states, implicit submission), `base.css` (tokens, host styles, `.visually-hidden`) and test support (`@teselia/shared/test`: axe helper, `emulateMedia` command). Move code there only when a second component needs it.
+- **`packages/shared`** holds code used by two or more components: composables (announcer, custom states, implicit submission), `base.css` (tokens, host styles, `.visually-hidden`) and test support (`@teselia/shared/test`: axe helper, `emulateMedia` command). Move code there only when a second component needs it. The form-associated element class stays in each component (see design/otp.md D8: a shared mixin inlines the whole `HTMLElement` type into the public `.d.ts`).
   - It is **private and never published**. Components list it as a **devDependency** (`"workspace:*"`), and Vite bundles it into their builds. It must never become a runtime `dependency`.
   - Types: its `exports` have a `teselia-source` condition. Each component's `tsconfig.json` sets `customConditions: ["teselia-source"]`, so typechecking and tests use the source. `tsconfig.build.json` resets it to `[]`, so declaration builds use `packages/shared/dist` (built first by `pnpm build`).
   - Every component build ends with `node ../../scripts/check-public-types.mjs`. It fails if the published declarations reachable from `types` import anything consumers cannot install, such as `@teselia/shared`.
