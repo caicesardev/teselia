@@ -329,7 +329,11 @@ Same layers and tools as phone §6.1. Normalization is pure logic in `src/core/`
 
 ## 7. Open questions
 
-1. **Does iOS offer the SMS code for an input inside a shadow root?** Safari's autofill has had gaps with shadow DOM inputs. If it fails, the fallback is to render the `<input>` in the light DOM through a slot, which changes the architecture. **That is why it is the first spike, on a real iPhone.** The same question applies to password managers.
+1. ~~**Does iOS offer the SMS code for an input inside a shadow root?**~~ ✅ **Yes. Resolved in #69 on 2026-09-30**, on the maintainer's iPhone in Safari, with the test page from draft PR #88. The input stays in the shadow root.
+   - The code came from an email in the Gmail app ("De Gmail"), not from an SMS. It is the same keyboard suggestion for `autocomplete="one-time-code"`, and it avoids paying for an SMS. Whether a field inside a shadow root is recognized does not depend on the source of the code.
+   - The keyboard offered the code for all three fields (light DOM control, plain shadow root, `<tes-otp>`), and tapping it filled each one. `<tes-otp>` worked every time. The plain shadow root field needed a second tap once, which looks like suggestion timing, not a shadow DOM limit.
+   - `<tes-otp>` showed the alphabetic keyboard, because `inputmode="numeric"` arrives with #70.
+   - Password managers remain an optional check in the manual testing (#82).
 2. **How do screen readers read the value?** NVDA may read `123456` as a number ("one hundred twenty-three thousand…") instead of digit by digit. The value of a native input cannot be changed for speech, so this goes into manual testing and, if needed, the docs.
 3. ~~**Selection sync events** (D2).~~ ✅ Resolved in #68: `selectionchange` alone is not enough in Chromium, so `keyup` and `pointerup` are needed too. See D2.
 4. **Unicode digits:** full-width and Arabic-Indic digits are in scope (D3). Other scripts (Devanagari, Bengali…) could follow if anyone asks.
