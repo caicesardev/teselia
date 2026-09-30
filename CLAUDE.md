@@ -104,7 +104,13 @@ Accessible international phone input with country dial code.
 
 **`design/phone.md` is the source of truth** for scope, public API, accessibility spec, definition of done and milestones. Read it before working on the component, and update it in the same change when a decision changes.
 
-Summary: `<tes-phone>`, `libphonenumber-js` (min metadata), country names via `Intl.DisplayNames`, no flags in v1, APG editable combobox, E.164 form value. Target: `1.0.0` on **2026-10-24**; format-as-you-type cut line on 2026-10-18.
+Summary: `<tes-phone>`, `libphonenumber-js` (min metadata), country names via `Intl.DisplayNames`, no flags in v1, APG editable combobox, E.164 form value. **Released `1.0.0` on 2026-09-27.** VoiceOver testing is still pending (#27).
+
+## Second component: `@teselia/otp`
+
+Accessible one-time code input. **`design/otp.md` is the source of truth.**
+
+Summary: `<tes-otp>`, one real `<input>` drawn as cells (not one input per character), digits by default and `type="alphanumeric"` as an option, `autosubmit` opt-in, no runtime dependency besides Vue. Shared code with phone moves to a private, bundled `packages/shared`. Target: `1.0.0` on **2026-10-24**.
 
 ## How we work
 
