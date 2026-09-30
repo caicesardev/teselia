@@ -2,7 +2,7 @@
 
 | | |
 | --- | --- |
-| **Status** | Proposed |
+| **Status** | Accepted |
 | **Date** | 2026-09-30 |
 | **Target release** | `1.0.0` on **2026-10-24** |
 | **Custom element** | `<tes-otp>` |
