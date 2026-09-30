@@ -52,6 +52,9 @@ importers:
         specifier: ^1.13.14
         version: 1.13.14
     devDependencies:
+      '@teselia/shared':
+        specifier: workspace:*
+        version: link:../shared
       '@vitejs/plugin-vue':
         specifier: ^6.0.9
         version: 6.0.9(vite@8.3.1(@types/node@24.19.0)(esbuild@0.28.1)(yaml@2.9.1))(vue@3.5.43(typescript@6.0.3))
@@ -64,6 +67,12 @@ importers:
       vue-tsc:
         specifier: ^3.3.11
         version: 3.3.11(typescript@6.0.3)
+
+  packages/shared:
+    devDependencies:
+      vue:
+        specifier: ^3.5.43
+        version: 3.5.43(typescript@6.0.3)
 
 packages:
 

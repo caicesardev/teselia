@@ -9,3 +9,9 @@ export interface EmulatedMedia {
 export const emulateMedia = defineBrowserCommand<[EmulatedMedia]>(async (context, media) => {
   await context.page.emulateMedia(media)
 })
+
+declare module 'vitest/browser' {
+  interface BrowserCommands {
+    emulateMedia: (media: EmulatedMedia) => Promise<void>
+  }
+}

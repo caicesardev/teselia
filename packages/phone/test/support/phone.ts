@@ -1,8 +1,9 @@
-import axe from 'axe-core'
 import { expect } from 'vitest'
 import { userEvent } from 'vitest/browser'
 import type { TesPhoneElement } from '../../src/index'
 import '../../src/index'
+
+export { expectNoAxeViolations } from '@teselia/shared/test'
 
 export async function renderPhone(attributes: string, wrapperTag = 'main'): Promise<TesPhoneElement> {
   const container = document.createElement(wrapperTag)
@@ -49,9 +50,4 @@ export function activeDescendant(el: TesPhoneElement): string | null {
 export async function typeInCombobox(el: TesPhoneElement, text: string): Promise<void> {
   combobox(el).focus()
   await userEvent.keyboard(text)
-}
-
-export async function expectNoAxeViolations(el: TesPhoneElement): Promise<void> {
-  const results = await axe.run(el.parentElement as HTMLElement)
-  expect(results.violations).toEqual([])
 }
