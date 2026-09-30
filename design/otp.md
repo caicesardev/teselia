@@ -116,7 +116,11 @@ This is the second component, so there is now real duplication with `@teselia/ph
   - `@teselia/phone` passed all 708 tests unchanged. Its ESM build went from 9.10 to 9.15 KB gzip and its IIFE from 68.30 to 68.31 KB.
   - Types: `packages/shared` emits its own declarations. A `teselia-source` export condition, enabled only in the components' dev `tsconfig.json`, lets typechecking use the source. Otherwise `vue-tsc` would pull the shared sources into the declaration build and fail on `rootDir`.
   - `scripts/check-public-types.mjs` runs after every declaration build. It walks the declarations reachable from `types` and fails on any import consumers cannot install. Tested by adding an `@teselia/shared` import to `element.d.ts`, which made it fail.
-  - **The element plumbing is extracted in #67 instead**, together with the OTP element. With a single consumer, its shape would be a guess, and the second one decides what is really shared.
+  - **The element plumbing stays in each component** (decided in #67, with both elements in front of us).
+    - A shared mixin (`FormAssociated(VueElement)`) was built and measured. It did not leak `@teselia/shared` into the public types, but TypeScript inlined the **whole `HTMLElement` instance type (about 400 lines) into `element.d.ts`**. That output is frozen to the `lib.dom` version used for the build (it includes members like `moveBefore` and `ariaBrailleLabel`), so consumers on an older TypeScript without `skipLibCheck` could get type errors.
+    - Writing the mixin's type by hand would either import `@teselia/shared` (not installable) or repeat the member list in each component.
+    - The plumbing is about 60 lines of one-line delegations that mirror the HTML spec, so the risk of drift is low. Each element keeps its own, and the behaviour that differs (value parsing, reset, restore) lives next to it.
+    - `<tes-otp>` needs no `focus()` override: with a single input, `delegatesFocus` already focuses it. A mutation (removing the override) proved it, so it was dropped.
 
 **Discarded:**
 

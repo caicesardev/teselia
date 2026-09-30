@@ -4,6 +4,7 @@ import { defineConfig } from 'vitepress'
 const isTeseliaElement = (tag: string): boolean => tag.startsWith('tes-')
 
 const phoneSource = fileURLToPath(new URL('../../packages/phone/src/index.ts', import.meta.url))
+const otpSource = fileURLToPath(new URL('../../packages/otp/src/index.ts', import.meta.url))
 
 export default defineConfig({
   lang: 'en',
@@ -23,17 +24,23 @@ export default defineConfig({
 
   vite: {
     resolve: {
-      alias: { '@teselia/phone': phoneSource },
+      alias: { '@teselia/phone': phoneSource, '@teselia/otp': otpSource },
     },
   },
 
   themeConfig: {
-    nav: [{ text: 'Phone', link: '/phone' }],
+    nav: [
+      { text: 'Phone', link: '/phone' },
+      { text: 'OTP', link: '/otp' },
+    ],
 
     sidebar: [
       {
         text: 'Components',
-        items: [{ text: 'Phone', link: '/phone' }],
+        items: [
+          { text: 'Phone', link: '/phone' },
+          { text: 'OTP', link: '/otp' },
+        ],
       },
     ],
 

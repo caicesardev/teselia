@@ -15,12 +15,12 @@
       required
     />
 
-    <div class="actions">
+    <div class="demo-actions">
       <button type="submit">Submit</button>
       <button type="reset">Reset</button>
     </div>
 
-    <dl class="readout">
+    <dl class="demo-readout">
       <div>
         <dt>value</dt>
         <dd><code>{{ JSON.stringify(live.value) }}</code></dd>
@@ -35,9 +35,9 @@
       </div>
     </dl>
 
-    <div class="result" role="status">
+    <div class="demo-result" role="status">
       <template v-if="submitted">
-        <span class="result-label">FormData</span>
+        <span class="demo-result-label">FormData</span>
         <code>{{ JSON.stringify(submitted) }}</code>
       </template>
     </div>
@@ -85,84 +85,3 @@ onMounted(async () => {
   readLiveStateOfPhone()
 })
 </script>
-
-<style scoped>
-.demo {
-  display: grid;
-  gap: 1rem;
-  justify-items: start;
-  padding: 1.5rem;
-  border: 1px solid var(--vp-c-divider);
-  border-radius: 8px;
-  background: var(--vp-c-bg-soft);
-}
-
-.actions {
-  display: flex;
-  gap: 0.5rem;
-}
-
-button {
-  min-block-size: 2.75rem;
-  padding-inline: 1rem;
-  border: 1px solid var(--vp-c-border);
-  border-radius: 6px;
-  background: var(--vp-c-bg);
-  color: var(--vp-c-text-1);
-  font: inherit;
-  font-weight: 500;
-  cursor: pointer;
-}
-
-button[type='submit'] {
-  border-color: transparent;
-  background: var(--vp-button-brand-bg);
-  color: var(--vp-button-brand-text);
-}
-
-button[type='submit']:hover {
-  background: var(--vp-button-brand-hover-bg);
-}
-
-button[type='submit']:active {
-  background: var(--vp-button-brand-active-bg);
-}
-
-button:focus-visible {
-  outline: 2px solid var(--vp-c-brand-1);
-  outline-offset: 2px;
-}
-
-.readout {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem 1.5rem;
-  margin: 0;
-  font-size: 0.875rem;
-}
-
-.readout div {
-  display: flex;
-  gap: 0.5rem;
-  align-items: baseline;
-}
-
-.readout dt {
-  color: var(--vp-c-text-2);
-}
-
-.readout dd {
-  margin: 0;
-}
-
-.result {
-  display: grid;
-  gap: 0.25rem;
-  min-block-size: 1.5rem;
-}
-
-.result-label {
-  font-size: 0.875rem;
-  color: var(--vp-c-text-2);
-}
-</style>
