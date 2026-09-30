@@ -50,7 +50,14 @@ The component renders **one `<input>`** that holds the whole code, and draws the
   - Focus has to be moved by script on every keystroke, and `Backspace` across boxes behaves differently in every implementation.
 - **How it is drawn.** The cells are `aria-hidden` elements that mirror the value, one character each. The input sits on top of them, with transparent text and caret, so pointer and keyboard interaction go to the real field. The active cell follows the input's selection and focus.
 - **Overwrite model.** When the caret lands on a filled cell (arrow keys, click), that character is selected, so typing replaces it and the value never grows past `length`. At the end of the value the caret is collapsed, so typing appends.
-- **Risk, to verify in the first spike:** keeping the active cell in sync with the selection in all three engines (`selectionchange` on inputs, or `select`/`keyup`/`pointerup` as a fallback), and hiding the real text and selection highlight without breaking `forced-colors`.
+- ✅ **Spike done in #68.** It works the same in Chromium, Firefox and WebKit (`test/browser/cells.test.ts`, 14 tests × 3 engines).
+  - **Layout.** The input is absolutely positioned over the cells' area. The cells are painted on top with `pointer-events: none`, so pointer and keyboard go to the input while the cells stay visible.
+  - **Hidden text.** `color`, `-webkit-text-fill-color`, `caret-color` and `::selection` are transparent, with `forced-color-adjust: none`: without it, forced colors mode paints the real text with a system color, and a mutation proves it. `caret-color` and `-webkit-text-fill-color` look redundant next to `color: transparent`, but Chromium's autofill forces a visible text color, so they are kept. An `:autofill` transition delay keeps the autofill background from showing between the cells.
+  - **Selection model** (`src/core/selection.ts`, unit tested; `useCells` wires it). A collapsed caret on a filled cell becomes a one-character selection, and a caret past the value is pulled back to its end. On a complete code, the caret at the end selects the last character. `ArrowLeft` on a one-character selection is handled by the component, because the browser only collapses it and the caret would never move back. `ArrowRight`, `Home` and `End` work natively.
+  - **Pointer.** A click selects the character of the nearest cell, or the end of a partial value. Drag selections are left alone.
+  - **Sync events (§7.3).** `selectionchange` on the input does **not** fire for keyboard caret moves in Chromium inside the shadow root. `keyup` covers the keyboard, `pointerup` the pointer and `input` typing. `selectionchange` stays for touch selection handles. `select` was redundant and was removed.
+  - `Backspace` on a selected character deletes it and the following characters move left: it is one text field. #72 decides whether to keep that.
+- The input uses `font-size: max(1rem, 16px)`, even though its text is invisible, so iOS Safari does not zoom the page on focus.
 
 **Discarded:**
 
@@ -324,5 +331,5 @@ Same layers and tools as phone §6.1. Normalization is pure logic in `src/core/`
 
 1. **Does iOS offer the SMS code for an input inside a shadow root?** Safari's autofill has had gaps with shadow DOM inputs. If it fails, the fallback is to render the `<input>` in the light DOM through a slot, which changes the architecture. **That is why it is the first spike, on a real iPhone.** The same question applies to password managers.
 2. **How do screen readers read the value?** NVDA may read `123456` as a number ("one hundred twenty-three thousand…") instead of digit by digit. The value of a native input cannot be changed for speech, so this goes into manual testing and, if needed, the docs.
-3. **Selection sync events** (D2): is `selectionchange` on the input enough in all three engines, or is a fallback needed?
+3. ~~**Selection sync events** (D2).~~ ✅ Resolved in #68: `selectionchange` alone is not enough in Chromium, so `keyup` and `pointerup` are needed too. See D2.
 4. **Unicode digits:** full-width and Arabic-Indic digits are in scope (D3). Other scripts (Devanagari, Bengali…) could follow if anyone asks.
