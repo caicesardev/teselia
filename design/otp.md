@@ -56,7 +56,7 @@ The component renders **one `<input>`** that holds the whole code, and draws the
   - **Selection model** (`src/core/selection.ts`, unit tested; `useCells` wires it). A collapsed caret on a filled cell becomes a one-character selection, and a caret past the value is pulled back to its end. On a complete code, the caret at the end selects the last character. `ArrowLeft` on a one-character selection is handled by the component, because the browser only collapses it and the caret would never move back. `ArrowRight`, `Home` and `End` work natively.
   - **Pointer.** A click selects the character of the nearest cell, or the end of a partial value. Drag selections are left alone.
   - **Sync events (§7.3).** `selectionchange` on the input does **not** fire for keyboard caret moves in Chromium inside the shadow root. `keyup` covers the keyboard, `pointerup` the pointer and `input` typing. `selectionchange` stays for touch selection handles. `select` was redundant and was removed.
-  - `Backspace` on a selected character deletes it and the following characters move left: it is one text field. #72 decides whether to keep that.
+  - `Backspace` on a selected character deletes it and the following characters move left: it is one text field. **Kept in #72.** Leaving a hole would mean a value with gaps that screen readers cannot convey, since they read the input value as text. Fixing one character stays a single step: select its cell and type over it.
 - The input uses `font-size: max(1rem, 16px)`, even though its text is invisible, so iOS Safari does not zoom the page on focus.
 - ✅ **Input model completed in #71** (`useCodeInput`, `test/browser/input-model.test.ts`). Three gaps were found by tests written before the fix:
   - **A complete code pasted over another one replaces it.** Before, `111111` with the third cell selected plus a pasted `987654` became `119876`, because the paste only replaced the selected character. A paste that normalizes to exactly `length` characters now replaces the whole value, with the last cell active. Shorter pastes are inserted at the caret, like in any text field.
@@ -274,13 +274,16 @@ The field is one text input, so these are the platform's own keys. The component
 | Key | Action |
 | --- | --- |
 | Typing | Fills the active cell and moves to the next one. On a filled cell, replaces its character. |
-| `Backspace` | Deletes the character before the caret, or the selected one. |
-| `Delete` | Deletes the character after the caret, or the selected one. |
+| `Backspace` | Deletes the selected character, or the one before the caret at the end. The following characters move left. |
+| `Delete` | Deletes the selected character. Does nothing at the end of the code. |
+| `Ctrl`/`⌘` + `A` | Selects the whole code; typing replaces it. |
 | `←` / `→` | Move to the previous or next cell. |
 | `Home` / `End` | Move to the first cell, or to the end of the value. |
-| `Ctrl`/`⌘` + `V` | Pastes, normalized (D3). |
+| `Ctrl`/`⌘` + `V` | Pastes, normalized (D3). A complete code replaces the current one (D2). |
 | `Enter` | Submits the form (implicit submission). |
 | `Tab` | Leaves the field. |
+
+Covered by `test/browser/keyboard.test.ts`, `cells.test.ts` and `input-model.test.ts` in all three engines (#72), except `Enter`, which comes with #75.
 
 ### 5.3 Screen readers
 
