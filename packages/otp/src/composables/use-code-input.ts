@@ -10,20 +10,39 @@ interface CodeInputOptions {
 
 export function useCodeInput({ state, options, syncSelection }: CodeInputOptions) {
   function updateFromUserInput(event: Event): void {
-    const input = event.target as HTMLInputElement
-    const { value } = normalizeCode(input.value, options.value)
+    if ((event as InputEvent).isComposing) return
+    normalizeField(event.target as HTMLInputElement)
+  }
 
-    if (value !== input.value) {
-      const caret = input.selectionStart ?? input.value.length
-      const caretAfterNormalizing = normalizeCode(input.value.slice(0, caret), options.value).value.length
+  function finishComposition(event: CompositionEvent): void {
+    normalizeField(event.target as HTMLInputElement)
+  }
+
+  function replaceWithPastedCode(event: ClipboardEvent): void {
+    const pasted = normalizeCode(event.clipboardData?.getData('text') ?? '', options.value).value
+    const isCompleteCode = pasted.length === options.value.length
+    if (pasted !== '' && !isCompleteCode) return
+
+    event.preventDefault()
+    if (isCompleteCode) commit(event.target as HTMLInputElement, pasted, pasted.length)
+  }
+
+  function normalizeField(input: HTMLInputElement): void {
+    const caret = input.selectionStart ?? input.value.length
+    const value = normalizeCode(input.value, options.value).value
+    const caretAfterNormalizing = normalizeCode(input.value.slice(0, caret), options.value).value.length
+    commit(input, value, caretAfterNormalizing)
+  }
+
+  function commit(input: HTMLInputElement, value: string, caret: number): void {
+    if (input.value !== value) {
       input.value = value
-      input.setSelectionRange(caretAfterNormalizing, caretAfterNormalizing)
+      input.setSelectionRange(caret, caret)
     }
-
     state.value = value
     state.dirty = true
     syncSelection()
   }
 
-  return { updateFromUserInput }
+  return { updateFromUserInput, finishComposition, replaceWithPastedCode }
 }

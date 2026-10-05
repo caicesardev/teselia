@@ -15,6 +15,8 @@
         :disabled="state.disabledByForm"
         spellcheck="false"
         @input.stop="updateFromUserInput"
+        @compositionend="finishComposition"
+        @paste="replaceWithPastedCode"
         @focus="startTracking"
         @blur="stopTracking"
         @selectionchange="syncSelection"
@@ -68,7 +70,7 @@ const { cells, syncSelection, startTracking, stopTracking, moveBackOnArrowLeft, 
   cellElements,
 })
 
-const { updateFromUserInput } = useCodeInput({ state, options, syncSelection })
+const { updateFromUserInput, finishComposition, replaceWithPastedCode } = useCodeInput({ state, options, syncSelection })
 
 function cellPart(cell: Cell): string {
   return ['cell', cell.filled && 'cell-filled', cell.active && 'cell-active'].filter(Boolean).join(' ')
