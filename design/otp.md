@@ -58,6 +58,10 @@ The component renders **one `<input>`** that holds the whole code, and draws the
   - **Sync events (§7.3).** `selectionchange` on the input does **not** fire for keyboard caret moves in Chromium inside the shadow root. `keyup` covers the keyboard, `pointerup` the pointer and `input` typing. `selectionchange` stays for touch selection handles. `select` was redundant and was removed.
   - `Backspace` on a selected character deletes it and the following characters move left: it is one text field. #72 decides whether to keep that.
 - The input uses `font-size: max(1rem, 16px)`, even though its text is invisible, so iOS Safari does not zoom the page on focus.
+- ✅ **Input model completed in #71** (`useCodeInput`, `test/browser/input-model.test.ts`). Three gaps were found by tests written before the fix:
+  - **A complete code pasted over another one replaces it.** Before, `111111` with the third cell selected plus a pasted `987654` became `119876`, because the paste only replaced the selected character. A paste that normalizes to exactly `length` characters now replaces the whole value, with the last cell active. Shorter pastes are inserted at the caret, like in any text field.
+  - **A paste without valid characters does nothing.** Before, pasting `hello` over a selected cell deleted that character.
+  - **Input method composition is left alone.** Rewriting the field during a composition (`isComposing`, for example Gboard on Android with letters) breaks the input method. The field is normalized on `compositionend`, and on the next non-composing `input` (Firefox fires one after `compositionend`).
 
 **Discarded:**
 
