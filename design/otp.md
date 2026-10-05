@@ -296,6 +296,13 @@ Covered by `test/browser/keyboard.test.ts`, `cells.test.ts` and `input-model.tes
 
 Same rules as phone §5.3: no errors while typing; they appear on blur after editing and on submit; they update live, and clear as soon as the value is valid. `setCustomValidity` errors show immediately.
 
+✅ **Implemented in #73.**
+- `validateCode` (`src/core/validation.ts`, unit tested) checks in this order: a custom error, then a missing value (`required`), then a partial code (`tooShort`). The error is anchored to the input, so `reportValidity()` and the browser's validation bubble focus it.
+- "Edited" means the user changed the value through the field. Tabbing through without typing shows nothing until submit.
+- `setCustomValidity(message)` shows the message at once and is cleared by the next edit through the field, by `setCustomValidity('')`, or by `form.reset()`. Reset clears it because it restores a different value, and the server error was about the old one.
+- The inner input gets `required` (announced by screen readers), `aria-invalid` and `aria-describedby="error"` only while an error is shown. The `error` part is always rendered with `aria-live="polite"`, and hidden with `:empty` while it is blank.
+- The cells' border goes from 1px to 2px in the error color, and to 2px `CanvasText` in forced colors mode.
+
 ### 5.5 Manual testing matrix
 
 | What | Browser | OS |

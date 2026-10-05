@@ -6,6 +6,9 @@ export interface TesOtpState {
   value: string
   dirty: boolean
   disabledByForm: boolean
+  edited: boolean
+  errorsVisible: boolean
+  customError: string
 }
 
 const VueTesOtp = defineCustomElement(TesOtpComponent, {
@@ -22,6 +25,9 @@ export class TesOtpElement extends VueTesOtp {
     value: '',
     dirty: false,
     disabledByForm: false,
+    edited: false,
+    errorsVisible: false,
+    customError: '',
   })
 
   constructor(initialProps?: Record<string, unknown>) {
@@ -78,6 +84,11 @@ export class TesOtpElement extends VueTesOtp {
     return this.internals.willValidate
   }
 
+  setCustomValidity(message: string): void {
+    this.state.customError = message
+    if (message) this.state.errorsVisible = true
+  }
+
   checkValidity(): boolean {
     return this.internals.checkValidity()
   }
@@ -95,6 +106,9 @@ export class TesOtpElement extends VueTesOtp {
   formResetCallback(): void {
     this.state.value = this.normalized(this.defaultValue)
     this.state.dirty = false
+    this.state.edited = false
+    this.state.errorsVisible = false
+    this.state.customError = ''
   }
 
   formDisabledCallback(disabled: boolean): void {
