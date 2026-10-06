@@ -14,6 +14,7 @@
         :autocomplete="autocomplete"
         :disabled="state.disabledByForm"
         :required="required"
+        :readonly="readonly"
         :aria-invalid="visibleError ? 'true' : undefined"
         :aria-describedby="describedBy"
         spellcheck="false"

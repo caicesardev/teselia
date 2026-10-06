@@ -21,6 +21,7 @@ export function useCodeInput({ state, options, syncSelection, announceUserChange
   }
 
   function replaceWithPastedCode(event: ClipboardEvent): void {
+    if ((event.target as HTMLInputElement).readOnly) return
     const pasted = normalizeCode(event.clipboardData?.getData('text') ?? '', options.value).value
     const isCompleteCode = pasted.length === options.value.length
     if (pasted !== '' && !isCompleteCode) return
