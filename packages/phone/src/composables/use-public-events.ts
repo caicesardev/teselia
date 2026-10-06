@@ -18,11 +18,20 @@ export function usePublicEvents(host: HTMLElement, state: TesPhoneState): Dispat
     )
   }
 
+  return dispatchPublicEvent
+}
+
+export function watchCountryChanges(
+  state: TesPhoneState,
+  dispatchPublicEvent: DispatchPublicEvent,
+  syncFormState: () => void,
+): void {
   watch(
     () => state.country,
-    () => dispatchPublicEvent('countrychange'),
+    () => {
+      syncFormState()
+      dispatchPublicEvent('countrychange')
+    },
     { flush: 'sync' },
   )
-
-  return dispatchPublicEvent
 }

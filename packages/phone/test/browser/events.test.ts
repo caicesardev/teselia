@@ -150,6 +150,47 @@ describe('country selection events', () => {
   })
 })
 
+describe('form state seen from listeners', () => {
+  function recordFormState(el: TesPhoneElement, names: PublicEventName[]) {
+    const form = el.closest('form') as HTMLFormElement
+    const seen: { type: string; detailValue: string; formValue: FormDataEntryValue | null; valid: boolean }[] = []
+    for (const name of names) {
+      el.addEventListener(name, (event) => {
+        seen.push({
+          type: event.type,
+          detailValue: (event as CustomEvent).detail.value,
+          formValue: new FormData(form).get('phone'),
+          valid: el.checkValidity(),
+        })
+      })
+    }
+    return seen
+  }
+
+  it('already holds the new value and validity when input and change fire', async () => {
+    const el = await renderPhone('name="phone" default-country="ES" required', 'form')
+    const seen = recordFormState(el, ['input', 'change'])
+
+    await userEvent.type(numberInput(el), '612345678')
+    await userEvent.tab()
+
+    for (const event of seen) expect(event.formValue).toBe(event.detailValue)
+    expect(seen.at(-2)).toMatchObject({ type: 'input', formValue: '+34612345678', valid: true })
+    expect(seen.at(-1)).toMatchObject({ type: 'change', formValue: '+34612345678', valid: true })
+  })
+
+  it('already holds the new value when a paste changes the country', async () => {
+    const el = await renderPhone('name="phone" default-country="ES"', 'form')
+    const seen = recordFormState(el, ['countrychange', 'input'])
+
+    await userEvent.fill(numberInput(el), '+44 20 7946 0958')
+
+    expect(seen.map((event) => event.type)).toContain('countrychange')
+    for (const event of seen) expect(event.formValue).toBe(event.detailValue)
+    expect(seen.at(-1)).toMatchObject({ type: 'input', formValue: '+442079460958', valid: true })
+  })
+})
+
 describe('event propagation', () => {
   it('bubbles and crosses shadow boundaries (composed)', async () => {
     const el = await renderPhone('default-country="ES"')
