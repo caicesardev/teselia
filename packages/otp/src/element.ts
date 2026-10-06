@@ -1,6 +1,6 @@
 import { defineCustomElement, reactive } from 'vue'
 import TesOtpComponent from './TesOtp.ce.vue'
-import { normalizeCode, resolveCodeOptions } from './core/code'
+import { type CodeOptions, normalizeCode, resolveCodeOptions } from './core/code'
 
 export interface TesOtpState {
   value: string
@@ -42,6 +42,10 @@ export class TesOtpElement extends VueTesOtp {
   set value(value: string) {
     this.state.value = this.normalized(value)
     this.state.dirty = true
+  }
+
+  get complete(): boolean {
+    return this.state.value.length === this.codeOptions().length
   }
 
   get defaultValue(): string {
@@ -130,7 +134,10 @@ export class TesOtpElement extends VueTesOtp {
   }
 
   private normalized(raw: string): string {
-    const options = resolveCodeOptions({ length: this.getAttribute('length'), type: this.getAttribute('type') })
-    return normalizeCode(raw, options).value
+    return normalizeCode(raw, this.codeOptions()).value
+  }
+
+  private codeOptions(): CodeOptions {
+    return resolveCodeOptions({ length: this.getAttribute('length'), type: this.getAttribute('type') })
   }
 }

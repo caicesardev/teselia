@@ -98,3 +98,35 @@ describe('<tes-otp> form value', () => {
     expect(new FormData(form).has('code')).toBe(false)
   })
 })
+
+describe('<tes-otp> complete property', () => {
+  it('is true only while every cell is filled', async () => {
+    const el = await renderOtp('length="4"')
+    expect(el.complete).toBe(false)
+
+    await userEvent.type(codeInput(el), '1234')
+    expect(el.complete).toBe(true)
+
+    el.setAttribute('length', '6')
+    await expect.poll(() => el.complete).toBe(false)
+  })
+
+  it('follows a length set as a property, which Vue reflects to the attribute', async () => {
+    const el = await renderOtp('')
+
+    el.length = 4
+    el.value = '123456'
+
+    expect(el.value).toBe('1234')
+    expect(el.complete).toBe(true)
+  })
+
+  it('follows a type set as a property', async () => {
+    const el = await renderOtp('')
+
+    el.type = 'alphanumeric'
+    el.value = 'ab12cd'
+
+    expect(el.value).toBe('AB12CD')
+  })
+})
