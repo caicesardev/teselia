@@ -389,6 +389,7 @@ It also adapts to Windows high contrast mode (`forced-colors`), has no animation
 - **External descriptions do not reach the inner field either.** `aria-describedby` on the element is not read with the field. Use the `hint` attribute.
 - **Long codes on narrow screens.** Up to 9 cells fit a 320px wide page with the default gap. For 10 to 12 characters, set a smaller `--tes-otp-cell-gap` on narrow screens.
 - **Screen readers may read a numeric code as a number** ("one hundred twenty-three thousand…") instead of digit by digit. A native field's value cannot be changed for speech; this is checked in the manual testing below.
+- **Password managers may not offer a code.** The manager we tested only filled codes into password fields. The field stays a visible text field on purpose: people need to see the code to check it, screen readers read a password field as hidden characters, and the keyboard's own code suggestion works as is. Pasting from the password manager always works.
 - **The WebOTP API is not used.** On Android, Chrome can read an SMS directly through `navigator.credentials.get({ otp })`, which needs a specially formatted message from your server. You can call it yourself and set `value` with the result.
 - **Not a verification service.** The component sends nothing over the network: sending, checking and resending codes belong to your page and server.
 
@@ -401,10 +402,11 @@ Manual testing with real devices and assistive technology:
 | What | Browser | Result |
 | --- | --- | --- |
 | Code autofill from the keyboard | Safari (iOS) | Passed. The keyboard offers a code received by email and fills the field inside the shadow root. |
-| Keyboard only | Chrome, Firefox (Windows) | Pending |
-| NVDA | Firefox, Brave (Windows) | Pending |
-| VoiceOver | Safari (iOS) | Pending |
-| High contrast mode | Edge (Windows) | Pending |
-| 200% and 400% zoom, 320px width, text spacing | Chrome | Pending |
+| Keyboard only | Firefox, Brave (Windows) | Passed. Testing fixed the active cell in Brave, which did not follow a held arrow key until it was released. |
+| NVDA | Firefox, Brave (Windows) | Passed. |
+| High contrast mode | Edge (Windows) | Passed. Active, filled and invalid cells and the caret stay distinguishable. |
+| 200% and 400% zoom, 320px width, text spacing | Chrome | Passed. Checked at 640px and 320px wide (the width 200% and 400% zoom leave on a 1280px screen) and with the WCAG 1.4.12 text spacing override: nothing clipped and no horizontal scroll. |
+| Password manager filling a code | Windows | Not offered. See the known limitations. |
+| VoiceOver | Safari (iOS) | Not tested yet |
 
 The full specification is in the [design document](https://github.com/caicesardev/teselia/blob/main/design/otp.md#5-accessibility-specification).
