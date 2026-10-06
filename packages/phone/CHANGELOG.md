@@ -1,5 +1,11 @@
 # @teselia/phone
 
+## 1.0.1
+
+### Patch Changes
+
+- 43895bb: Listeners of `input`, `change` and `countrychange` now see the new form value and validity. Before, `new FormData(form)` and `checkValidity()` inside a listener returned the state from before the change, for example one digit behind while typing.
+
 ## 1.0.0
 
 ### Major Changes

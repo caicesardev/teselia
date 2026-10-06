@@ -45,8 +45,8 @@ Attributes, events, styling, and examples for Vue and React are in the [document
 
 | Build | gzip |
 | --- | --- |
-| npm (ESM), in an app that already has Vue | 6.3 KB |
-| CDN (IIFE), everything including Vue | 29 KB |
+| npm (ESM), in an app that already has Vue | 6.5 KB |
+| CDN (IIFE), everything including Vue | 30 KB |
 
 No dependencies besides Vue.
 

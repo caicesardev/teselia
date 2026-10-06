@@ -358,14 +358,14 @@ The iOS autofill test does not need VoiceOver: text yourself a message such as "
 
 ### Definition of done for `1.0.0`
 
-- [ ] Everything in §3 "In" is implemented.
-- [ ] `@teselia/phone` still passes all its tests after the shared code extraction, and its size changed by at most ±0.2 KB.
-- [ ] Unit tests cover normalization (separators, full-width and Arabic-Indic digits, case, length).
-- [ ] Browser tests cover the overwrite model, keyboard, paste, autofill-style input, form submission/reset/validity, events and auto-submit, in Chromium, Firefox and WebKit.
-- [ ] axe reports zero violations in every rendered state (empty, partial, complete, invalid, disabled, readonly).
-- [ ] The manual testing matrix (§5.5) is completed, and results are on the docs page.
-- [ ] Bundle size measured and published in the README and docs.
-- [ ] Docs page with examples, API tables, keyboard table, accessibility notes and known limitations.
+- [x] Everything in §3 "In" is implemented.
+- [x] `@teselia/phone` still passes all its tests after the shared code extraction, and its size changed by at most ±0.2 KB. (Measured in #83: 9.04 KB at 1.0.0, 9.09 KB now.)
+- [x] Unit tests cover normalization (separators, full-width and Arabic-Indic digits, case, length).
+- [x] Browser tests cover the overwrite model, keyboard, paste, autofill-style input, form submission/reset/validity, events and auto-submit, in Chromium, Firefox and WebKit.
+- [x] axe reports zero violations in every rendered state (empty, partial, complete, invalid, disabled, readonly).
+- [x] The manual testing matrix (§5.5) is completed, and results are on the docs page.
+- [x] Bundle size measured and published in the README and docs.
+- [x] Docs page with examples, API tables, keyboard table, accessibility notes and known limitations.
 - [ ] `@teselia/otp@1.0.0` published to npm (only after explicit approval).
 
 ### Testing strategy
@@ -381,7 +381,7 @@ Same layers and tools as phone §6.1. Normalization is pure logic in `src/core/`
 | 3 | 10-14 → 10-20 | Theming, `forced-colors`, RTL, reflow, docs page and demo, README. |
 | 4 | 10-21 → 10-24 | Manual testing, fixes, release **2026-10-24**. |
 
-✅ **Docs page done in #80** (`docs/otp.md`, `OtpDemo.vue`): the demo switches `type` and `autosubmit`, shows `value` and `complete` live and the submitted `FormData`, and rejects `000000` with `setCustomValidity()` to show a server error. Sizes measured for the page: 6.3 KB gzip on npm (Vue external), 29 KB for the CDN build with Vue.
+✅ **Docs page done in #80** (`docs/otp.md`, `OtpDemo.vue`): the demo switches `type` and `autosubmit`, shows `value` and `complete` live and the submitted `FormData`, and rejects `000000` with `setCustomValidity()` to show a server error. Sizes measured for the page: 6.3 KB gzip on npm (Vue external), 29 KB for the CDN build with Vue. Re-measured in #83 with the method used for phone 1.0.0 (gzip default level, 1 KB = 1000 bytes): **6.5 KB and 30 KB**.
 
 ---
 

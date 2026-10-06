@@ -32,8 +32,8 @@ const components = [
     name: 'OTP',
     tag: '<tes-otp>',
     link: '/otp',
-    status: 'Coming Oct 24',
-    released: false,
+    status: 'v1.0',
+    released: true,
     summary: 'One-time code input drawn as cells over one real field, so paste, SMS autofill and screen readers work.',
   },
 ]
