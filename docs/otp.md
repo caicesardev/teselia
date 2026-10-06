@@ -4,10 +4,6 @@ Accessible one-time code input for verification codes sent by SMS, email or an a
 
 Design decisions and the full accessibility specification are in the [design document](https://github.com/caicesardev/teselia/blob/main/design/otp.md).
 
-::: warning Not published yet
-`@teselia/otp` `1.0.0` is planned for **October 24, 2026**. The demo runs the current code; the installation commands below will work from that release.
-:::
-
 ## Demo
 
 <OtpDemo />
@@ -44,8 +40,8 @@ The npm build keeps Vue as a peer dependency, so apps that already use Vue don't
 
 | Build | Size (gzip) |
 | --- | --- |
-| npm, in an app that already uses Vue | 6.3 KB |
-| CDN, including Vue | 29 KB |
+| npm, in an app that already uses Vue | 6.5 KB |
+| CDN, including Vue | 30 KB |
 
 Importing the package registers the `<tes-otp>` element. If `tes-otp` is already taken on your page, register it under another name:
 

@@ -44,9 +44,9 @@ Attributes, events, styling, and examples for Vue and React are in the [document
 
 | Build | gzip |
 | --- | --- |
-| npm (ESM), component code only | 9.0 KB |
+| npm (ESM), component code only | 9.1 KB |
 | npm (ESM), with `libphonenumber-js`, minified, in an app that already has Vue | 43 KB |
-| CDN (IIFE), everything including Vue | 67 KB |
+| CDN (IIFE), everything including Vue | 68 KB |
 
 Most of the weight is the phone number metadata of [`libphonenumber-js`](https://gitlab.com/catamphetamine/libphonenumber-js) (the `min` set), which the component needs to format and validate numbers of every country.
 

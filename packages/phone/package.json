@@ -1,6 +1,6 @@
 {
   "name": "@teselia/phone",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Accessible international phone input with country calling code, shipped as a framework-agnostic Web Component. WCAG 2.2 AA by default.",
   "keywords": [
     "phone",
@@ -29,7 +29,8 @@
   "type": "module",
   "sideEffects": true,
   "files": [
-    "dist"
+    "dist",
+    "CHANGELOG.md"
   ],
   "types": "./dist/index.d.ts",
   "module": "./dist/tes-phone.js",

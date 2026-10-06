@@ -153,6 +153,14 @@ describe('hidden text field', () => {
     expect(activeCell.outlineColor).not.toBe('rgba(0, 0, 0, 0)')
   })
 
+  it('has no axe violations with a complete code', async () => {
+    const el = await renderOtp('')
+    await focusAndType(el, '123456')
+
+    expect(el.matches(':state(complete)')).toBe(true)
+    await expectNoAxeViolations(el)
+  })
+
   it('has no axe violations while typing', async () => {
     const el = await renderOtp('')
     await focusAndType(el, '12')
