@@ -100,7 +100,7 @@ describe('error timing', () => {
 
     expect(errorText(el)).toBe('Enter all 6 digits')
     expect(codeInput(el).getAttribute('aria-invalid')).toBe('true')
-    expect(codeInput(el).getAttribute('aria-describedby')).toBe('error')
+    expect(codeInput(el).getAttribute('aria-describedby')).toBe('length error')
   })
 
   it('updates live after it is shown, and clears when the code is complete', async () => {

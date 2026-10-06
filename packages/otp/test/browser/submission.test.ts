@@ -109,7 +109,7 @@ describe('autosubmit', () => {
     const { el } = await renderForm('autosubmit')
 
     expect(notice(el)?.textContent).toBe('The code is sent when you enter the last digit')
-    expect(codeInput(el).getAttribute('aria-describedby')).toBe('notice')
+    expect(codeInput(el).getAttribute('aria-describedby')).toBe('length notice')
     expect(notice(el)?.checkVisibility()).toBe(true)
   })
 
@@ -126,7 +126,7 @@ describe('autosubmit', () => {
 
     el.reportValidity()
 
-    await expect.poll(() => codeInput(el).getAttribute('aria-describedby')).toBe('notice error')
+    await expect.poll(() => codeInput(el).getAttribute('aria-describedby')).toBe('length notice error')
   })
 
   it('has no axe violations with the notice', async () => {
