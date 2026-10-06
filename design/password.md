@@ -2,7 +2,7 @@
 
 | | |
 | --- | --- |
-| **Status** | Proposed |
+| **Status** | Accepted |
 | **Date** | 2026-10-07 |
 | **Target release** | `1.0.0` on **2026-11-04** |
 | **Custom element** | `<tes-password>` |
