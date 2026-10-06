@@ -80,12 +80,15 @@ if (import.meta.env.DEV && !props.label) {
 const options = useCodeOptions(props, state)
 const length = computed(() => options.value.length)
 
-const { cells, syncSelection, startTracking, stopTracking, moveBackOnArrowLeft, selectCellUnderPointer } = useCells({
-  state,
-  length,
-  input,
-  cellElements,
-})
+const {
+  cells,
+  syncSelection,
+  syncSelectionAfterKey,
+  startTracking,
+  stopTracking,
+  moveBackOnArrowLeft,
+  selectCellUnderPointer,
+} = useCells({ state, length, input, cellElements })
 
 const { announceUserChange, rememberValueWhenFocused, commitChange } = usePublicEvents({ host, state, options })
 
@@ -107,6 +110,7 @@ const { visibleError, revealErrorsIfEdited } = useValidation({ props, host, opti
 const { lengthDescription, autosubmitNotice, describedBy } = useDescription({ props, options, visibleError })
 
 function handleKeydown(event: KeyboardEvent): void {
+  syncSelectionAfterKey()
   moveBackOnArrowLeft(event)
   submitOnEnter(event)
 }

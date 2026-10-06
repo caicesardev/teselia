@@ -51,6 +51,10 @@ export function useCells(options: CellsOptions) {
     select(overwriteSelection(current, state.value.length, length.value))
   }
 
+  function syncSelectionAfterKey(): void {
+    requestAnimationFrame(syncSelection)
+  }
+
   function startTracking(): void {
     focused.value = true
     syncSelection()
@@ -90,5 +94,5 @@ export function useCells(options: CellsOptions) {
     return nearest
   }
 
-  return { cells, syncSelection, startTracking, stopTracking, moveBackOnArrowLeft, selectCellUnderPointer }
+  return { cells, syncSelection, syncSelectionAfterKey, startTracking, stopTracking, moveBackOnArrowLeft, selectCellUnderPointer }
 }

@@ -126,3 +126,31 @@ describe('focus indicator', () => {
     await expectNoAxeViolations(el)
   })
 })
+
+describe('held arrow keys', () => {
+  it.each([
+    ['partial', '1234', 4],
+    ['complete', '123456', 5],
+  ])('move the active cell on every repeat of a held → in a %s code, before the key is released', async (_, value, last) => {
+    const el = await renderOtp(`value="${value}"`)
+    codeInput(el).focus()
+    await userEvent.keyboard('{Home}')
+
+    await userEvent.keyboard('{ArrowRight>2}')
+    await expect.poll(() => activeCells(el)).toEqual([2])
+
+    await userEvent.keyboard(`{ArrowRight>${last}}`)
+    await expect.poll(() => activeCells(el)).toEqual([last])
+    await userEvent.keyboard('{/ArrowRight}')
+  })
+
+  it('moves the active cell on every repeat of a held ← in a partial code', async () => {
+    const el = await renderOtp('value="1234"')
+    codeInput(el).focus()
+    await userEvent.keyboard('{End}')
+
+    await userEvent.keyboard('{ArrowLeft>2}')
+    await expect.poll(() => activeCells(el)).toEqual([2])
+    await userEvent.keyboard('{/ArrowLeft}')
+  })
+})
