@@ -65,9 +65,9 @@ export function useValidation({ props, host, locale, excludedCountry, combobox, 
     state.errorsVisible = true
   }
 
-  watchEffect(syncFormState, { flush: 'post' })
+  watchEffect(syncFormState, { flush: 'sync' })
   onMounted(() => host.addEventListener('invalid', revealErrors))
   onBeforeUnmount(() => host.removeEventListener('invalid', revealErrors))
 
-  return { visibleError, numberDescribedBy }
+  return { visibleError, numberDescribedBy, syncFormState }
 }

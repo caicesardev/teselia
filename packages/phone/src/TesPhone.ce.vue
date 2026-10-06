@@ -100,7 +100,7 @@ import { useCountryCombobox } from './composables/use-country-combobox'
 import { useCountryList } from './composables/use-country-list'
 import { useLocale } from './composables/use-locale'
 import { useNumberField } from './composables/use-number-field'
-import { usePublicEvents } from './composables/use-public-events'
+import { usePublicEvents, watchCountryChanges } from './composables/use-public-events'
 import { useValidation } from './composables/use-validation'
 import { resolveDefaultCountry } from './core/locale'
 import type { TesPhoneElement } from './element'
@@ -178,7 +178,7 @@ const { excludedCountry, updateFromUserInput, rememberTextBeforeEditing, commitE
     submitOwnerForm: useImplicitSubmission(internals),
   })
 
-const { visibleError, numberDescribedBy } = useValidation({
+const { visibleError, numberDescribedBy, syncFormState } = useValidation({
   props,
   host,
   locale,
@@ -186,6 +186,8 @@ const { visibleError, numberDescribedBy } = useValidation({
   combobox,
   numberInput,
 })
+
+watchCountryChanges(state, dispatchPublicEvent, syncFormState)
 
 useCustomStates(internals, () => ({
   invalid: visibleError.value !== null,
