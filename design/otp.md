@@ -344,6 +344,12 @@ Same rules as phone §5.3: no errors while typing; they appear on blur after edi
 | Windows High Contrast (`forced-colors`) | Edge | Windows |
 | 200 % and 400 % zoom, 320 px viewport | Chrome | any |
 
+✅ **Results (#82, 2026-10-07):**
+- Keyboard (Firefox, Brave), NVDA (Firefox, Brave) and high contrast (Edge) passed. iOS code autofill passed in #69. Zoom, 320px and text spacing were checked with Playwright on the docs page.
+- **Brave:** a held arrow key moved the caret but not the active cell until it was released, and arrows felt slightly late. Fixed in #103 (D2).
+- **Password manager:** it only filled codes into `type="password"` fields. **Kept `type="text"`**: the code must stay visible so people can check it (3.3.8 is about not having to transcribe, not about hiding), screen readers read a password field as hidden characters, a password field invites "save password" prompts, and the iOS suggestion is confirmed on the text field. Pasting from the manager works. Documented as a known limitation.
+- VoiceOver is still untested, like phone (#27).
+
 The iOS autofill test does not need VoiceOver: text yourself a message such as "Your code is 123456" from another phone, and check that the keyboard offers the code.
 
 ---
