@@ -7,8 +7,8 @@ hero:
   tagline: Small, single-purpose form inputs built with Vue 3 and shipped as framework-agnostic Web Components. WCAG 2.2 AA by default.
   actions:
     - theme: brand
-      text: Phone input
-      link: /phone
+      text: Browse components
+      link: /#components
     - theme: alt
       text: View on GitHub
       link: https://github.com/caicesardev/teselia
@@ -20,4 +20,8 @@ features:
     details: Standard Web Components. Use them in plain HTML from a CDN, or in Vue, React, Angular, Svelte and server-rendered pages.
   - title: Native forms
     details: Form-associated elements that submit, reset, validate and disable like built-in inputs. No wrappers, no glue code.
+  - title: One theme for all
+    details: Every component reads the same CSS custom properties, and exposes parts and states for the rest. Light and dark defaults meet AA contrast.
 ---
+
+<ComponentGrid />
