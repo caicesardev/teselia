@@ -51,6 +51,7 @@
 </template>
 
 <script setup lang="ts">
+import { useCustomStates } from '@teselia/shared'
 import { computed, useHost, useTemplateRef, watchEffect } from 'vue'
 import { useAnnouncements } from './composables/use-announcements'
 import { type Cell, useCells } from './composables/use-cells'
@@ -126,6 +127,12 @@ function cellPart(cell: Cell): string {
 }
 
 watchEffect(() => internals.setFormValue(state.value), { flush: 'sync' })
+
+useCustomStates(internals, () => ({
+  invalid: visibleError.value !== null,
+  complete: state.value.length === length.value,
+  empty: state.value === '',
+}))
 </script>
 
 <style src="@teselia/shared/base.css"></style>

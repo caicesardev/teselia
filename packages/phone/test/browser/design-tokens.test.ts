@@ -1,8 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest'
 import type { TesPhoneElement } from '../../src/index'
 import '../../src/index'
-
-type Rgb = [number, number, number]
+import { REQUIRED_TOKEN_CONTRASTS, contrastRatio, resolveColor } from '@teselia/shared/test'
 
 async function renderInScheme(colorScheme: 'light' | 'dark'): Promise<TesPhoneElement> {
   const wrapper = document.createElement('div')
@@ -15,62 +14,16 @@ async function renderInScheme(colorScheme: 'light' | 'dark'): Promise<TesPhoneEl
   return el
 }
 
-function resolveColor(el: TesPhoneElement, cssColor: string): Rgb {
-  const probe = document.createElement('span')
-  probe.style.color = cssColor
-  el.shadowRoot?.append(probe)
-  const computed = getComputedStyle(probe).color
-  probe.remove()
-
-  const context = document.createElement('canvas').getContext('2d') as CanvasRenderingContext2D
-  context.fillStyle = computed
-  context.fillRect(0, 0, 1, 1)
-  const [r, g, b] = context.getImageData(0, 0, 1, 1).data
-  return [r ?? 0, g ?? 0, b ?? 0]
-}
-
-function relativeLuminance([r, g, b]: Rgb): number {
-  const linear = (channel: number): number => {
-    const c = channel / 255
-    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4
-  }
-  return 0.2126 * linear(r) + 0.7152 * linear(g) + 0.0722 * linear(b)
-}
-
-function contrastRatio(a: Rgb, b: Rgb): number {
-  const [lighter, darker] = [relativeLuminance(a), relativeLuminance(b)].sort((x, y) => y - x)
-  return ((lighter ?? 0) + 0.05) / ((darker ?? 0) + 0.05)
-}
-
-const TEXT_MINIMUM = 4.5
-const NON_TEXT_MINIMUM = 3
-
-const requiredContrasts: Array<[foreground: string, background: string, minimum: number]> = [
-  ['--_text', '--_bg', TEXT_MINIMUM],
-  ['--_muted', '--_bg', TEXT_MINIMUM],
-  ['--_error', '--_bg', TEXT_MINIMUM],
-  ['--_on-accent', '--_accent', TEXT_MINIMUM],
-  ['--_text', '--_hover', TEXT_MINIMUM],
-  ['--_border', '--_bg', NON_TEXT_MINIMUM],
-  ['--_focus', '--_bg', NON_TEXT_MINIMUM],
-  ['--_accent', '--_bg', NON_TEXT_MINIMUM],
-]
-
 afterEach(() => {
   document.body.innerHTML = ''
   document.documentElement.style.removeProperty('--tes-color-border')
 })
 
 describe.each(['light', 'dark'] as const)('default design tokens in %s color scheme', (scheme) => {
-  it.each(requiredContrasts)('%s on %s meets %s:1', async (foreground, background, minimum) => {
+  it.each(REQUIRED_TOKEN_CONTRASTS)('%s on %s meets %s:1', async (foreground, background, minimum) => {
     const el = await renderInScheme(scheme)
 
-    const ratio = contrastRatio(
-      resolveColor(el, `var(${foreground})`),
-      resolveColor(el, `var(${background})`),
-    )
-
-    expect(ratio).toBeGreaterThanOrEqual(minimum)
+    expect(contrastRatio(el, `var(${foreground})`, `var(${background})`)).toBeGreaterThanOrEqual(minimum)
   })
 
   it('uses a different palette than the other scheme', async () => {
