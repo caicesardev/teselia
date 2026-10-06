@@ -40,7 +40,7 @@ export function useValidation({ props, host, options, input }: ValidationOptions
     if (state.edited) revealErrors()
   }
 
-  watchEffect(syncValidity, { flush: 'post' })
+  watchEffect(syncValidity, { flush: 'sync' })
   onMounted(() => host.addEventListener('invalid', revealErrors))
   onBeforeUnmount(() => host.removeEventListener('invalid', revealErrors))
 

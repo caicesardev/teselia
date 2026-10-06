@@ -91,6 +91,18 @@ describe('complete event', () => {
     expect(recorded.at(-1)).toMatchObject({ type: 'complete', isCustom: true, bubbles: true, composed: true, detail: { value: '123456' } })
   })
 
+  it('lets a listener read the new form value and validity right away', async () => {
+    const el = await renderOtp('name="code" required', 'form')
+    const seen: { formValue: FormDataEntryValue | null; valid: boolean }[] = []
+    el.addEventListener('complete', () => {
+      seen.push({ formValue: new FormData(el.closest('form') as HTMLFormElement).get('code'), valid: el.checkValidity() })
+    })
+
+    await userEvent.type(codeInput(el), '123456')
+
+    expect(seen).toEqual([{ formValue: '123456', valid: true }])
+  })
+
   it('fires once for a pasted code', async () => {
     const el = await renderOtp('')
     const recorded = recordEvents(el, ['input', 'complete'])

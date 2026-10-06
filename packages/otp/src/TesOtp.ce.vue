@@ -15,7 +15,7 @@
         :disabled="state.disabledByForm"
         :required="required"
         :aria-invalid="visibleError ? 'true' : undefined"
-        :aria-describedby="visibleError ? 'error' : undefined"
+        :aria-describedby="describedBy"
         spellcheck="false"
         @input.stop="updateFromUserInput"
         @compositionend="finishComposition"
@@ -24,7 +24,7 @@
         @blur="leaveField"
         @selectionchange="syncSelection"
         @keyup="syncSelection"
-        @keydown="moveBackOnArrowLeft"
+        @keydown="handleKeydown"
         @pointerup="selectCellUnderPointer"
       />
       <div class="cells" part="cells" aria-hidden="true">
@@ -40,6 +40,7 @@
       </div>
     </div>
 
+    <p v-if="autosubmitNotice" id="notice" class="notice" part="notice">{{ autosubmitNotice }}</p>
     <p id="error" class="error" part="error" aria-live="polite">{{ visibleError?.message }}</p>
   </div>
 </template>
@@ -50,9 +51,10 @@ import { type Cell, useCells } from './composables/use-cells'
 import { useCodeInput } from './composables/use-code-input'
 import { useCodeOptions } from './composables/use-code-options'
 import { usePublicEvents } from './composables/use-public-events'
+import { useSubmission } from './composables/use-submission'
 import { useValidation } from './composables/use-validation'
 import type { TesOtpElement } from './element'
-import { TES_OTP_DEFAULTS, type TesOtpProps } from './props'
+import { TES_OTP_DEFAULTS, TEXT_AUTOSUBMIT_DEFAULTS, type TesOtpProps } from './props'
 
 defineOptions({ inheritAttrs: false })
 
@@ -79,14 +81,30 @@ const { cells, syncSelection, startTracking, stopTracking, moveBackOnArrowLeft, 
 
 const { announceUserChange, rememberValueWhenFocused, commitChange } = usePublicEvents({ host, state, options })
 
+const { submitOnEnter, submitIfAutosubmit } = useSubmission({ props, internals, commitChange })
+
 const { updateFromUserInput, finishComposition, replaceWithPastedCode } = useCodeInput({
   state,
   options,
   syncSelection,
   announceUserChange,
+  onComplete: submitIfAutosubmit,
 })
 
 const { visibleError, revealErrorsIfEdited } = useValidation({ props, host, options, input })
+
+const autosubmitNotice = computed(() =>
+  props.autosubmit ? (props.textAutosubmit ?? TEXT_AUTOSUBMIT_DEFAULTS[options.value.type]) : '',
+)
+
+const describedBy = computed(
+  () => [autosubmitNotice.value && 'notice', visibleError.value && 'error'].filter(Boolean).join(' ') || undefined,
+)
+
+function handleKeydown(event: KeyboardEvent): void {
+  moveBackOnArrowLeft(event)
+  submitOnEnter(event)
+}
 
 function enterField(): void {
   startTracking()
@@ -103,7 +121,7 @@ function cellPart(cell: Cell): string {
   return ['cell', cell.filled && 'cell-filled', cell.active && 'cell-active'].filter(Boolean).join(' ')
 }
 
-watchEffect(() => internals.setFormValue(state.value))
+watchEffect(() => internals.setFormValue(state.value), { flush: 'sync' })
 </script>
 
 <style src="@teselia/shared/base.css"></style>
