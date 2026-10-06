@@ -135,7 +135,7 @@ This is the second component, so there is now real duplication with `@teselia/ph
 - Constraint: the public type declarations of a component must not import from `packages/shared`, or consumers would get broken types. The build must check this.
 - The extraction is the first OTP issue, before any OTP code. `@teselia/phone` must keep its behaviour (all its tests pass unchanged), and its bundle size must stay within ±0.2 KB. It needs no release unless something else changes.
 - ✅ **Done in #66.**
-  - `packages/shared` holds the announcer, custom states (now generic over the state names), implicit submission, `base.css` (tokens, host styles, `.visually-hidden`) and the test support (axe helper, `emulateMedia` command).
+  - `packages/shared` holds the announcer, custom states (now generic over the state names), implicit submission, `base.css` (tokens, host styles, `.visually-hidden`) and the test support (axe helper, token contrast checks, `emulateMedia` command).
   - `@teselia/phone` passed all 708 tests unchanged. Its ESM build went from 9.10 to 9.15 KB gzip and its IIFE from 68.30 to 68.31 KB.
   - Types: `packages/shared` emits its own declarations. A `teselia-source` export condition, enabled only in the components' dev `tsconfig.json`, lets typechecking use the source. Otherwise `vue-tsc` would pull the shared sources into the declaration build and fail on `rootDir`.
   - `scripts/check-public-types.mjs` runs after every declaration build. It walks the declarations reachable from `types` and fails on any import consumers cannot install. Tested by adding an `@teselia/shared` import to `element.d.ts`, which made it fail.
@@ -242,6 +242,8 @@ As in `@teselia/phone` §4.3, through the shared element plumbing (D8):
   - `formStateRestoreCallback` normalizes both modes and marks the value as edited, so a later change to the `value` attribute does not overwrite it. It fires no events and never auto-submits.
 
 ### 4.4 CSS custom properties
+
+✅ **Implemented in #78** (`useCustomStates`, `test/browser/theming.test.ts`). The contrast checks for the shared tokens moved to `@teselia/shared/test`, so phone and otp assert the same pairs in light and dark. The tests also check that the transparent input keeps covering every cell when `--tes-otp-cell-size` changes, since clicks and autofill land on it.
 
 All the `--tes-*` tokens of `@teselia/phone` §4.4, with the same defaults and contrast guarantees, plus:
 
