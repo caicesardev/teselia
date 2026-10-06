@@ -5,6 +5,7 @@
 
 .field {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: calc(var(--_space) / 2);
 }
 
@@ -16,6 +17,7 @@ label {
   position: relative;
   inline-size: fit-content;
   max-inline-size: 100%;
+  direction: ltr;
 }
 
 .cells {
@@ -30,6 +32,7 @@ label {
   display: grid;
   place-items: center;
   inline-size: var(--_cell-size);
+  min-inline-size: 24px;
   block-size: var(--_cell-size);
   border: 1px solid var(--_border);
   border-radius: var(--_radius);
