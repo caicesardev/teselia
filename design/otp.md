@@ -119,6 +119,11 @@ The component renders **one `<input>`** that holds the whole code, and draws the
 - **Reflow:** cells shrink to fit the container, down to 24px wide (WCAG 2.5.8). Eight cells fit in a 288px container.
 - **Direction:** the cells are always left-to-right, even in `dir="rtl"` pages. Codes are read in that order everywhere; the label and messages still follow the page direction.
 - The same `--tes-*` tokens and defaults as `@teselia/phone`, so both components look like one suite.
+- ✅ **Forced colors, direction and reflow implemented in #79** (`test/browser/modes.test.ts`, run in all three engines).
+  - Forced colors: cells use `Canvas`/`CanvasText`, the active cell keeps a `Highlight` outline, the caret is `CanvasText`, and the error border stays 2px against 1px, so active, filled and invalid cells differ without color.
+  - The `.code` wrapper sets `direction: ltr`, which covers both the cells and the real input. The label, hint and messages keep the page direction, and the code sits at the inline start (on the right in RTL).
+  - `.field` uses `grid-template-columns: minmax(0, 1fr)`. With an `auto` track, the grid sized the column from the cells' full width and they overflowed instead of shrinking. Cells keep `inline-size: var(--_cell-size)` and shrink to `min-inline-size: 24px`. A `flex-basis` made them collapse to 24px everywhere, because the intrinsic width then used the minimum.
+  - **Limit:** with the default 0.5rem gap, up to 9 cells fit 288px (9 × 24 + 8 × 8 = 280). Codes of 10 to 12 characters need a smaller `--tes-otp-cell-gap` on narrow screens (12 cells only fit 288px with no gap). The docs page (#80) will say so.
 
 ### D8. Shared code: a private workspace package, bundled into each component
 
