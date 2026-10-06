@@ -5,6 +5,7 @@ export interface TesOtpProps {
   length?: number
   type?: CodeType
   required?: boolean
+  readonly?: boolean
   autosubmit?: boolean
   autocomplete?: string
   textRequired?: string
@@ -14,6 +15,7 @@ export interface TesOtpProps {
 
 export const TES_OTP_DEFAULTS = {
   required: false,
+  readonly: false,
   autosubmit: false,
   autocomplete: 'one-time-code',
   textRequired: 'Enter the code',

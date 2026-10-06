@@ -68,6 +68,14 @@ export class TesOtpElement extends VueTesOtp {
     this.toggleAttribute('disabled', value)
   }
 
+  get readOnly(): boolean {
+    return this.hasAttribute('readonly')
+  }
+
+  set readOnly(value: boolean) {
+    this.toggleAttribute('readonly', value)
+  }
+
   get form(): HTMLFormElement | null {
     return this.internals.form
   }
@@ -113,6 +121,12 @@ export class TesOtpElement extends VueTesOtp {
 
   formDisabledCallback(disabled: boolean): void {
     this.state.disabledByForm = disabled
+  }
+
+  formStateRestoreCallback(saved: string | File | FormData | null, _mode: 'restore' | 'autocomplete'): void {
+    if (typeof saved !== 'string') return
+    this.state.value = this.normalized(saved)
+    this.state.dirty = true
   }
 
   private normalized(raw: string): string {
