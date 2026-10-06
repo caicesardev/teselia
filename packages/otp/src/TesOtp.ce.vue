@@ -20,7 +20,7 @@
         @input.stop="updateFromUserInput"
         @compositionend="finishComposition"
         @paste="replaceWithPastedCode"
-        @focus="startTracking"
+        @focus="enterField"
         @blur="leaveField"
         @selectionchange="syncSelection"
         @keyup="syncSelection"
@@ -49,6 +49,7 @@ import { computed, useHost, useTemplateRef, watchEffect } from 'vue'
 import { type Cell, useCells } from './composables/use-cells'
 import { useCodeInput } from './composables/use-code-input'
 import { useCodeOptions } from './composables/use-code-options'
+import { usePublicEvents } from './composables/use-public-events'
 import { useValidation } from './composables/use-validation'
 import type { TesOtpElement } from './element'
 import { TES_OTP_DEFAULTS, type TesOtpProps } from './props'
@@ -76,13 +77,26 @@ const { cells, syncSelection, startTracking, stopTracking, moveBackOnArrowLeft, 
   cellElements,
 })
 
-const { updateFromUserInput, finishComposition, replaceWithPastedCode } = useCodeInput({ state, options, syncSelection })
+const { announceUserChange, rememberValueWhenFocused, commitChange } = usePublicEvents({ host, state, options })
+
+const { updateFromUserInput, finishComposition, replaceWithPastedCode } = useCodeInput({
+  state,
+  options,
+  syncSelection,
+  announceUserChange,
+})
 
 const { visibleError, revealErrorsIfEdited } = useValidation({ props, host, options, input })
+
+function enterField(): void {
+  startTracking()
+  rememberValueWhenFocused()
+}
 
 function leaveField(): void {
   stopTracking()
   revealErrorsIfEdited()
+  commitChange()
 }
 
 function cellPart(cell: Cell): string {

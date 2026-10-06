@@ -213,6 +213,12 @@ All events bubble and are composed.
 
 Like native inputs, setting `value` from code fires none of them.
 
+✅ **Implemented in #74** (`usePublicEvents`, `test/browser/events.test.ts`).
+- The events are dispatched from the host. The inner `input` is stopped at its source. The inner `change` is not composed, so it never leaves the shadow root anyway.
+- `input` fires only when user input changes the value. A rejected key or a paste with no valid characters fires nothing.
+- **`complete` fires when user input leaves a complete code that differs from the previous value.** Correcting one character of a complete code fires it again, so the page can verify the new code. Pasting the same code again does not.
+- `change` compares with the value at focus time, so typing a character and deleting it fires nothing on blur. `commitChange()` is exposed to the submission code in #75.
+
 ### 4.3 Form integration
 
 As in `@teselia/phone` §4.3, through the shared element plumbing (D8):

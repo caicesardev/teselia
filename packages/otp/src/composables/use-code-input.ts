@@ -6,9 +6,10 @@ interface CodeInputOptions {
   state: TesOtpState
   options: ComputedRef<CodeOptions>
   syncSelection: () => void
+  announceUserChange: (previous: string) => void
 }
 
-export function useCodeInput({ state, options, syncSelection }: CodeInputOptions) {
+export function useCodeInput({ state, options, syncSelection, announceUserChange }: CodeInputOptions) {
   function updateFromUserInput(event: Event): void {
     if ((event as InputEvent).isComposing) return
     normalizeField(event.target as HTMLInputElement)
@@ -35,6 +36,7 @@ export function useCodeInput({ state, options, syncSelection }: CodeInputOptions
   }
 
   function commit(input: HTMLInputElement, value: string, caret: number): void {
+    const previous = state.value
     if (input.value !== value) {
       input.value = value
       input.setSelectionRange(caret, caret)
@@ -44,6 +46,7 @@ export function useCodeInput({ state, options, syncSelection }: CodeInputOptions
     state.edited = true
     state.customError = ''
     syncSelection()
+    announceUserChange(previous)
   }
 
   return { updateFromUserInput, finishComposition, replaceWithPastedCode }
