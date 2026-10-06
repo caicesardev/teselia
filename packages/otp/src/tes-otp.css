@@ -48,6 +48,12 @@ label {
   border: 2px solid var(--_error);
 }
 
+.notice {
+  margin: 0;
+  color: var(--_muted);
+  font-size: 0.875em;
+}
+
 .error {
   margin: 0;
   color: var(--_error);

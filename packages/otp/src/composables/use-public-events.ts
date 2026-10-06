@@ -17,10 +17,12 @@ export function usePublicEvents({ host, state, options }: PublicEventsOptions) {
     host.dispatchEvent(new CustomEvent(name, { bubbles: true, composed: true, detail }))
   }
 
-  function announceUserChange(previous: string): void {
-    if (state.value === previous) return
-    dispatch('input', { value: state.value, complete: isComplete(state.value) })
-    if (isComplete(state.value)) dispatch('complete', { value: state.value })
+  function announceUserChange(previous: string): boolean {
+    if (state.value === previous) return false
+    const complete = isComplete(state.value)
+    dispatch('input', { value: state.value, complete })
+    if (complete) dispatch('complete', { value: state.value })
+    return complete
   }
 
   function rememberValueWhenFocused(): void {

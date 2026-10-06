@@ -100,6 +100,12 @@ The component renders **one `<input>`** that holds the whole code, and draws the
 
 **Discarded:** auto-submit on by default. It surprises people and conflicts with 3.2.2 unless every integrator writes the warning.
 
+✅ **Implemented in #75** (`useSubmission`, `test/browser/submission.test.ts`).
+- `Enter` in the field commits `change` and runs the shared implicit submission. It is ignored while an input method is composing.
+- With `autosubmit`, a user input that completes the code fires `input`, `complete` and `change`, then submits.
+- **The notice is visible**, not only announced: WCAG 3.2.2 asks to tell every user in advance, not only screen reader users. It is rendered in a new `notice` part below the cells, and referenced by `aria-describedby` before the error.
+- **The form value and validity are synced synchronously** (`flush: 'sync'`). With Vue's default scheduling, autosubmit ran before the form value and validity were updated: typing was blocked as "incomplete", and autofill submitted an empty code. Listeners of `input`, `change` and `complete` now see the new `FormData` and validity, and a test covers it. The same bug existed in `@teselia/phone` 1.0.0, fixed separately.
+
 ### D6. Form value
 
 - The form value is the normalized code (`'123456'`, or upper case for `alphanumeric`), or empty.
@@ -242,7 +248,7 @@ All the `--tes-*` tokens of `@teselia/phone` §4.4, with the same defaults and c
 
 ### 4.5 Parts
 
-`field`, `label`, `cells` (the row), `cell`, `cell-filled` and `cell-active` (added alongside `cell`), `hint`, `error`.
+`field`, `label`, `cells` (the row), `cell`, `cell-filled` and `cell-active` (added alongside `cell`), `hint`, `notice` (the `autosubmit` notice, #75), `error`.
 
 ### 4.6 Custom states
 
