@@ -8,16 +8,22 @@ interface CodeInputOptions {
   syncSelection: () => void
   announceUserChange: (previous: string) => boolean
   onComplete: () => void
+  reportTypedCharacters: (rejected: boolean) => void
 }
 
-export function useCodeInput({ state, options, syncSelection, announceUserChange, onComplete }: CodeInputOptions) {
+const NOT_TYPED = new Set(['insertFromPaste', 'insertFromDrop', 'insertReplacementText'])
+
+export function useCodeInput(codeInputOptions: CodeInputOptions) {
+  const { state, options, syncSelection, announceUserChange, onComplete, reportTypedCharacters } = codeInputOptions
+
   function updateFromUserInput(event: Event): void {
-    if ((event as InputEvent).isComposing) return
-    normalizeField(event.target as HTMLInputElement)
+    const inputEvent = event as InputEvent
+    if (inputEvent.isComposing) return
+    normalizeField(event.target as HTMLInputElement, !NOT_TYPED.has(inputEvent.inputType))
   }
 
   function finishComposition(event: CompositionEvent): void {
-    normalizeField(event.target as HTMLInputElement)
+    normalizeField(event.target as HTMLInputElement, true)
   }
 
   function replaceWithPastedCode(event: ClipboardEvent): void {
@@ -30,9 +36,10 @@ export function useCodeInput({ state, options, syncSelection, announceUserChange
     if (isCompleteCode) commit(event.target as HTMLInputElement, pasted, pasted.length)
   }
 
-  function normalizeField(input: HTMLInputElement): void {
+  function normalizeField(input: HTMLInputElement, typed: boolean): void {
     const caret = input.selectionStart ?? input.value.length
-    const value = normalizeCode(input.value, options.value).value
+    const { value, rejectedCharacters } = normalizeCode(input.value, options.value)
+    if (typed) reportTypedCharacters(rejectedCharacters)
     const caretAfterNormalizing = normalizeCode(input.value.slice(0, caret), options.value).value.length
     commit(input, value, caretAfterNormalizing)
   }

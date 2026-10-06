@@ -308,6 +308,10 @@ Covered by `test/browser/keyboard.test.ts`, `cells.test.ts` and `input-model.tes
 - Rejected characters: `text-invalid-character`, once typing pauses (same debounced announcer as phone).
 - Completion is not announced: the value is already read, and with `autosubmit` the page changes.
 
+✅ **Implemented in #77** (`useDescription`, `useAnnouncements`, `test/browser/description.test.ts`).
+- `aria-describedby` is always at least `length`, then `hint length notice error` as each one applies. The hint is visible (`hint` part). The length text is visually hidden, because the cells already show it.
+- A key is "typed" unless its `inputType` is `insertFromPaste`, `insertFromDrop` or `insertReplacementText`. A composition counts as typed. A typed rejected character schedules `text-invalid-character` for when typing pauses (the shared 500 ms announcer). An accepted key before the pause cancels it, so a slip that was immediately followed by the right key stays silent.
+
 ### 5.4 Error messaging
 
 Same rules as phone §5.3: no errors while typing; they appear on blur after editing and on submit; they update live, and clear as soon as the value is valid. `setCustomValidity` errors show immediately.

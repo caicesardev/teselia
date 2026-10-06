@@ -41,21 +41,27 @@
       </div>
     </div>
 
+    <p v-if="hint" id="hint" class="hint" part="hint">{{ hint }}</p>
+    <span id="length" class="visually-hidden">{{ lengthDescription }}</span>
     <p v-if="autosubmitNotice" id="notice" class="notice" part="notice">{{ autosubmitNotice }}</p>
     <p id="error" class="error" part="error" aria-live="polite">{{ visibleError?.message }}</p>
+
+    <div role="status" class="visually-hidden">{{ announcement }}</div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, useHost, useTemplateRef, watchEffect } from 'vue'
+import { useAnnouncements } from './composables/use-announcements'
 import { type Cell, useCells } from './composables/use-cells'
 import { useCodeInput } from './composables/use-code-input'
 import { useCodeOptions } from './composables/use-code-options'
+import { useDescription } from './composables/use-description'
 import { usePublicEvents } from './composables/use-public-events'
 import { useSubmission } from './composables/use-submission'
 import { useValidation } from './composables/use-validation'
 import type { TesOtpElement } from './element'
-import { TES_OTP_DEFAULTS, TEXT_AUTOSUBMIT_DEFAULTS, type TesOtpProps } from './props'
+import { TES_OTP_DEFAULTS, type TesOtpProps } from './props'
 
 defineOptions({ inheritAttrs: false })
 
@@ -84,23 +90,20 @@ const { announceUserChange, rememberValueWhenFocused, commitChange } = usePublic
 
 const { submitOnEnter, submitIfAutosubmit } = useSubmission({ props, internals, commitChange })
 
+const { announcement, reportTypedCharacters } = useAnnouncements(props, options)
+
 const { updateFromUserInput, finishComposition, replaceWithPastedCode } = useCodeInput({
   state,
   options,
   syncSelection,
   announceUserChange,
   onComplete: submitIfAutosubmit,
+  reportTypedCharacters,
 })
 
 const { visibleError, revealErrorsIfEdited } = useValidation({ props, host, options, input })
 
-const autosubmitNotice = computed(() =>
-  props.autosubmit ? (props.textAutosubmit ?? TEXT_AUTOSUBMIT_DEFAULTS[options.value.type]) : '',
-)
-
-const describedBy = computed(
-  () => [autosubmitNotice.value && 'notice', visibleError.value && 'error'].filter(Boolean).join(' ') || undefined,
-)
+const { lengthDescription, autosubmitNotice, describedBy } = useDescription({ props, options, visibleError })
 
 function handleKeydown(event: KeyboardEvent): void {
   moveBackOnArrowLeft(event)
