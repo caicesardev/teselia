@@ -41,6 +41,8 @@ export function useCodeInput({ state, options, syncSelection }: CodeInputOptions
     }
     state.value = value
     state.dirty = true
+    state.edited = true
+    state.customError = ''
     syncSelection()
   }
 

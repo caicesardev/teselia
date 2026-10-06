@@ -2,7 +2,7 @@
   <div class="field" part="field">
     <label for="code" part="label">{{ label }}</label>
 
-    <div class="code">
+    <div class="code" :class="{ invalid: visibleError }">
       <input
         id="code"
         ref="input"
@@ -13,12 +13,15 @@
         autocorrect="off"
         :autocomplete="autocomplete"
         :disabled="state.disabledByForm"
+        :required="required"
+        :aria-invalid="visibleError ? 'true' : undefined"
+        :aria-describedby="visibleError ? 'error' : undefined"
         spellcheck="false"
         @input.stop="updateFromUserInput"
         @compositionend="finishComposition"
         @paste="replaceWithPastedCode"
         @focus="startTracking"
-        @blur="stopTracking"
+        @blur="leaveField"
         @selectionchange="syncSelection"
         @keyup="syncSelection"
         @keydown="moveBackOnArrowLeft"
@@ -36,6 +39,8 @@
         ></span>
       </div>
     </div>
+
+    <p id="error" class="error" part="error" aria-live="polite">{{ visibleError?.message }}</p>
   </div>
 </template>
 
@@ -44,6 +49,7 @@ import { computed, useHost, useTemplateRef, watchEffect } from 'vue'
 import { type Cell, useCells } from './composables/use-cells'
 import { useCodeInput } from './composables/use-code-input'
 import { useCodeOptions } from './composables/use-code-options'
+import { useValidation } from './composables/use-validation'
 import type { TesOtpElement } from './element'
 import { TES_OTP_DEFAULTS, type TesOtpProps } from './props'
 
@@ -71,6 +77,13 @@ const { cells, syncSelection, startTracking, stopTracking, moveBackOnArrowLeft, 
 })
 
 const { updateFromUserInput, finishComposition, replaceWithPastedCode } = useCodeInput({ state, options, syncSelection })
+
+const { visibleError, revealErrorsIfEdited } = useValidation({ props, host, options, input })
+
+function leaveField(): void {
+  stopTracking()
+  revealErrorsIfEdited()
+}
 
 function cellPart(cell: Cell): string {
   return ['cell', cell.filled && 'cell-filled', cell.active && 'cell-active'].filter(Boolean).join(' ')

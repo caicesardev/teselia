@@ -44,6 +44,21 @@ label {
   outline-offset: 2px;
 }
 
+.invalid .cell {
+  border: 2px solid var(--_error);
+}
+
+.error {
+  margin: 0;
+  color: var(--_error);
+  font-size: 0.875em;
+  font-weight: 500;
+}
+
+.error:empty {
+  display: none;
+}
+
 .caret {
   inline-size: 1px;
   block-size: 1.2em;
@@ -87,6 +102,10 @@ label {
 
   .cell.active {
     outline-color: Highlight;
+  }
+
+  .invalid .cell {
+    border-color: CanvasText;
   }
 
   .caret {
