@@ -4,7 +4,7 @@
 | --- | --- |
 | **Status** | Accepted |
 | **Date** | 2026-09-30 |
-| **Target release** | `1.0.0` on **2026-10-24** |
+| **Target release** | `1.0.0` on **2026-10-24**. **Released on 2026-10-07.** |
 | **Custom element** | `<tes-otp>` |
 
 An accessible one-time code input: the verification code people get by SMS, email or an authenticator app. It looks like a row of cells but is a single text field inside, so screen readers, paste, SMS autofill and password managers all work. It is a form-associated custom element that submits the code to any native `<form>`.
@@ -366,7 +366,7 @@ The iOS autofill test does not need VoiceOver: text yourself a message such as "
 - [x] The manual testing matrix (§5.5) is completed, and results are on the docs page.
 - [x] Bundle size measured and published in the README and docs.
 - [x] Docs page with examples, API tables, keyboard table, accessibility notes and known limitations.
-- [ ] `@teselia/otp@1.0.0` published to npm (only after explicit approval).
+- [x] `@teselia/otp@1.0.0` published to npm on 2026-10-07, after explicit approval (#83).
 
 ### Testing strategy
 
