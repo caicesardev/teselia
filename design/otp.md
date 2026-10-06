@@ -210,6 +210,8 @@ This is the second component, so there is now real duplication with `@teselia/ph
 
 **Read-only properties:** `complete` (boolean), `form`, `validity`, `validationMessage`, `willValidate`.
 
+`complete` was missing until #80, found while writing the docs. It reads `length` from the attribute like the value normalization does, which is enough because Vue reflects props set as properties (`el.length = 4`) to their attributes; a test guards that.
+
 **Methods:** `checkValidity()`, `reportValidity()`, `setCustomValidity(message)` (see D6), `focus()`.
 
 ### 4.2 Events
@@ -371,6 +373,8 @@ Same layers and tools as phone §6.1. Normalization is pure logic in `src/core/`
 | 2 | 10-07 → 10-13 | Input model (normalization, overwrite, paste), keyboard, cells, validation, events, auto-submit. |
 | 3 | 10-14 → 10-20 | Theming, `forced-colors`, RTL, reflow, docs page and demo, README. |
 | 4 | 10-21 → 10-24 | Manual testing, fixes, release **2026-10-24**. |
+
+✅ **Docs page done in #80** (`docs/otp.md`, `OtpDemo.vue`): the demo switches `type` and `autosubmit`, shows `value` and `complete` live and the submitted `FormData`, and rejects `000000` with `setCustomValidity()` to show a server error. Sizes measured for the page: 6.3 KB gzip on npm (Vue external), 29 KB for the CDN build with Vue.
 
 ---
 
