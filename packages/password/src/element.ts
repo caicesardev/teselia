@@ -6,12 +6,21 @@ import { requirementsMet, resolveRuleOptions } from './core/rules'
 export interface TesPasswordState {
   revealed: boolean
   value: string
+  edited: boolean
+  errorsVisible: boolean
+  customError: string
 }
 
 const VueTesPassword = defineCustomElement(TesPasswordComponent, { shadowRoot: false })
 
 export class TesPasswordElement extends VueTesPassword {
-  readonly state: TesPasswordState = reactive({ revealed: false, value: '' })
+  readonly state: TesPasswordState = reactive({
+    revealed: false,
+    value: '',
+    edited: false,
+    errorsVisible: false,
+    customError: '',
+  })
 
   private pendingValue: string | null = null
 
@@ -73,6 +82,31 @@ export class TesPasswordElement extends VueTesPassword {
 
   get form(): HTMLFormElement | null {
     return this.input?.form ?? null
+  }
+
+  get validity(): ValidityState {
+    return (this.input ?? document.createElement('input')).validity
+  }
+
+  get validationMessage(): string {
+    return this.input?.validationMessage ?? ''
+  }
+
+  get willValidate(): boolean {
+    return this.input?.willValidate ?? false
+  }
+
+  setCustomValidity(message: string): void {
+    this.state.customError = message
+    if (message) this.state.errorsVisible = true
+  }
+
+  checkValidity(): boolean {
+    return this.input?.checkValidity() ?? true
+  }
+
+  reportValidity(): boolean {
+    return this.input?.reportValidity() ?? true
   }
 
   override connectedCallback(): void {

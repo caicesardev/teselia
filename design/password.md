@@ -355,6 +355,14 @@ There is no shadow root, so `::part()` does not apply (D2). These documented cla
 
 The same rules as the other components: no errors while typing; they appear on blur after editing and on submit; they update live and clear as soon as the value is valid. `setCustomValidity` errors show immediately and are cleared by the next edit.
 
+✅ **Implemented in #117** (`src/core/validation.ts`, `useValidation`, `test/browser/validation.test.ts`, mutation-checked).
+- The rules are checked in this order: a custom error, then a missing value (only when `required`), then, for `purpose="new"`, a password over `maxlength` and unmet rules. An empty optional field is valid even with rules, and signing in accepts any password.
+- **Validity lives on the native input.** It gets `required`, so screen readers announce it, and `setCustomValidity` with the computed message. Native interactive validation then blocks submission and shows our text. The sync runs with `flush: 'sync'`, so `input` listeners see the new validity (the OTP #96 lesson).
+- The element delegates `validity`, `validationMessage`, `willValidate`, `checkValidity()` and `reportValidity()` to the input. Its `setCustomValidity()` stores the message in its state and shows it at once. The next edit, an empty message or a form reset clears it.
+- Errors become visible on the input's `invalid` event (a submit attempt or `reportValidity()`), or on blur after the user edited the field. They then update live. A form reset hides them again.
+- While an error shows, the input has `aria-invalid="true"` and the error joins `aria-describedby` last. The order is hint, requirements, Caps Lock, error. The `__control` border becomes 2px, `CanvasText` in forced colors. The error paragraph is always rendered with `aria-live="polite"` and hidden with `:empty`.
+- `hint` was in the API but in no issue, so it came with this one: a muted paragraph right under the field, first in the description.
+
 ### 5.5 Manual testing matrix
 
 | What | Browser | OS |
