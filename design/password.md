@@ -301,7 +301,13 @@ All the shared `--tes-*` tokens, plus a new shared one:
 
 | Property | Purpose | Light | Dark |
 | --- | --- | --- | --- |
-| `--tes-color-success` | Met requirement | to be chosen, ≥ 3:1 | to be chosen, ≥ 3:1 |
+| `--tes-color-success` | Met requirement | `#1f7a3a` | `#4cc26a` |
+
+✅ **Implemented in #120** (`test/browser/theming.test.ts`, `test/unit/styles.test.ts`, mutation-checked).
+- `--tes-color-success` lives in `packages/shared/src/base.css` with the other tokens, and `REQUIRED_TOKEN_CONTRASTS` asserts it at 3:1 against the background in light and dark, for every component. Phone and OTP carry it unused, a few bytes, with no behavior change and no release needed.
+- The shared contrast helper inserts its probe into the shadow root or, without one, into the element itself, so the same checks run on this light DOM component.
+- A unit test parses `tes-password.css` and fails if any selector is not wrapped in `:where()`, so the "any page style wins" promise cannot regress silently.
+- Custom states come from the shared `useCustomStates` through `attachInternals()`, which works on any custom element, form-associated or not.
 
 ### 4.5 Classes (instead of parts)
 
