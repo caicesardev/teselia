@@ -89,6 +89,12 @@ Decided with the maintainer: a configurable list of rules, **only a minimum leng
 - **No strength meter.** Meters based on heuristics (the alternative was a home-made score) contradict the rules ("strong" but rejected, or "weak" but accepted). They also add another moving part for screen readers. The zxcvbn-style estimator was discarded for size (about 400 KB).
 - **`passwordrules`.** Safari reads the `passwordrules` attribute to generate passwords that meet the site's rules. The component writes it from `minlength`, `maxlength` and `requirements`. The spike checks that Safari honours it where the input lives (D2).
 - **How the list behaves** (§5.3): it is visible before typing, linked to the input, and each item shows its state with an icon shape plus text, not color alone.
+- ✅ **Rules implemented in #112** (`src/core/rules.ts`, `test/unit/rules.test.ts`, mutation-checked):
+  - **Length counts Unicode code points** (`[...value].length`), as NIST asks, so `🔒` counts as one character. Native `minlength` counts UTF-16 units and would count it as two, so the component validates length itself.
+  - Lowercase is `\p{Ll}`, uppercase `\p{Lu}` or titlecase `\p{Lt}`, digit `\p{Nd}` (any script: `٧`, `７`), symbol anything that is not a letter, number or white space (`€`, `🔒`, `、`).
+  - **Known limit:** letters from scripts without case (Chinese, Arabic, Hebrew…) meet neither `lowercase` nor `uppercase`. Another reason to avoid case rules; the docs will say so.
+  - Invalid `minlength` falls back to 8. A `maxlength` below `minlength` is ignored. Unknown requirement names are reported, for a dev warning.
+  - `passwordrules` always ends with `allowed: lower, upper, digit, special;`. Without it, Safari would only use the required classes, so `required: lower` alone would produce a lowercase-only password.
 
 ### D5. No "confirm password" field
 

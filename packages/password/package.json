@@ -1,0 +1,50 @@
+{
+  "name": "@teselia/password",
+  "version": "0.0.0",
+  "description": "Accessible password input with a show/hide button and live requirements, shipped as a framework-agnostic Web Component. Works with password managers. WCAG 2.2 AA by default.",
+  "keywords": [
+    "password",
+    "password-input",
+    "show-password",
+    "password-requirements",
+    "web-component",
+    "custom-element",
+    "accessibility",
+    "a11y",
+    "wcag",
+    "vue"
+  ],
+  "license": "MIT",
+  "author": "caicesardev",
+  "homepage": "https://teselia.caicesardev.com/password",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/caicesardev/teselia.git",
+    "directory": "packages/password"
+  },
+  "bugs": {
+    "url": "https://github.com/caicesardev/teselia/issues"
+  },
+  "type": "module",
+  "sideEffects": true,
+  "files": [
+    "dist",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "typecheck": "vue-tsc --noEmit"
+  },
+  "peerDependencies": {
+    "vue": "^3.5.0"
+  },
+  "devDependencies": {
+    "@teselia/shared": "workspace:*",
+    "@vitejs/plugin-vue": "^6.0.9",
+    "vite": "^8.3.1",
+    "vue": "^3.5.43",
+    "vue-tsc": "^3.3.11"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
