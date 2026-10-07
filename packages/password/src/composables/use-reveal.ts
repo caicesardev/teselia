@@ -1,4 +1,3 @@
-import { useAnnouncer } from '@teselia/shared'
 import { type Ref, computed, onBeforeUnmount, onMounted } from 'vue'
 import type { TesPasswordElement } from '../element'
 import type { ResolvedTesPasswordProps } from '../props'
@@ -7,10 +6,10 @@ interface RevealOptions {
   host: TesPasswordElement
   props: ResolvedTesPasswordProps
   input: Readonly<Ref<HTMLInputElement | null>>
+  announceNow: (message: string) => void
 }
 
-export function useReveal({ host, props, input }: RevealOptions) {
-  const { announcement, announceNow } = useAnnouncer()
+export function useReveal({ host, props, input, announceNow }: RevealOptions) {
 
   const inputType = computed(() => (host.state.revealed ? 'text' : 'password'))
   const toggleText = computed(() => (host.state.revealed ? props.textHide : props.textShow))
@@ -41,5 +40,5 @@ export function useReveal({ host, props, input }: RevealOptions) {
     window.removeEventListener('pagehide', hide)
   })
 
-  return { announcement, inputType, toggleText, toggleLabel, toggleByUser }
+  return { inputType, toggleText, toggleLabel, toggleByUser }
 }

@@ -11,22 +11,59 @@
         :value.attr="defaultValue"
         :autocomplete="autocomplete"
         :passwordrules="rulesForPasswordManagers"
+        :aria-describedby="describedBy"
         spellcheck="false"
         autocapitalize="off"
         autocorrect="off"
+        @input="handleUserInput"
       />
       <button type="button" class="tes-password__toggle" :aria-label="toggleLabel" @click="toggleByUser">
         {{ toggleText }}
       </button>
+    </div>
+    <div v-if="requirementItems.length" :id="requirementsId" class="tes-password__requirements">
+      <p class="tes-password__requirements-title">{{ textRequirements }}</p>
+      <ul class="tes-password__requirements-list">
+        <li
+          v-for="item in requirementItems"
+          :key="item.requirement"
+          class="tes-password__requirement"
+          :class="{ 'tes-password__requirement--met': item.met }"
+        >
+          <svg
+            v-if="item.met"
+            class="tes-password__icon tes-password__icon--met"
+            viewBox="0 0 16 16"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <path d="M3.5 8.5l3 3 6-7" />
+          </svg>
+          <svg
+            v-else
+            class="tes-password__icon tes-password__icon--unmet"
+            viewBox="0 0 16 16"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <circle cx="8" cy="8" r="5" />
+          </svg>
+          <span>{{ item.text }}</span
+          ><span class="tes-password__visually-hidden">, {{ item.met ? textRuleMet : textRuleUnmet }}</span>
+        </li>
+      </ul>
     </div>
     <div role="status" class="tes-password__visually-hidden">{{ announcement }}</div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { useAnnouncer } from '@teselia/shared'
 import { computed, useAttrs, useHost, useTemplateRef } from 'vue'
 import { useFieldOptions } from './composables/use-field-options'
+import { useRequirements } from './composables/use-requirements'
 import { useReveal } from './composables/use-reveal'
+import { useValueSync } from './composables/use-value-sync'
 import { nextInstanceId } from './core/ids'
 import type { TesPasswordElement } from './element'
 import { TES_PASSWORD_DEFAULTS, type TesPasswordProps } from './props'
@@ -39,10 +76,26 @@ const host = useHost() as TesPasswordElement
 const input = useTemplateRef<HTMLInputElement>('input')
 
 const inputId = nextInstanceId('tes-password')
+const requirementsId = `${inputId}-requirements`
 const defaultValue = computed(() => (typeof attrs.value === 'string' ? attrs.value : undefined))
 
-const { autocomplete, rulesForPasswordManagers } = useFieldOptions(props)
-const { announcement, inputType, toggleText, toggleLabel, toggleByUser } = useReveal({ host, props, input })
+const { announcement, announceNow, announceOnceTypingPauses } = useAnnouncer()
+const { ruleOptions, autocomplete, rulesForPasswordManagers } = useFieldOptions(props)
+const { inputType, toggleText, toggleLabel, toggleByUser } = useReveal({ host, props, input, announceNow })
+const { syncFromInput } = useValueSync({ host, input })
+const { requirementItems, reportUserChange } = useRequirements({
+  host,
+  props,
+  ruleOptions,
+  announceOnceTypingPauses,
+})
+
+const describedBy = computed(() => (requirementItems.value.length ? requirementsId : undefined))
+
+function handleUserInput(): void {
+  syncFromInput()
+  reportUserChange()
+}
 
 if (import.meta.env.DEV && !props.label) {
   console.warn('[tes-password] The `label` attribute is required for an accessible name.')

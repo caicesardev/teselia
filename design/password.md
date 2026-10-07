@@ -338,6 +338,13 @@ There is no shadow root, so `::part()` does not apply (D2). These documented cla
 - The requirements are read with the field. Each item carries its state in text, for example "At least 8 characters, done" / "…, not yet", in a visually hidden suffix (`text-rule-met` / `text-rule-unmet`, to add to §4.1 during implementation).
 - **While typing**, once typing pauses (the shared 500 ms announcer), only **changes** are announced: "At least 8 characters, done", or "All requirements met". Nothing is announced for keystrokes that change no rule, and nothing per character.
 - Show/hide announces "Your password is shown/hidden". Caps Lock announces once when it turns on.
+- ✅ **Requirements implemented in #115** (`useRequirements`, `src/core/changes.ts`, `test/browser/requirements.test.ts`, mutation-checked).
+  - The list (title plus one item per rule) is the input's `aria-describedby`. Each item has an `aria-hidden` icon (check or empty circle) and a visually hidden state suffix: `text-rule-met` ("done") or `text-rule-unmet` ("not yet"). The visually hidden suffix is positioned absolutely, so accessible name computation treats it as a separate block and reads "At least 8 characters , not yet". The extra space does not change speech, and the tests accept it.
+  - **What is announced:** once typing pauses, only the rules whose state changed since the last announcement, in list order ("At least 8 characters, done. A number, not yet"), or `text-all-met` ("All requirements met") when the change completes the list. Keystrokes that change nothing announce nothing. Changes from code or a form reset are never announced, now or later: they move the baseline silently.
+  - **One announcer for the component:** show/hide and the requirements share one live region, so they cannot talk over each other.
+  - The element mirrors the value in `state.value`. User input, the `value` setter, a value set before connection and form reset (read on the next task, after the browser restores the input) keep it in sync. `requirementsMet` reads it and is always `true` while signing in.
+  - Met rules use the text color and unmet ones the muted color, besides the shape. The check uses `--_accent` until `--tes-color-success` arrives (#120).
+  - **Second light DOM lesson:** content typography styles (`.vp-doc ul`, `li + li`, `p`) added indents and margins to the list. The docs now enable VitePress's `postcssIsolateStyles` for `vp-doc.css` only (its default also matches `packages/shared/src/base.css`), and the demo element has `class="vp-raw"`. The docs page will tell users about the equivalent opt-outs, such as Tailwind's `not-prose`.
 
 ### 5.4 Error messaging
 

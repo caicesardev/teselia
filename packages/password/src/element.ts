@@ -1,15 +1,17 @@
 import { defineCustomElement, reactive } from 'vue'
 import TesPasswordComponent from './TesPassword.vue'
-import { resolveRuleOptions } from './core/rules'
+import { resolvePurpose } from './core/purpose'
+import { requirementsMet, resolveRuleOptions } from './core/rules'
 
 export interface TesPasswordState {
   revealed: boolean
+  value: string
 }
 
 const VueTesPassword = defineCustomElement(TesPasswordComponent, { shadowRoot: false })
 
 export class TesPasswordElement extends VueTesPassword {
-  readonly state: TesPasswordState = reactive({ revealed: false })
+  readonly state: TesPasswordState = reactive({ revealed: false, value: '' })
 
   private pendingValue: string | null = null
 
@@ -32,6 +34,17 @@ export class TesPasswordElement extends VueTesPassword {
     const input = this.input
     if (input) input.value = value
     else this.pendingValue = value
+    this.state.value = value
+  }
+
+  get requirementsMet(): boolean {
+    if (resolvePurpose(this.getAttribute('purpose')) !== 'new') return true
+    const options = resolveRuleOptions({
+      minlength: this.getAttribute('minlength'),
+      maxlength: this.getAttribute('maxlength'),
+      requirements: this.getAttribute('requirements'),
+    })
+    return requirementsMet(this.state.value, options)
   }
 
   get defaultValue(): string {
@@ -84,6 +97,7 @@ export class TesPasswordElement extends VueTesPassword {
     const input = this.input
     if (!input || this.pendingValue === null) return
     input.value = this.pendingValue
+    this.state.value = this.pendingValue
     this.pendingValue = null
   }
 }

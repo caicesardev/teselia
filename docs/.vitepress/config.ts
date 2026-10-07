@@ -1,5 +1,5 @@
 import { fileURLToPath } from 'node:url'
-import { defineConfig } from 'vitepress'
+import { defineConfig, postcssIsolateStyles } from 'vitepress'
 
 const isTeseliaElement = (tag: string): boolean => tag.startsWith('tes-')
 
@@ -24,6 +24,9 @@ export default defineConfig({
   },
 
   vite: {
+    css: {
+      postcss: { plugins: [postcssIsolateStyles({ includeFiles: [/vp-doc\.css/] })] },
+    },
     resolve: {
       alias: { '@teselia/phone': phoneSource, '@teselia/otp': otpSource, '@teselia/password': passwordSource },
     },
