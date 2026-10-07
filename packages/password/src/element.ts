@@ -80,6 +80,14 @@ export class TesPasswordElement extends VueTesPassword {
     this.setAttribute('maxlength', String(value))
   }
 
+  get readOnly(): boolean {
+    return this.hasAttribute('readonly')
+  }
+
+  set readOnly(value: boolean) {
+    this.toggleAttribute('readonly', value)
+  }
+
   get form(): HTMLFormElement | null {
     return this.input?.form ?? null
   }

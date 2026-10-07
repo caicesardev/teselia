@@ -5,6 +5,8 @@ export interface TesPasswordProps {
   name?: string
   hint?: string
   required?: boolean
+  disabled?: boolean
+  readonly?: boolean
   purpose?: Purpose
   minlength?: number
   maxlength?: number
@@ -33,6 +35,8 @@ export interface TesPasswordProps {
 
 export const TES_PASSWORD_DEFAULTS = {
   required: false,
+  disabled: false,
+  readonly: false,
   textShow: 'Show',
   textHide: 'Hide',
   textShowLabel: 'Show password',

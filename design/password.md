@@ -287,6 +287,13 @@ The inner `<input type="password">` is a normal form control (D2), so submission
   - a message from `setCustomValidity` on the element
 - hides the password before the form's `submit` event, on `reset` and on `pagehide`.
 
+✅ **Implemented in #119** (`test/browser/form-lifecycle.test.ts`, mutation-checked).
+- `disabled`, `readonly` and `required` are Vue props bound to the input. The element gets `readOnly` like a native input (the prop itself is `readonly`), and `disabled` from Vue.
+- `Enter` submits natively through the form's submit button. Reset, disabled fieldsets and `readonly` exclusion from validation are native too; the tests prove them.
+- **The show button is hidden with CSS** (`input:disabled ~ toggle`), so a disabled `<fieldset>` hides it too; the component cannot observe a fieldset. Disabling the element through its own attribute also hides a shown password. The button stays usable while `readonly`.
+- A disabled field uses the muted text color and a `not-allowed` cursor. Our explicit text color otherwise hid the browser's own disabled styling. Phone and OTP have no disabled styling either; that is a follow-up outside this component.
+- **Not testable in the browser test runner:** that the password is not restored on back/forward navigation. It is native behaviour for password inputs; it moves to the manual testing (#124).
+
 ### 4.4 CSS custom properties
 
 All the shared `--tes-*` tokens, plus a new shared one:
