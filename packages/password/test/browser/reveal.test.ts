@@ -7,6 +7,14 @@ function toggle(el: TesPasswordElement): HTMLButtonElement {
   return el.querySelector('.tes-password__toggle') as HTMLButtonElement
 }
 
+function visibleToggleText(el: TesPasswordElement): string {
+  const texts = [...toggle(el).querySelectorAll<HTMLElement>('.tes-password__toggle-text')]
+  return texts
+    .filter((text) => getComputedStyle(text).visibility === 'visible')
+    .map((text) => text.textContent?.trim())
+    .join('|')
+}
+
 function liveRegion(el: TesPasswordElement): HTMLElement {
   return el.querySelector('[role="status"]') as HTMLElement
 }
@@ -30,7 +38,7 @@ describe('show/hide button', () => {
     const el = await renderPassword('')
 
     expect(toggle(el).type).toBe('button')
-    expect(toggle(el).textContent?.trim()).toBe('Show')
+    expect(visibleToggleText(el)).toBe('Show')
     expect(toggle(el).hasAttribute('aria-pressed')).toBe(false)
     await expect.element(page.getByRole('button', { name: 'Show password' })).toBeVisible()
   })
@@ -41,14 +49,14 @@ describe('show/hide button', () => {
     await userEvent.click(toggle(el))
 
     expect(passwordInput(el).type).toBe('text')
-    expect(toggle(el).textContent?.trim()).toBe('Hide')
+    expect(visibleToggleText(el)).toBe('Hide')
     await expect.element(page.getByRole('button', { name: 'Hide password' })).toBeVisible()
     expect(el.revealed).toBe(true)
 
     await userEvent.click(toggle(el))
 
     expect(passwordInput(el).type).toBe('password')
-    expect(toggle(el).textContent?.trim()).toBe('Show')
+    expect(visibleToggleText(el)).toBe('Show')
     expect(el.value).toBe('correct horse')
   })
 
@@ -95,12 +103,12 @@ describe('show/hide button', () => {
     const el = await renderPassword(
       'text-show="Mostrar" text-hide="Ocultar" text-show-label="Mostrar contraseña" text-hide-label="Ocultar contraseña" text-shown="Contraseña visible" text-hidden="Contraseña oculta"',
     )
-    expect(toggle(el).textContent?.trim()).toBe('Mostrar')
+    expect(visibleToggleText(el)).toBe('Mostrar')
     expect(toggle(el).getAttribute('aria-label')).toBe('Mostrar contraseña')
 
     await userEvent.click(toggle(el))
 
-    expect(toggle(el).textContent?.trim()).toBe('Ocultar')
+    expect(visibleToggleText(el)).toBe('Ocultar')
     expect(toggle(el).getAttribute('aria-label')).toBe('Ocultar contraseña')
     await expect.poll(() => liveRegion(el).textContent?.trim()).toBe('Contraseña visible')
   })
@@ -218,6 +226,21 @@ describe('hiding the password again', () => {
 })
 
 describe('layout', () => {
+  it.each([
+    ['', 'Show and Hide'],
+    ['text-show="Mostrar" text-hide="Ocultar"', 'translated labels'],
+  ])('keeps the button and the input the same width when toggled, with %j (%s)', async (attributes) => {
+    const el = await renderPassword(attributes)
+    const widths = () => [toggle(el).getBoundingClientRect().width, passwordInput(el).getBoundingClientRect().width]
+    const hidden = widths()
+
+    el.revealed = true
+    await expect.poll(() => passwordInput(el).type).toBe('text')
+    await new Promise((resolve) => requestAnimationFrame(resolve))
+
+    expect(widths()).toEqual(hidden)
+  })
+
   it('sits inside the field at the end, never covering the text', async () => {
     const el = await renderPassword('')
     const input = passwordInput(el).getBoundingClientRect()
@@ -229,6 +252,10 @@ describe('layout', () => {
     expect(control.height).toBe(44)
     expect(button.width).toBeGreaterThanOrEqual(44)
     expect(button.height).toBeGreaterThanOrEqual(42)
+    expect(button.height).toBeLessThanOrEqual(control.height)
+    const [show, hide] = [...toggle(el).querySelectorAll('.tes-password__toggle-text')].map((text) => text.getBoundingClientRect())
+    expect(hide?.top).toBe(show?.top)
+    expect((show?.bottom ?? 0) <= button.bottom && (show?.top ?? 0) >= button.top).toBe(true)
   })
 
   it('keeps a long translated label inside the field', async () => {
