@@ -51,6 +51,15 @@ label {
   border: 2px solid var(--_error);
 }
 
+#code:disabled {
+  cursor: not-allowed;
+}
+
+#code:disabled + .cells .cell {
+  background: color-mix(in srgb, var(--_muted) 12%, var(--_bg));
+  color: var(--_muted);
+}
+
 .hint {
   margin: 0;
   color: var(--_muted);
@@ -121,6 +130,11 @@ label {
 
   .invalid .cell {
     border-color: CanvasText;
+  }
+
+  #code:disabled + .cells .cell {
+    border-color: GrayText;
+    color: GrayText;
   }
 
   .caret {

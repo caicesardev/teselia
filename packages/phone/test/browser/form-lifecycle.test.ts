@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { userEvent } from 'vitest/browser'
 import type { TesPhoneElement } from '../../src/index'
-import { combobox, expectNoAxeViolations, isExpanded, numberInput, renderPhone } from '../support/phone'
+import { chevron, combobox, expectNoAxeViolations, isExpanded, numberInput, renderPhone } from '../support/phone'
 
 async function renderInForm(attributes: string): Promise<{ el: TesPhoneElement; form: HTMLFormElement }> {
   const el = await renderPhone(`name="phone" lang="en" ${attributes}`, 'form')
@@ -78,6 +78,35 @@ describe('disabled', () => {
     el.disabled = false
     await expect.poll(() => combobox(el).disabled).toBe(false)
     expect(new FormData(form).get('phone')).toBe('+34612345678')
+  })
+
+  it('keeps the country list closed when the chevron is clicked', async () => {
+    const { el } = await renderInForm('default-country="ES" disabled')
+    await expect.poll(() => combobox(el).disabled).toBe(true)
+
+    await userEvent.click(chevron(el))
+
+    expect(isExpanded(el)).toBe(false)
+  })
+
+  it.each([
+    ['the disabled attribute', (el: TesPhoneElement) => (el.disabled = true)],
+    ['a disabled fieldset', (el: TesPhoneElement) => ((el.parentElement as HTMLFieldSetElement).disabled = true)],
+  ])('looks disabled through %s: muted text, fill and chevron', async (_, disable) => {
+    const enabled = await renderPhone('value="+34612345678" lang="en"', 'fieldset')
+    const disabled = await renderPhone('value="+34612345678" lang="en"', 'fieldset')
+
+    disable(disabled)
+    await expect.poll(() => numberInput(disabled).disabled).toBe(true)
+
+    for (const control of [combobox, numberInput]) {
+      const enabledStyle = getComputedStyle(control(enabled))
+      const disabledStyle = getComputedStyle(control(disabled))
+      expect(disabledStyle.color).not.toBe(enabledStyle.color)
+      expect(disabledStyle.backgroundColor).not.toBe(enabledStyle.backgroundColor)
+      expect(disabledStyle.cursor).toBe('not-allowed')
+    }
+    expect(getComputedStyle(chevron(disabled)).color).not.toBe(getComputedStyle(chevron(enabled)).color)
   })
 
   it('has no axe violations', async () => {

@@ -1,7 +1,8 @@
 import { afterEach, describe, expect, it } from 'vitest'
 import { commands, userEvent } from 'vitest/browser'
 import type { TesOtpElement } from '../../src/index'
-import { codeInput, expectNoAxeViolations, renderOtp } from '../support/otp'
+import { systemColor } from '@teselia/shared/test'
+import { cellElements, codeInput, expectNoAxeViolations, renderOtp } from '../support/otp'
 
 const addedStyles: HTMLStyleElement[] = []
 
@@ -10,10 +11,6 @@ function addPageStyles(css: string): void {
   style.textContent = css
   document.head.append(style)
   addedStyles.push(style)
-}
-
-function cellElements(el: TesOtpElement): HTMLElement[] {
-  return Array.from(el.shadowRoot?.querySelectorAll<HTMLElement>('.cell') ?? [])
 }
 
 function shadowElement(el: TesOtpElement, selector: string): HTMLElement {
@@ -79,6 +76,21 @@ describe('forced colors (Windows High Contrast)', () => {
     const el = await renderOtp('')
 
     expect(getComputedStyle(cellElements(el)[0] as HTMLElement).borderTopWidth).toBe('1px')
+  })
+
+  it('greys out the cells of a disabled field with the system GrayText color', async (context) => {
+    await commands.emulateMedia({ forcedColors: 'active' })
+    if (!matchMedia('(forced-colors: active)').matches) context.skip()
+
+    const el = await renderOtp('value="123" disabled')
+    await expect.poll(() => codeInput(el).disabled).toBe(true)
+
+    const grayText = systemColor('GrayText')
+    for (const cell of cellElements(el)) {
+      const style = getComputedStyle(cell)
+      expect(style.color).toBe(grayText)
+      expect(style.borderTopColor).toBe(grayText)
+    }
   })
 })
 

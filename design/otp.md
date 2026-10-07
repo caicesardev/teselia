@@ -247,6 +247,7 @@ As in `@teselia/phone` §4.3, through the shared element plumbing (D8):
 - ✅ **Implemented in #76** (`test/browser/form-lifecycle.test.ts`).
   - `readonly` and `readOnly` (reflected): typing and pasting are blocked, the value is still submitted, and the element is barred from constraint validation, like a native readonly input. The custom paste handler checks `readOnly` first: without that check, a complete code pasted into a readonly field replaced it, because the handler writes the value itself.
   - `disabled` works as an attribute, a property and through a `<fieldset>`, and excludes the value from submission.
+  - A disabled field looks disabled: the cells use the muted text color and a fill mixed from the muted and background tokens, so even an empty code looks disabled, and the input shows a `not-allowed` cursor. The styles key on `#code:disabled`, which covers the attribute and a fieldset alike, because both reach the input through `formDisabledCallback`. The cells are spans, so the browser never greys them out in forced colors mode: they use `GrayText` for text and border there.
   - `formStateRestoreCallback` normalizes both modes and marks the value as edited, so a later change to the `value` attribute does not overwrite it. It fires no events and never auto-submits.
 
 ### 4.4 CSS custom properties
