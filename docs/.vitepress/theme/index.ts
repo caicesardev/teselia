@@ -1,9 +1,11 @@
 import '@teselia/otp'
+import '@teselia/password'
 import '@teselia/phone'
 import type { Theme } from 'vitepress'
 import DefaultTheme from 'vitepress/theme'
 import ComponentGrid from './components/ComponentGrid.vue'
 import OtpDemo from './components/OtpDemo.vue'
+import PasswordDemo from './components/PasswordDemo.vue'
 import PhoneDemo from './components/PhoneDemo.vue'
 import './custom.css'
 import './demo.css'
@@ -13,6 +15,7 @@ export default {
   enhanceApp({ app }) {
     app.component('ComponentGrid', ComponentGrid)
     app.component('OtpDemo', OtpDemo)
+    app.component('PasswordDemo', PasswordDemo)
     app.component('PhoneDemo', PhoneDemo)
   },
 } satisfies Theme
