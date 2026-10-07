@@ -12,6 +12,10 @@ function addPageStyles(css: string): void {
   addedStyles.push(style)
 }
 
+function control(el: HTMLElement): HTMLElement {
+  return el.querySelector('.tes-password__control') as HTMLElement
+}
+
 function formOf(el: TesPasswordElement): HTMLFormElement {
   return el.closest('form') as HTMLFormElement
 }
@@ -36,7 +40,7 @@ describe('<tes-password> registration', () => {
 
     expect(el).toBeInstanceOf(TesPasswordElement)
     expect(getComputedStyle(el).display).toBe('inline-block')
-    expect(passwordInput(el).getBoundingClientRect().height).toBe(44)
+    expect(control(el).getBoundingClientRect().height).toBe(44)
   })
 })
 
@@ -142,8 +146,8 @@ describe('<tes-password> styles', () => {
     const el = await renderPassword('')
     el.style.setProperty('--tes-color-border', 'rgb(255, 0, 0)')
 
-    expect(passwordInput(el).getBoundingClientRect().height).toBe(44)
-    expect(getComputedStyle(passwordInput(el)).borderTopColor).toBe('rgb(255, 0, 0)')
+    expect(control(el).getBoundingClientRect().height).toBe(44)
+    expect(getComputedStyle(control(el)).borderTopColor).toBe('rgb(255, 0, 0)')
   })
 
   it('adopts one stylesheet for the document, however many instances there are', async () => {

@@ -1,11 +1,28 @@
-import { defineCustomElement } from 'vue'
+import { defineCustomElement, reactive } from 'vue'
 import TesPasswordComponent from './TesPassword.vue'
 import { resolveRuleOptions } from './core/rules'
+
+export interface TesPasswordState {
+  revealed: boolean
+}
 
 const VueTesPassword = defineCustomElement(TesPasswordComponent, { shadowRoot: false })
 
 export class TesPasswordElement extends VueTesPassword {
+  readonly state: TesPasswordState = reactive({ revealed: false })
+
   private pendingValue: string | null = null
+
+  get revealed(): boolean {
+    return this.state.revealed
+  }
+
+  set revealed(revealed: boolean) {
+    if (revealed === this.state.revealed) return
+    this.state.revealed = revealed
+    this.syncInputType()
+    this.dispatchEvent(new CustomEvent('revealchange', { bubbles: true, composed: true, detail: { revealed } }))
+  }
 
   get value(): string {
     return this.input?.value ?? this.pendingValue ?? this.defaultValue
@@ -56,6 +73,11 @@ export class TesPasswordElement extends VueTesPassword {
 
   private get input(): HTMLInputElement | null {
     return this.querySelector<HTMLInputElement>('.tes-password__input')
+  }
+
+  private syncInputType(): void {
+    const input = this.input
+    if (input) input.type = this.state.revealed ? 'text' : 'password'
   }
 
   private applyPendingValue(): void {
