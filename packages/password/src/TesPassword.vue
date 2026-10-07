@@ -1,7 +1,7 @@
 <template>
   <div class="tes-password__field">
     <label :for="inputId" class="tes-password__label">{{ label }}</label>
-    <div class="tes-password__control">
+    <div class="tes-password__control" :class="{ 'tes-password__control--invalid': visibleError }">
       <input
         :id="inputId"
         ref="input"
@@ -12,6 +12,8 @@
         :autocomplete="autocomplete"
         :passwordrules="rulesForPasswordManagers"
         :aria-describedby="describedBy"
+        :aria-invalid="visibleError ? 'true' : undefined"
+        :required="required"
         spellcheck="false"
         autocapitalize="off"
         autocorrect="off"
@@ -19,7 +21,8 @@
         @keydown="readCapsLock"
         @keyup="readCapsLock"
         @pointerdown="readCapsLock"
-        @blur="forgetCapsLock"
+        @blur="leaveField"
+        @invalid="revealErrors"
       />
       <button type="button" class="tes-password__toggle" :aria-label="toggleLabel" @click="toggleByUser">
         <span class="tes-password__toggle-text" :class="{ 'tes-password__toggle-text--inactive': revealed }">{{
@@ -30,6 +33,7 @@
         }}</span>
       </button>
     </div>
+    <p v-if="hint" :id="hintId" class="tes-password__hint">{{ hint }}</p>
     <p v-if="capsLockOn" :id="capsLockId" class="tes-password__caps-lock">{{ textCapsLock }}</p>
     <div v-if="requirementItems.length" :id="requirementsId" class="tes-password__requirements">
       <p class="tes-password__requirements-title">{{ textRequirements }}</p>
@@ -63,6 +67,7 @@
         </li>
       </ul>
     </div>
+    <p :id="errorId" class="tes-password__error" aria-live="polite">{{ visibleError?.message }}</p>
     <div role="status" class="tes-password__visually-hidden">{{ announcement }}</div>
   </div>
 </template>
@@ -74,6 +79,7 @@ import { useCapsLock } from './composables/use-caps-lock'
 import { useFieldOptions } from './composables/use-field-options'
 import { useRequirements } from './composables/use-requirements'
 import { useReveal } from './composables/use-reveal'
+import { useValidation } from './composables/use-validation'
 import { useValueSync } from './composables/use-value-sync'
 import { nextInstanceId } from './core/ids'
 import type { TesPasswordElement } from './element'
@@ -89,6 +95,8 @@ const input = useTemplateRef<HTMLInputElement>('input')
 const inputId = nextInstanceId('tes-password')
 const requirementsId = `${inputId}-requirements`
 const capsLockId = `${inputId}-caps-lock`
+const hintId = `${inputId}-hint`
+const errorId = `${inputId}-error`
 const defaultValue = computed(() => (typeof attrs.value === 'string' ? attrs.value : undefined))
 
 const { announcement, announceNow, announceOnceTypingPauses } = useAnnouncer()
@@ -104,14 +112,32 @@ const { requirementItems, reportUserChange } = useRequirements({
 
 const { capsLockOn, readCapsLock, forgetCapsLock } = useCapsLock({ props, announceNow })
 
+const { visibleError, markEdited, revealErrors, revealErrorsIfEdited } = useValidation({
+  host,
+  props,
+  input,
+  ruleOptions,
+})
+
 const describedBy = computed(() => {
-  const ids = [requirementItems.value.length > 0 && requirementsId, capsLockOn.value && capsLockId].filter(Boolean)
+  const ids = [
+    props.hint && hintId,
+    requirementItems.value.length > 0 && requirementsId,
+    capsLockOn.value && capsLockId,
+    visibleError.value && errorId,
+  ].filter(Boolean)
   return ids.length > 0 ? ids.join(' ') : undefined
 })
 
 function handleUserInput(): void {
+  markEdited()
   syncFromInput()
   reportUserChange()
+}
+
+function leaveField(): void {
+  forgetCapsLock()
+  revealErrorsIfEdited()
 }
 
 if (import.meta.env.DEV && !props.label) {

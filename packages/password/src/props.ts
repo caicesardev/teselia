@@ -3,6 +3,8 @@ import type { Purpose } from './core/purpose'
 export interface TesPasswordProps {
   label?: string
   name?: string
+  hint?: string
+  required?: boolean
   purpose?: Purpose
   minlength?: number
   maxlength?: number
@@ -24,9 +26,13 @@ export interface TesPasswordProps {
   textRuleUnmet?: string
   textAllMet?: string
   textCapsLock?: string
+  textRequired?: string
+  textUnmet?: string
+  textTooLong?: string
 }
 
 export const TES_PASSWORD_DEFAULTS = {
+  required: false,
   textShow: 'Show',
   textHide: 'Hide',
   textShowLabel: 'Show password',
@@ -43,6 +49,9 @@ export const TES_PASSWORD_DEFAULTS = {
   textRuleUnmet: 'not yet',
   textAllMet: 'All requirements met',
   textCapsLock: 'Caps Lock is on',
+  textRequired: 'Enter a password',
+  textUnmet: 'Your password does not meet all the requirements',
+  textTooLong: 'Use {maxlength} characters or fewer',
 }
 
 export type ResolvedTesPasswordProps = Readonly<TesPasswordProps & typeof TES_PASSWORD_DEFAULTS>
