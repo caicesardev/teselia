@@ -7,7 +7,7 @@
 | **Target release** | `1.0.0` on **2026-11-04** |
 | **Custom element** | `<tes-password>` |
 
-An accessible password input with a show/hide button and, for new passwords, a list of requirements that are checked as the person types. It is a form-associated custom element that submits the password to any native `<form>`, and it must keep working with browser and third-party password managers.
+An accessible password input with a show/hide button and, for new passwords, a list of requirements that are checked as the person types. It renders a native password input in the light DOM, so it submits with any native `<form>` and keeps working with browser and third-party password managers (D2).
 
 This document records the decisions taken before writing code, the options that were considered and why they were discarded. If a decision changes during implementation, update this file in the same pull request.
 
@@ -62,6 +62,33 @@ Phone and OTP keep their inputs in the shadow root. For OTP, #69 proved that iOS
   - **Slotted input:** the author writes `<tes-password><input type="password" name="password"></tes-password>`. It works without JavaScript, managers see a normal field, and the form submits it natively, so `ElementInternals` is not needed. The cost: the API differs from phone and OTP, and the styling of the input must reach the light DOM.
   - **Rendered light DOM:** the component renders its own `<input>` as a child. The same API as the other components, but its styles leak both ways, so they need careful scoping.
 - Whatever wins, the docs say which managers were tested, with results, like the OTP docs.
+
+✅ **Spike done in #110 (2026-10-07), on the maintainer's devices, with the page from draft PR #127.**
+
+| Manager | A. light DOM | B. shadow DOM | C. rendered light DOM |
+| --- | --- | --- | --- |
+| Chrome / Brave (Windows) | save, fill | save, fill | save, fill |
+| Firefox (Windows) | save, fill, generate | save, generate, **no fill** | save, fill, generate |
+| iCloud Keychain (Safari, iOS) | save, fill, generate | save, fill, generate | save, fill, generate |
+
+- Chrome and Brave did not generate even for the control: Chrome only suggests passwords when signed in to a Google account with password sync, and Brave removes the feature.
+- **Safari honours `passwordrules`** in every case: with `allowed: lower, digit; minlength: 10; maxlength: 12`, it generated lowercase letters and digits of that length.
+- **Firefox does not fill a password input inside a shadow root.** It fills the username next to it and leaves the password empty.
+
+**Decision: the component renders its whole field in the light DOM** (option C), chosen with the maintainer over a slotted, author-written input. Usage stays the same as the other components: `<tes-password label="Password" name="password">`.
+
+- **Everything goes to the light DOM, not only the input.** The label, hint, requirements, Caps Lock notice and error are linked to the input with `for` and `aria-describedby`. Those references cannot point from the light DOM into a shadow root.
+- **Not form-associated.** The native input carries `name` and is a normal form control: the form submits it, `form.reset()` restores it, a disabled `<fieldset>` disables it, and validity and `setCustomValidity` go to it. This is what managers expect, and it is simpler than `ElementInternals`. The element's `value`, `validity`, `checkValidity()` and similar members delegate to the input.
+- **Ids are unique per instance**, because they now share the page's id space.
+- **Styles** are one stylesheet for the whole document (adopted once when the element is defined). Every selector is wrapped in `:where()` so it has zero specificity, and any page style can override it. Shared tokens work as before.
+- **No `::part()`**: it only exists for shadow trees. Documented classes replace the parts (`tes-password__input`, `tes-password__toggle`…). `:state()` works, because custom states live on the element.
+- **Known cost:** global page styles (a CSS reset, `input { … }`) also reach the inner elements. The docs will say so.
+- Draft PR #127 is closed and never merged.
+
+**Discarded:**
+
+- **Shadow DOM (B):** Firefox cannot fill it.
+- **Slotted, author-written input:** it works without JavaScript, but it breaks the suite's API, and authors would repeat `name`, `autocomplete` and `passwordrules` on the input.
 
 ### D3. Two purposes: signing in and choosing a new password
 
@@ -126,7 +153,7 @@ When Caps Lock is on while the field has focus (`KeyboardEvent.getModifierState(
 - **The value is submitted as typed.** No trimming, no normalization: changing a password silently can lock people out. Unicode normalization, if any, is the server's job.
 - **No truncation.** There is no `maxlength` on the inner input, because it would cut a pasted or generated password silently, the same lesson as OTP #70. If `maxlength` is set, a longer value is an error (`tooLong`) with a message, never a cut.
 - **Paste and drop are never blocked.**
-- **Form state.** `setFormValue(value, '')`: the restore state is empty, so the browser **does not restore the password** on back/forward navigation, like a native password field. Values offered by browser autofill through `formStateRestoreCallback(…, 'autocomplete')` are accepted.
+- **Form state.** ~~`setFormValue(value, '')`~~ The field is a native password input (D2), so browsers already **do not restore the password** on back/forward navigation, and autofill works natively.
 
 ### D9. Visual design
 
@@ -137,7 +164,7 @@ When Caps Lock is on while the field has focus (`KeyboardEvent.getModifierState(
 
 ### D10. Shared code
 
-Reused from `packages/shared` as is: the announcer, custom states, implicit submission, `base.css` and the test support. The form-associated element plumbing stays in the component (OTP D8). If D2 ends in the light DOM, the parts that assume a shadow root (`base.css` on `:host`, `delegatesFocus`) are adapted in this component, not in `shared`.
+Reused from `packages/shared`: the announcer, custom states, the tokens and the test support. **Not needed** after D2: implicit submission (a native input in a form already submits on `Enter`) and the form-associated plumbing. `base.css` targets `:host`, which does not exist without a shadow root, so this component declares the same tokens on `tes-password` itself. If a second light DOM component appears, that part moves to `shared`.
 
 `--tes-color-success` goes into `base.css` with its contrast checks in `REQUIRED_TOKEN_CONTRASTS`, so it is ready for the whole suite.
 
@@ -212,23 +239,22 @@ All events bubble and are composed.
 | Event | `detail` | When |
 | --- | --- | --- |
 | `input` | `{ value, requirementsMet }` | On every user change of the value. |
-| `change` | `{ value, requirementsMet }` | When the field loses focus with a different value, or before an implicit submission. |
+| `change` | `{ value, requirementsMet }` | When the native input fires `change`: on blur with a different value, or when `Enter` submits the form. |
 | `revealchange` | `{ revealed }` | When the password is shown or hidden, by the user or from code. |
 
-Like native inputs, setting `value` from code fires neither `input` nor `change`. The event is not called `visibilitychange`, because a composed, bubbling event with that name would reach the page's `document.visibilitychange` listeners.
+Like native inputs, setting `value` from code fires neither `input` nor `change`. Because the input is in the light DOM (D2), its native `input` and `change` events would reach the page too. The element stops them at itself and dispatches its own `CustomEvent` with the same name instead, so a listener on the element or above it gets each event once, with `detail`. The event is not called `visibilitychange`, because a composed, bubbling event with that name would reach the page's `document.visibilitychange` listeners.
 
 ### 4.3 Form integration
 
-As in the other components:
+The inner `<input type="password">` is a normal form control (D2), so submission, reset, disabled fieldsets and history navigation are native. The component:
 
-- `setFormValue(value, '')` (D8: no restore).
-- Validity:
-  - `valueMissing` → `text-required`
-  - `tooShort` or a missing rule → `text-unmet` (the list says which ones)
-  - `tooLong` → `text-too-long`
-  - `customError` → the `setCustomValidity` message
-  - The anchor is the input.
-- `formResetCallback` (also hides the password), `formDisabledCallback`, `formStateRestoreCallback` (only `autocomplete` mode).
+- copies `name` to the input, and keeps `value` and `defaultValue` in sync with it;
+- sets the input's validity with `setCustomValidity`, in this order:
+  - a missing value → `text-required`
+  - a password that is too short or misses a rule → `text-unmet` (the list says which ones)
+  - a password over `maxlength` → `text-too-long`
+  - a message from `setCustomValidity` on the element
+- hides the password before the form's `submit` event, on `reset` and on `pagehide`.
 
 ### 4.4 CSS custom properties
 
@@ -238,9 +264,11 @@ All the shared `--tes-*` tokens, plus a new shared one:
 | --- | --- | --- | --- |
 | `--tes-color-success` | Met requirement | to be chosen, ≥ 3:1 | to be chosen, ≥ 3:1 |
 
-### 4.5 Parts
+### 4.5 Classes (instead of parts)
 
-`field`, `label`, `control` (the input and the button), `input`, `toggle`, `hint`, `requirements` (the list), `requirement`, `requirement-met` (added alongside `requirement`), `caps-lock`, `error`.
+There is no shadow root, so `::part()` does not apply (D2). These documented classes take its place. The component's own rules have zero specificity, so any page selector wins:
+
+`tes-password__field`, `__label`, `__control` (the input and the button), `__input`, `__toggle`, `__hint`, `__requirements` (the list), `__requirement`, `__requirement--met`, `__caps-lock`, `__error`.
 
 ### 4.6 Custom states
 
@@ -279,7 +307,7 @@ All the shared `--tes-*` tokens, plus a new shared one:
 | Key | Action |
 | --- | --- |
 | Typing, editing, `Ctrl`/`⌘` + `V` | Native text field behaviour. Nothing is blocked. |
-| `Enter` in the input | Submits the form (implicit submission), after hiding the password. |
+| `Enter` in the input | Submits the form, natively, after hiding the password. |
 | `Tab` | From the input to the show button, then out. |
 | `Space` / `Enter` on the button | Shows or hides the password. Focus stays on the button. |
 
@@ -334,7 +362,7 @@ The same rules as the other components: no errors while typing; they appear on b
 
 ## 7. Open questions
 
-1. **Do password managers fill, save and generate for an input inside a shadow root?** The spike in week 1 answers it and decides D2.
-2. **Does Safari honour `passwordrules`** where the input ends up?
+1. ~~**Do password managers fill, save and generate for an input inside a shadow root?**~~ ✅ Not Firefox, which does not fill it. Resolved in #110: the field renders in the light DOM (D2).
+2. ~~**Does Safari honour `passwordrules`?**~~ ✅ Yes, in the light DOM and in a shadow root (#110).
 3. **Default `minlength`: 8 or 15?** 8 is proposed (NIST's value with multi-factor authentication). It can change after reading the current NIST text closely.
 4. **Should the requirements list announce progress at all**, or only be read with the field and at errors? §5.3 proposes announcing changes after a pause; NVDA testing will tell whether it helps or is noise.
