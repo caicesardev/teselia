@@ -111,6 +111,12 @@ Phone and OTP keep their inputs in the shadow root. For OTP, #69 proved that iOS
 
 - `autocomplete` can still be overridden, but the right token is chosen for people who forget it. It is what tells managers whether to fill or to generate.
 - **Discarded:** two components (`<tes-password>` and `<tes-new-password>`). Most of the code is shared, and switching an attribute is easier than switching a tag.
+- ✅ **Implemented in #113** (`src/core/purpose.ts`, `useFieldOptions`, `test/browser/field.test.ts`, mutation-checked).
+  - An unknown `purpose` (including `NEW`) falls back to `current`, with a dev warning. An empty `autocomplete` counts as missing; any other value, even `off`, is kept.
+  - `passwordrules` is only written for `new`. Rules set while signing in are ignored with a dev warning, and so are unknown requirement names.
+  - **Attribute and property names.** The Vue props are `minlength` and `maxlength`, so the attributes match HTML. A prop named `minLength` would have made the attribute `min-length`. The element adds `minLength` and `maxLength` properties like a native input: `minLength` returns the effective minimum (8 by default), and `maxLength` returns -1 without a maximum.
+  - The input gets explicit `spellcheck="false"`, `autocapitalize="off"` and `autocorrect="off"`. The `spellcheck` property is already false for inputs in Chromium, so the tests check the attributes.
+  - No `minlength` or `maxlength` reaches the input. A pasted 181-character password (with an emoji) is kept whole, even with `maxlength="64"`.
 
 ### D4. Requirements: rules, only a minimum length by default
 
