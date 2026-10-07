@@ -153,6 +153,13 @@ Decided with the maintainer: a text button, **"Show"** / **"Hide"**, inside the 
   - `spellcheck="false"`, `autocapitalize="off"` and `autocorrect="off"` are always set. With the text visible, enhanced spellcheck services could otherwise send the password over the network.
 - The button is at least 44px tall, like the field, and never covers the text: the input gets inline padding for it.
 - The button is **not** shown while the field is `disabled`. It stays usable while `readonly`, which is harmless.
+- ✅ **Implemented in #114** (`useReveal`, `test/browser/reveal.test.ts`, mutation-checked in three engines).
+  - The state lives on the element (`state.revealed`). The `revealed` setter fires `revealchange` only when the state changes, for user and code changes alike, and it **sets the input's `type` synchronously**. Vue re-renders asynchronously: when `requestSubmit()` is called from script right after showing the password, no microtask runs between the hiding listener and the page's `submit` listener, so the page would still see `type="text"`. A test covers that case.
+  - The hiding listeners are on `window` in the **capture** phase (`submit`, `reset`) and only act on the element's own form. `pagehide` hides every instance. They are removed on unmount.
+  - Only the button announces the change; changes from code or the automatic hiding stay silent.
+  - Layout: the border moved from the input to the `__control` box, with the input and the button side by side inside it, so the button never covers the text, whatever the label's length. The focus ring is on the box (`:has(input:focus-visible)`). The button is at least 44px wide and as tall as the box's inside, 42px.
+  - **Focus on click:** Safari (WebKit) never focuses a button on click, so the tests check that focus stays on the button for keyboard use, not after a click.
+  - **First light DOM lesson:** the docs' own `.demo button` rule restyled the toggle (border, white background), because page styles reach the inner elements by design (D2). The demo styles now target `.demo-actions button`, and the docs page will warn about broad `button` and `input` rules.
 
 ### D7. Caps Lock warning
 
