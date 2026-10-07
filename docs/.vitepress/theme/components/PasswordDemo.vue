@@ -6,6 +6,11 @@
     @input="updateLiveState"
     @revealchange="updateRevealed"
   >
+    <div class="demo-field">
+      <label :for="emailId">Email</label>
+      <input :id="emailId" name="email" type="email" autocomplete="username" required />
+    </div>
+
     <tes-password
       ref="password"
       class="vp-raw"
@@ -62,6 +67,7 @@ interface LiveState {
 const BREACHED_WORD = 'password'
 
 const password = useTemplateRef<TesPasswordElement>('password')
+const emailId = `demo-email-${purpose}`
 const signingUp = computed(() => purpose === 'new')
 const live = reactive<LiveState>({ value: '', requirementsMet: purpose !== 'new', revealed: false })
 const submitted = ref<Record<string, FormDataEntryValue> | null>(null)
