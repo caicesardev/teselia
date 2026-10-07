@@ -18,7 +18,12 @@
         @input="handleUserInput"
       />
       <button type="button" class="tes-password__toggle" :aria-label="toggleLabel" @click="toggleByUser">
-        {{ toggleText }}
+        <span class="tes-password__toggle-text" :class="{ 'tes-password__toggle-text--inactive': revealed }">{{
+          textShow
+        }}</span>
+        <span class="tes-password__toggle-text" :class="{ 'tes-password__toggle-text--inactive': !revealed }">{{
+          textHide
+        }}</span>
       </button>
     </div>
     <div v-if="requirementItems.length" :id="requirementsId" class="tes-password__requirements">
@@ -81,7 +86,7 @@ const defaultValue = computed(() => (typeof attrs.value === 'string' ? attrs.val
 
 const { announcement, announceNow, announceOnceTypingPauses } = useAnnouncer()
 const { ruleOptions, autocomplete, rulesForPasswordManagers } = useFieldOptions(props)
-const { inputType, toggleText, toggleLabel, toggleByUser } = useReveal({ host, props, input, announceNow })
+const { revealed, inputType, toggleLabel, toggleByUser } = useReveal({ host, props, input, announceNow })
 const { syncFromInput } = useValueSync({ host, input })
 const { requirementItems, reportUserChange } = useRequirements({
   host,

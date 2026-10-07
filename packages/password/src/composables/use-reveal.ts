@@ -11,9 +11,9 @@ interface RevealOptions {
 
 export function useReveal({ host, props, input, announceNow }: RevealOptions) {
 
-  const inputType = computed(() => (host.state.revealed ? 'text' : 'password'))
-  const toggleText = computed(() => (host.state.revealed ? props.textHide : props.textShow))
-  const toggleLabel = computed(() => (host.state.revealed ? props.textHideLabel : props.textShowLabel))
+  const revealed = computed(() => host.state.revealed)
+  const inputType = computed(() => (revealed.value ? 'text' : 'password'))
+  const toggleLabel = computed(() => (revealed.value ? props.textHideLabel : props.textShowLabel))
 
   function toggleByUser(): void {
     host.revealed = !host.revealed
@@ -40,5 +40,5 @@ export function useReveal({ host, props, input, announceNow }: RevealOptions) {
     window.removeEventListener('pagehide', hide)
   })
 
-  return { inputType, toggleText, toggleLabel, toggleByUser }
+  return { revealed, inputType, toggleLabel, toggleByUser }
 }
