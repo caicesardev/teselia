@@ -1,6 +1,6 @@
 <template>
   <form class="demo" @submit.prevent="showSubmittedData" @reset="clearSubmittedData">
-    <tes-password name="password" label="Password" />
+    <tes-password class="vp-raw" name="password" label="Password" />
 
     <div class="demo-actions">
       <button type="submit">Sign in</button>
