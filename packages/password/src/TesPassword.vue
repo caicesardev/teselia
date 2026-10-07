@@ -16,6 +16,10 @@
         autocapitalize="off"
         autocorrect="off"
         @input="handleUserInput"
+        @keydown="readCapsLock"
+        @keyup="readCapsLock"
+        @pointerdown="readCapsLock"
+        @blur="forgetCapsLock"
       />
       <button type="button" class="tes-password__toggle" :aria-label="toggleLabel" @click="toggleByUser">
         <span class="tes-password__toggle-text" :class="{ 'tes-password__toggle-text--inactive': revealed }">{{
@@ -26,6 +30,7 @@
         }}</span>
       </button>
     </div>
+    <p v-if="capsLockOn" :id="capsLockId" class="tes-password__caps-lock">{{ textCapsLock }}</p>
     <div v-if="requirementItems.length" :id="requirementsId" class="tes-password__requirements">
       <p class="tes-password__requirements-title">{{ textRequirements }}</p>
       <ul class="tes-password__requirements-list">
@@ -65,6 +70,7 @@
 <script setup lang="ts">
 import { useAnnouncer } from '@teselia/shared'
 import { computed, useAttrs, useHost, useTemplateRef } from 'vue'
+import { useCapsLock } from './composables/use-caps-lock'
 import { useFieldOptions } from './composables/use-field-options'
 import { useRequirements } from './composables/use-requirements'
 import { useReveal } from './composables/use-reveal'
@@ -82,6 +88,7 @@ const input = useTemplateRef<HTMLInputElement>('input')
 
 const inputId = nextInstanceId('tes-password')
 const requirementsId = `${inputId}-requirements`
+const capsLockId = `${inputId}-caps-lock`
 const defaultValue = computed(() => (typeof attrs.value === 'string' ? attrs.value : undefined))
 
 const { announcement, announceNow, announceOnceTypingPauses } = useAnnouncer()
@@ -95,7 +102,12 @@ const { requirementItems, reportUserChange } = useRequirements({
   announceOnceTypingPauses,
 })
 
-const describedBy = computed(() => (requirementItems.value.length ? requirementsId : undefined))
+const { capsLockOn, readCapsLock, forgetCapsLock } = useCapsLock({ props, announceNow })
+
+const describedBy = computed(() => {
+  const ids = [requirementItems.value.length > 0 && requirementsId, capsLockOn.value && capsLockId].filter(Boolean)
+  return ids.length > 0 ? ids.join(' ') : undefined
+})
 
 function handleUserInput(): void {
   syncFromInput()

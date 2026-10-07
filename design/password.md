@@ -169,6 +169,10 @@ When Caps Lock is on while the field has focus (`KeyboardEvent.getModifierState(
 - It prevents a frequent, invisible error (WCAG 3.3 Input Assistance), and it costs a few lines.
 - Browsers only know the Caps Lock state after a key event, so the notice appears on the first keystroke, not on focus.
 - Mobile keyboards do not report it, so nothing shows there.
+- ✅ **Implemented in #116** (`useCapsLock`, `test/browser/caps-lock.test.ts`, mutation-checked).
+  - The state is read with `getModifierState('CapsLock')` on `keydown`, `keyup` and `pointerdown` in the input, so a click in the field reports it before the first key. Blur forgets it.
+  - The notice sits right under the field and joins `aria-describedby` after the requirements (§5.3 order). It is announced when it turns on, through the shared announcer, and not again on later keys while it stays on.
+  - All three engines report `modifierCapsLock` on synthetic events, so the tests run everywhere; they still skip themselves on an engine that does not.
 
 ### D8. Value, form state and paste
 

@@ -23,6 +23,7 @@ export interface TesPasswordProps {
   textRuleMet?: string
   textRuleUnmet?: string
   textAllMet?: string
+  textCapsLock?: string
 }
 
 export const TES_PASSWORD_DEFAULTS = {
@@ -41,6 +42,7 @@ export const TES_PASSWORD_DEFAULTS = {
   textRuleMet: 'done',
   textRuleUnmet: 'not yet',
   textAllMet: 'All requirements met',
+  textCapsLock: 'Caps Lock is on',
 }
 
 export type ResolvedTesPasswordProps = Readonly<TesPasswordProps & typeof TES_PASSWORD_DEFAULTS>
