@@ -268,7 +268,12 @@ All events bubble and are composed.
 | `change` | `{ value, requirementsMet }` | When the native input fires `change`: on blur with a different value, or when `Enter` submits the form. |
 | `revealchange` | `{ revealed }` | When the password is shown or hidden, by the user or from code. |
 
-Like native inputs, setting `value` from code fires neither `input` nor `change`. Because the input is in the light DOM (D2), its native `input` and `change` events would reach the page too. The element stops them at itself and dispatches its own `CustomEvent` with the same name instead, so a listener on the element or above it gets each event once, with `detail`. The event is not called `visibilitychange`, because a composed, bubbling event with that name would reach the page's `document.visibilitychange` listeners.
+Like native inputs, setting `value` from code fires neither `input` nor `change`. Because the input is in the light DOM (D2), its native `input` and `change` events would reach the page too. The element stops them at itself and dispatches its own `CustomEvent` with the same name instead, so a listener on the element or above it gets each event once, with `detail`.
+
+✅ **Implemented in #118** (`usePublicEvents`, `test/browser/events.test.ts`, `test/browser/vue-v-model.test.ts`, mutation-checked).
+- The native `input` and `change` are stopped on the inner input itself (`@input.stop`, `@change.stop`), so a page listener on the element or anywhere above it only sees the element's own `CustomEvent`. A listener attached straight to the inner input would still see the native one.
+- `input` is dispatched after the value, the requirements and the validity are updated, so listeners see the new state. `change` follows the native one: on blur with a different value.
+- Vue's `v-model` works unchanged: `vModelText` listens to `input` on the element and reads `el.value`. A test checks that each keystroke updates the model exactly once. The event is not called `visibilitychange`, because a composed, bubbling event with that name would reach the page's `document.visibilitychange` listeners.
 
 ### 4.3 Form integration
 

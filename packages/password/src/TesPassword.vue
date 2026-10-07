@@ -17,7 +17,8 @@
         spellcheck="false"
         autocapitalize="off"
         autocorrect="off"
-        @input="handleUserInput"
+        @input.stop="handleUserInput"
+        @change.stop="dispatchChange"
         @keydown="readCapsLock"
         @keyup="readCapsLock"
         @pointerdown="readCapsLock"
@@ -77,6 +78,7 @@ import { useAnnouncer } from '@teselia/shared'
 import { computed, useAttrs, useHost, useTemplateRef } from 'vue'
 import { useCapsLock } from './composables/use-caps-lock'
 import { useFieldOptions } from './composables/use-field-options'
+import { usePublicEvents } from './composables/use-public-events'
 import { useRequirements } from './composables/use-requirements'
 import { useReveal } from './composables/use-reveal'
 import { useValidation } from './composables/use-validation'
@@ -129,10 +131,13 @@ const describedBy = computed(() => {
   return ids.length > 0 ? ids.join(' ') : undefined
 })
 
+const { dispatchInput, dispatchChange } = usePublicEvents(host)
+
 function handleUserInput(): void {
   markEdited()
   syncFromInput()
   reportUserChange()
+  dispatchInput()
 }
 
 function leaveField(): void {
