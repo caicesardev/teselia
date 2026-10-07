@@ -1,7 +1,8 @@
 import { afterEach, describe, expect, it } from 'vitest'
 import { commands, userEvent } from 'vitest/browser'
 import type { TesPhoneElement } from '../../src/index'
-import { combobox, numberInput, renderPhone } from '../support/phone'
+import { systemColor } from '@teselia/shared/test'
+import { chevron, combobox, numberInput, renderPhone } from '../support/phone'
 
 function option(el: TesPhoneElement, code: string): HTMLElement {
   return el.shadowRoot?.getElementById(`option-${code}`) as HTMLElement
@@ -45,6 +46,19 @@ describe('forced colors (Windows High Contrast)', () => {
     expect(style.borderTopStyle).toBe('solid')
     expect(style.borderTopWidth).not.toBe('0px')
   })
+
+  it('greys out a disabled field with the system GrayText color', async (context) => {
+    await commands.emulateMedia({ forcedColors: 'active' })
+    if (!matchMedia('(forced-colors: active)').matches) context.skip()
+
+    const el = await renderPhone('value="+34612345678" lang="en" disabled')
+    await expect.poll(() => numberInput(el).disabled).toBe(true)
+
+    const grayText = systemColor('GrayText')
+    expect(getComputedStyle(combobox(el)).color).toBe(grayText)
+    expect(getComputedStyle(numberInput(el)).color).toBe(grayText)
+    expect(getComputedStyle(chevron(el)).color).toBe(grayText)
+  })
 })
 
 describe('reduced motion', () => {
@@ -79,9 +93,9 @@ describe('right-to-left layouts', () => {
     const el = await renderRtl()
     const country = combobox(el).getBoundingClientRect()
     const number = numberInput(el).getBoundingClientRect()
-    const chevron = (el.shadowRoot?.querySelector('.toggle') as HTMLElement).getBoundingClientRect()
+    const toggle = chevron(el).getBoundingClientRect()
 
     expect(country.left).toBeGreaterThan(number.left)
-    expect(chevron.left - country.left).toBeLessThan(country.right - chevron.right)
+    expect(toggle.left - country.left).toBeLessThan(country.right - toggle.right)
   })
 })

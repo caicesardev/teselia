@@ -1,11 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest'
 import { commands, page, userEvent } from 'vitest/browser'
 import type { TesOtpElement } from '../../src/index'
-import { codeInput, expectNoAxeViolations, renderOtp } from '../support/otp'
-
-function cellElements(el: TesOtpElement): HTMLElement[] {
-  return Array.from(el.shadowRoot?.querySelectorAll<HTMLElement>('.cell') ?? [])
-}
+import { cellElements, codeInput, expectNoAxeViolations, renderOtp } from '../support/otp'
 
 function drawnCells(el: TesOtpElement): string {
   return cellElements(el)

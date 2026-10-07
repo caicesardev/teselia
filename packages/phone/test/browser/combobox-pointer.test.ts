@@ -3,6 +3,7 @@ import { userEvent } from 'vitest/browser'
 import type { TesPhoneElement } from '../../src/index'
 import {
   activeDescendant,
+  chevron,
   combobox,
   expectNoAxeViolations,
   isExpanded,
@@ -16,10 +17,6 @@ import {
 
 function option(el: TesPhoneElement, code: string): HTMLElement {
   return el.shadowRoot?.getElementById(`option-${code}`) as HTMLElement
-}
-
-function chevron(el: TesPhoneElement): HTMLElement {
-  return el.shadowRoot?.querySelector('.toggle') as HTMLElement
 }
 
 async function renderWithOutsideButton(): Promise<{ el: TesPhoneElement; outside: HTMLButtonElement }> {

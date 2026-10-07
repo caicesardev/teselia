@@ -291,7 +291,8 @@ The inner `<input type="password">` is a normal form control (D2), so submission
 - `disabled`, `readonly` and `required` are Vue props bound to the input. The element gets `readOnly` like a native input (the prop itself is `readonly`), and `disabled` from Vue.
 - `Enter` submits natively through the form's submit button. Reset, disabled fieldsets and `readonly` exclusion from validation are native too; the tests prove them.
 - **The show button is hidden with CSS** (`input:disabled ~ toggle`), so a disabled `<fieldset>` hides it too; the component cannot observe a fieldset. Disabling the element through its own attribute also hides a shown password. The button stays usable while `readonly`.
-- A disabled field uses the muted text color and a `not-allowed` cursor. Our explicit text color otherwise hid the browser's own disabled styling. Phone and OTP have no disabled styling either; that is a follow-up outside this component.
+- A disabled field uses the muted text color, a `not-allowed` cursor and, on `__control`, a fill mixed from the muted and background tokens, so an empty field looks disabled too. The fill keys on `:has(input:disabled)`, which also matches inside a disabled `<fieldset>`. Our explicit text color otherwise hid the browser's own disabled styling. Phone and OTP use the same look.
+- In forced colors mode a disabled input uses `GrayText` explicitly, like phone and OTP. Chromium and Firefox already grey out a disabled input that has a `type` attribute, as ours always does, so the rule keeps the three components consistent rather than fixing a visible bug.
 - **Not testable in the browser test runner:** that the password is not restored on back/forward navigation. It is native behaviour for password inputs; it moves to the manual testing (#124).
 
 ### 4.4 CSS custom properties

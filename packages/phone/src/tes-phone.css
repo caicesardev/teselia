@@ -50,6 +50,12 @@ input[aria-invalid='true'] {
   box-shadow: inset 0 0 0 1px var(--_error);
 }
 
+input:disabled {
+  background: color-mix(in srgb, var(--_muted) 12%, var(--_bg));
+  color: var(--_muted);
+  cursor: not-allowed;
+}
+
 .hint,
 .error {
   margin: 0;
@@ -79,6 +85,11 @@ input[aria-invalid='true'] {
   place-items: center;
   inline-size: calc(var(--_space) * 4);
   cursor: pointer;
+}
+
+#country:disabled + .toggle {
+  color: var(--_muted);
+  cursor: not-allowed;
 }
 
 .chevron {
@@ -192,5 +203,10 @@ input[aria-invalid='true'] {
 
   input[aria-invalid='true'] {
     border-width: 2px;
+  }
+
+  input:disabled,
+  #country:disabled + .toggle {
+    color: GrayText;
   }
 }

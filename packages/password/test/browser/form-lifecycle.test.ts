@@ -1,10 +1,15 @@
+import { systemColor } from '@teselia/shared/test'
 import { afterEach, describe, expect, it } from 'vitest'
-import { userEvent } from 'vitest/browser'
+import { commands, userEvent } from 'vitest/browser'
 import type { TesPasswordElement } from '../../src/index'
 import { expectNoAxeViolations, passwordInput, renderPassword } from '../support/password'
 
 function toggle(el: TesPasswordElement): HTMLButtonElement {
   return el.querySelector('.tes-password__toggle') as HTMLButtonElement
+}
+
+function control(el: TesPasswordElement): HTMLElement {
+  return el.querySelector('.tes-password__control') as HTMLElement
 }
 
 function formOf(el: TesPasswordElement): HTMLFormElement {
@@ -20,8 +25,9 @@ function recordSubmissions(el: TesPasswordElement): { submitter: string | undefi
   return submissions
 }
 
-afterEach(() => {
+afterEach(async () => {
   document.body.innerHTML = ''
+  await commands.emulateMedia({ forcedColors: 'none' })
 })
 
 describe('Enter', () => {
@@ -57,11 +63,29 @@ describe('disabled', () => {
     expect(toggle(el).checkVisibility()).toBe(false)
   })
 
-  it('looks disabled: muted text', async () => {
-    const enabled = await renderPassword('value="secret"')
-    const disabled = await renderPassword('value="secret" disabled')
+  it.each([
+    ['the disabled attribute', (el: TesPasswordElement) => (el.disabled = true)],
+    ['a disabled fieldset', (el: TesPasswordElement) => ((el.parentElement as HTMLFieldSetElement).disabled = true)],
+  ])('looks disabled through %s: muted text and fill', async (_, disable) => {
+    const enabled = await renderPassword('value="secret"', 'fieldset')
+    const disabled = await renderPassword('value="secret"', 'fieldset')
 
-    expect(getComputedStyle(passwordInput(disabled)).color).not.toBe(getComputedStyle(passwordInput(enabled)).color)
+    disable(disabled)
+    await expect.poll(() => passwordInput(disabled).matches(':disabled')).toBe(true)
+
+    const disabledInput = getComputedStyle(passwordInput(disabled))
+    expect(disabledInput.color).not.toBe(getComputedStyle(passwordInput(enabled)).color)
+    expect(disabledInput.cursor).toBe('not-allowed')
+    expect(getComputedStyle(control(disabled)).backgroundColor).not.toBe(getComputedStyle(control(enabled)).backgroundColor)
+  })
+
+  it('uses the system GrayText color in forced colors mode', async (context) => {
+    await commands.emulateMedia({ forcedColors: 'active' })
+    if (!matchMedia('(forced-colors: active)').matches) context.skip()
+
+    const el = await renderPassword('value="secret" disabled')
+
+    expect(getComputedStyle(passwordInput(el)).color).toBe(systemColor('GrayText'))
   })
 
   it('follows the disabled property in both directions', async () => {
