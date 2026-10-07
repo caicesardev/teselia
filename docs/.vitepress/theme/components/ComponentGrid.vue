@@ -36,6 +36,14 @@ const components = [
     released: true,
     summary: 'One-time code input drawn as cells over one real field, so paste, SMS autofill and screen readers work.',
   },
+  {
+    name: 'Password',
+    tag: '<tes-password>',
+    link: '/password',
+    status: 'Coming Nov 4',
+    released: false,
+    summary: 'Password input with a show button and live requirements that password managers can fill, save and generate.',
+  },
 ]
 </script>
 
