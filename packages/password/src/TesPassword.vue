@@ -14,6 +14,8 @@
         :aria-describedby="describedBy"
         :aria-invalid="visibleError ? 'true' : undefined"
         :required="required"
+        :disabled="disabled"
+        :readonly="readonly"
         spellcheck="false"
         autocapitalize="off"
         autocorrect="off"
@@ -75,7 +77,7 @@
 
 <script setup lang="ts">
 import { useAnnouncer } from '@teselia/shared'
-import { computed, useAttrs, useHost, useTemplateRef } from 'vue'
+import { computed, useAttrs, useHost, useTemplateRef, watch } from 'vue'
 import { useCapsLock } from './composables/use-caps-lock'
 import { useFieldOptions } from './composables/use-field-options'
 import { usePublicEvents } from './composables/use-public-events'
@@ -139,6 +141,13 @@ function handleUserInput(): void {
   reportUserChange()
   dispatchInput()
 }
+
+watch(
+  () => props.disabled,
+  (disabled) => {
+    if (disabled) host.revealed = false
+  },
+)
 
 function leaveField(): void {
   forgetCapsLock()
