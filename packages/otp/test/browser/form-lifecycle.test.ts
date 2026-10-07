@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest'
 import { userEvent } from 'vitest/browser'
 import type { TesOtpElement } from '../../src/index'
-import { codeInput, expectNoAxeViolations, renderOtp } from '../support/otp'
+import { cellElements, codeInput, expectNoAxeViolations, renderOtp } from '../support/otp'
 
 async function renderInForm(attributes: string): Promise<{ el: TesOtpElement; form: HTMLFormElement }> {
   const el = await renderOtp(`name="code" ${attributes}`, 'form')
@@ -82,6 +82,23 @@ describe('disabled', () => {
     el.disabled = false
     await expect.poll(() => codeInput(el).disabled).toBe(false)
     expect(new FormData(form).get('code')).toBe('123456')
+  })
+
+  it.each([
+    ['the disabled attribute', (el: TesOtpElement) => (el.disabled = true)],
+    ['a disabled fieldset', (el: TesOtpElement) => ((el.parentElement as HTMLFieldSetElement).disabled = true)],
+  ])('looks disabled through %s: muted characters and filled cells', async (_, disable) => {
+    const enabled = await renderOtp('value="123"', 'fieldset')
+    const disabled = await renderOtp('value="123"', 'fieldset')
+
+    disable(disabled)
+    await expect.poll(() => codeInput(disabled).disabled).toBe(true)
+
+    const [enabledFilled, , , enabledEmpty] = cellElements(enabled).map((cell) => getComputedStyle(cell))
+    const [disabledFilled, , , disabledEmpty] = cellElements(disabled).map((cell) => getComputedStyle(cell))
+    expect(disabledFilled?.color).not.toBe(enabledFilled?.color)
+    expect(disabledEmpty?.backgroundColor).not.toBe(enabledEmpty?.backgroundColor)
+    expect(getComputedStyle(codeInput(disabled)).cursor).toBe('not-allowed')
   })
 
   it('has no axe violations', async () => {

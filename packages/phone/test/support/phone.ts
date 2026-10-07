@@ -23,6 +23,10 @@ export function numberInput(el: TesPhoneElement): HTMLInputElement {
   return el.shadowRoot?.querySelector('#number') as HTMLInputElement
 }
 
+export function chevron(el: TesPhoneElement): HTMLElement {
+  return el.shadowRoot?.querySelector('.toggle') as HTMLElement
+}
+
 export function listbox(el: TesPhoneElement): HTMLElement {
   return el.shadowRoot?.querySelector('[role="listbox"]') as HTMLElement
 }

@@ -17,3 +17,7 @@ export async function renderOtp(attributes: string, wrapperTag = 'main'): Promis
 export function codeInput(el: TesOtpElement): HTMLInputElement {
   return el.shadowRoot?.querySelector('#code') as HTMLInputElement
 }
+
+export function cellElements(el: TesOtpElement): HTMLElement[] {
+  return Array.from(el.shadowRoot?.querySelectorAll<HTMLElement>('.cell') ?? [])
+}

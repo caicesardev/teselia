@@ -159,7 +159,7 @@ export function useCountryCombobox(options: CountryComboboxOptions) {
   }
 
   function toggleFromChevron(): void {
-    if (props.readonly) return
+    if (props.readonly || state.disabledByForm) return
     combobox.value?.focus()
     if (isOpen.value) closeAndRestoreSelection()
     else moveHighlight(1)
