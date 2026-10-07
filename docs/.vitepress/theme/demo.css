@@ -72,6 +72,10 @@
   min-block-size: 1.5rem;
 }
 
+.demo-result code {
+  overflow-wrap: anywhere;
+}
+
 .demo-result-label {
   font-size: 0.875rem;
   color: var(--vp-c-text-2);
@@ -110,4 +114,31 @@
   block-size: 1.125rem;
   margin: 0;
   accent-color: var(--vp-c-brand-1);
+}
+
+.demo-field {
+  display: grid;
+  gap: 0.25rem;
+  inline-size: min(100%, 20rem);
+}
+
+.demo-field label {
+  font-weight: 500;
+}
+
+.demo-field input {
+  box-sizing: border-box;
+  block-size: 2.75rem;
+  padding-inline: 0.75rem;
+  border: 1px solid var(--vp-c-border);
+  border-radius: 6px;
+  background: var(--vp-c-bg);
+  color: var(--vp-c-text-1);
+  font: inherit;
+  font-size: max(1em, 16px);
+}
+
+.demo-field input:focus-visible {
+  outline: 2px solid var(--vp-c-brand-1);
+  outline-offset: 2px;
 }
