@@ -76,7 +76,7 @@
 </template>
 
 <script setup lang="ts">
-import { useAnnouncer } from '@teselia/shared'
+import { useAnnouncer, useCustomStates } from '@teselia/shared'
 import { computed, useAttrs, useHost, useTemplateRef, watch } from 'vue'
 import { useCapsLock } from './composables/use-caps-lock'
 import { useFieldOptions } from './composables/use-field-options'
@@ -148,6 +148,14 @@ watch(
     if (disabled) host.revealed = false
   },
 )
+
+useCustomStates(host.internals, () => ({
+  invalid: visibleError.value !== null,
+  empty: host.state.value === '',
+  revealed: revealed.value,
+  'requirements-met': requirementItems.value.length > 0 && requirementItems.value.every((item) => item.met),
+  'caps-lock': capsLockOn.value,
+}))
 
 function leaveField(): void {
   forgetCapsLock()

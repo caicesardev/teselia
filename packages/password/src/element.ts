@@ -22,7 +22,14 @@ export class TesPasswordElement extends VueTesPassword {
     customError: '',
   })
 
+  readonly internals: ElementInternals
+
   private pendingValue: string | null = null
+
+  constructor(initialProps?: Record<string, unknown>) {
+    super(initialProps)
+    this.internals = this.attachInternals()
+  }
 
   get revealed(): boolean {
     return this.state.revealed

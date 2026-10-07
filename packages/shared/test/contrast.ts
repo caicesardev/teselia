@@ -12,12 +12,14 @@ export const REQUIRED_TOKEN_CONTRASTS: Array<[foreground: string, background: st
   ['--_border', '--_bg', NON_TEXT_MINIMUM],
   ['--_focus', '--_bg', NON_TEXT_MINIMUM],
   ['--_accent', '--_bg', NON_TEXT_MINIMUM],
+  ['--_success', '--_bg', NON_TEXT_MINIMUM],
 ]
 
 export function resolveColor(host: HTMLElement, cssColor: string): Rgb {
   const probe = document.createElement('span')
   probe.style.color = cssColor
-  host.shadowRoot?.append(probe)
+  const root = host.shadowRoot ?? host
+  root.append(probe)
   const computed = getComputedStyle(probe).color
   probe.remove()
 
