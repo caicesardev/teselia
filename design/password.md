@@ -187,6 +187,11 @@ When Caps Lock is on while the field has focus (`KeyboardEvent.getModifierState(
 - The show button sits inside the field at the inline end, so it mirrors in RTL. The password text keeps the page direction, like a native password field.
 - The requirements list sits below the field: one line per rule, with a check mark or an empty circle (different shapes, so not color alone) and the text. A met rule uses a new shared token, `--tes-color-success`. Its default must meet 3:1 against the background, like the other non-text tokens.
 - No animation.
+- ✅ **Forced colors, RTL and reflow verified in #121** (`test/browser/modes.test.ts`, three engines, forced colors included).
+  - **Forced colors:** the focus ring on the field box and on the button is `Highlight`, and the icons and borders stay visible. The error keeps its 2px border, and met and unmet rules differ by shape and hidden text.
+  - **RTL:** the button sits at the inline end (left), each requirement icon at the inline start (right), and the field and messages keep the page direction, like a native password field.
+  - **Reflow:** a 288px container with a long translated button label keeps the input at least 100px wide. Long requirement texts wrap at 200px. Nothing is clipped with the WCAG 1.4.12 text spacing override, which here reaches the inner elements directly, not only through inheritance.
+  - **The tests passed before any change.** Mutations then showed three rules that did nothing in all three engines, so they were removed: `color: ButtonText` on the button and `border-color: CanvasText` on the error (forced colors already forces both), and `max-inline-size: 100%` on the element (an `inline-block` already shrinks to the available width).
 
 ### D10. Shared code
 
