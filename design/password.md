@@ -123,7 +123,7 @@ Phone and OTP keep their inputs in the shadow root. For OTP, #69 proved that iOS
 Decided with the maintainer: a configurable list of rules, **only a minimum length by default**, with no strength meter.
 
 - **Why length only.** NIST SP 800-63B recommends a minimum length and no composition rules (no forced uppercase, digits or symbols), because they push people to predictable patterns like `Password1!`. Length is what makes a password hard to guess.
-- **Default `minlength`: 8.** NIST's current revision asks for **15** when the password is the only factor, and 8 when it is part of multi-factor authentication. The docs explain this and recommend `minlength="15"` without MFA. *(Verify the exact NIST wording when writing the docs.)*
+- **Default `minlength`: 8.** NIST SP 800-63B-4 asks for **15** when the password is the only factor, and 8 when it is part of multi-factor authentication. ✅ *Verified against the published text in #122*: it also forbids composition rules, counts each Unicode code point as one character, recommends allowing at least 64 characters and requires allowing paste and password managers. The docs recommend `minlength="15"` without MFA.
 - **Opt-in rules**, because many backends require them: `requirements="lowercase uppercase digit symbol"` (any subset, space-separated). Each one is a visible list item.
   - "Symbol" means any character that is not a letter, digit or space, so non-Latin scripts are not rejected for missing "symbols".
   - "Lowercase" and "uppercase" use Unicode properties (`\p{Ll}`, `\p{Lu}`), so `ñ` and `É` count.
@@ -429,5 +429,5 @@ The same rules as the other components: no errors while typing; they appear on b
 
 1. ~~**Do password managers fill, save and generate for an input inside a shadow root?**~~ ✅ Not Firefox, which does not fill it. Resolved in #110: the field renders in the light DOM (D2).
 2. ~~**Does Safari honour `passwordrules`?**~~ ✅ Yes, in the light DOM and in a shadow root (#110).
-3. **Default `minlength`: 8 or 15?** 8 is proposed (NIST's value with multi-factor authentication). It can change after reading the current NIST text closely.
+3. ~~**Default `minlength`: 8 or 15?**~~ ✅ 8, the NIST minimum with multi-factor authentication. The docs (#122) tell sites without MFA to set 15, quoting SP 800-63B-4.
 4. **Should the requirements list announce progress at all**, or only be read with the field and at errors? §5.3 proposes announcing changes after a pause; NVDA testing will tell whether it helps or is noise.
