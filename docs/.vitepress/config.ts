@@ -5,6 +5,7 @@ const isTeseliaElement = (tag: string): boolean => tag.startsWith('tes-')
 
 const phoneSource = fileURLToPath(new URL('../../packages/phone/src/index.ts', import.meta.url))
 const otpSource = fileURLToPath(new URL('../../packages/otp/src/index.ts', import.meta.url))
+const passwordSource = fileURLToPath(new URL('../../packages/password/src/index.ts', import.meta.url))
 
 export default defineConfig({
   lang: 'en',
@@ -24,7 +25,7 @@ export default defineConfig({
 
   vite: {
     resolve: {
-      alias: { '@teselia/phone': phoneSource, '@teselia/otp': otpSource },
+      alias: { '@teselia/phone': phoneSource, '@teselia/otp': otpSource, '@teselia/password': passwordSource },
     },
   },
 
@@ -32,6 +33,7 @@ export default defineConfig({
     nav: [
       { text: 'Phone', link: '/phone' },
       { text: 'OTP', link: '/otp' },
+      { text: 'Password', link: '/password' },
     ],
 
     sidebar: [
@@ -40,6 +42,7 @@ export default defineConfig({
         items: [
           { text: 'Phone', link: '/phone' },
           { text: 'OTP', link: '/otp' },
+          { text: 'Password', link: '/password' },
         ],
       },
     ],

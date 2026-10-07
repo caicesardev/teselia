@@ -31,7 +31,20 @@
     "dist",
     "CHANGELOG.md"
   ],
+  "types": "./dist/index.d.ts",
+  "module": "./dist/tes-password.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/tes-password.js"
+    },
+    "./iife": "./dist/tes-password.iife.js",
+    "./package.json": "./package.json"
+  },
+  "unpkg": "./dist/tes-password.iife.js",
+  "jsdelivr": "./dist/tes-password.iife.js",
   "scripts": {
+    "build": "vite build && vite build --mode iife && vue-tsc -p tsconfig.build.json && node ../../scripts/check-public-types.mjs",
     "typecheck": "vue-tsc --noEmit"
   },
   "peerDependencies": {

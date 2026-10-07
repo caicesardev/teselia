@@ -84,6 +84,14 @@ Phone and OTP keep their inputs in the shadow root. For OTP, #69 proved that iOS
 - **No `::part()`**: it only exists for shadow trees. Documented classes replace the parts (`tes-password__input`, `tes-password__toggle`…). `:state()` works, because custom states live on the element.
 - **Known cost:** global page styles (a CSS reset, `input { … }`) also reach the inner elements. The docs will say so.
 - Draft PR #127 is closed and never merged.
+- ✅ **Scaffold done in #111** (`test/browser/element.test.ts`, three engines, mutation-checked).
+  - `defineCustomElement(component, { shadowRoot: false })`. Vue 3.5 then renders into the element itself and **does not inject SFC styles** (it only warns), so the component is a plain `.vue` file and `src/tes-password.css` is imported with `?inline`. `define()` adopts it into `document.adoptedStyleSheets` once per tag name, rewriting `:where(tes-password` to the custom tag.
+  - `inheritAttrs: false`: in the light DOM, every attribute that is not a prop (`value`, `class`, `data-*`) would otherwise land on the root `<div>`.
+  - **`value` is not a Vue prop.** Vue would define its own `value` property on the element and replace the class getter. The element reads the input; the `value` attribute reaches the template through `$attrs` and is bound with `:value.attr`, so it is the input's native default value and `form.reset()` restores it natively.
+  - A value set before the element is connected (Vue's `v-model` can do that) is kept and applied right after `super.connectedCallback()`, which mounts synchronously.
+  - Ids come from a module counter (`src/core/ids.ts`). Vue's `useId()` creates one app per custom element, so every instance would get the same id.
+  - `focus()` focuses the input; there is no `delegatesFocus` without a shadow root.
+  - `test/unit/tokens.test.ts` fails if the token declarations drift from `packages/shared/src/base.css`.
 
 **Discarded:**
 

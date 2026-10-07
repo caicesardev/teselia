@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@teselia/otp": "workspace:^",
-    "@teselia/phone": "workspace:^"
+    "@teselia/phone": "workspace:^",
+    "@teselia/password": "workspace:^"
   }
 }

@@ -76,6 +76,7 @@ teselia/
 └── packages/
     ├── phone/              # @teselia/phone (published)
     ├── otp/                # @teselia/otp (published)
+    ├── password/           # @teselia/password (in progress, light DOM: see design/password.md D2)
     └── shared/             # @teselia/shared (private, bundled into each component)
 ```
 

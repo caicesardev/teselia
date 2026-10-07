@@ -38,6 +38,9 @@ importers:
       '@teselia/otp':
         specifier: workspace:^
         version: link:../packages/otp
+      '@teselia/password':
+        specifier: workspace:^
+        version: link:../packages/password
       '@teselia/phone':
         specifier: workspace:^
         version: link:../packages/phone
