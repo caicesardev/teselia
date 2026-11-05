@@ -4,7 +4,7 @@
 | --- | --- |
 | **Status** | Accepted |
 | **Date** | 2026-10-07 |
-| **Target release** | `1.0.0` on **2026-11-04** |
+| **Target release** | `1.0.0` on **2026-11-04**. **Released on 2026-11-05.** |
 | **Custom element** | `<tes-password>` |
 
 An accessible password input with a show/hide button and, for new passwords, a list of requirements that are checked as the person types. It renders a native password input in the light DOM, so it submits with any native `<form>` and keeps working with browser and third-party password managers (D2).
@@ -412,7 +412,7 @@ The same rules as the other components: no errors while typing; they appear on b
 - [x] The manual testing matrix (§5.5) is completed, and results are on the docs page (#124). Still open, like phone and OTP: VoiceOver and the final component with iCloud Keychain on iOS (#27), and a password manager extension (Bitwarden or 1Password).
 - [x] Bundle size measured and published in the README and docs: 6.6 KB gzip on npm, 30 KB for the CDN build with Vue.
 - [x] `pnpm pack` succeeds before the release (#125).
-- [ ] `@teselia/password@1.0.0` published to npm (only after explicit approval).
+- [x] `@teselia/password@1.0.0` published to npm on 2026-11-05, after explicit approval (#125).
 
 ### Milestones
 

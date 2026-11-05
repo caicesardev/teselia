@@ -76,7 +76,7 @@ teselia/
 └── packages/
     ├── phone/              # @teselia/phone (published)
     ├── otp/                # @teselia/otp (published)
-    ├── password/           # @teselia/password (in progress, light DOM: see design/password.md D2)
+    ├── password/           # @teselia/password (published, light DOM: see design/password.md D2)
     └── shared/             # @teselia/shared (private, bundled into each component)
 ```
 
@@ -118,6 +118,12 @@ Accessible one-time code input. **`design/otp.md` is the source of truth.**
 
 Summary: `<tes-otp>`, one real `<input>` drawn as cells (not one input per character), digits by default and `type="alphanumeric"` as an option, `autosubmit` opt-in, no runtime dependency besides Vue. Shared code lives in the private, bundled `packages/shared`. **Released `1.0.0` on 2026-10-07**, ahead of the 2026-10-24 target, together with `@teselia/phone` `1.0.1`. VoiceOver testing is still pending, like phone (#27).
 
+## Third component: `@teselia/password`
+
+Accessible password input. **`design/password.md` is the source of truth.**
+
+Summary: `<tes-password>`, a native `<input>` in the **light DOM** (not shadow DOM) so password managers work in every browser (Firefox does not fill inside a shadow root, D2). It is not form-associated: the native input carries `name` and submits, resets and validates natively. Show/hide button, live requirements (length only by default, NIST SP 800-63B-4), Caps Lock warning, `purpose="new"` with `passwordrules`. Styles are adopted into `document.adoptedStyleSheets` with zero-specificity `:where()` selectors and documented `tes-password__*` classes instead of `::part()`. **Released `1.0.0` on 2026-11-05**, one day after the 2026-11-04 target, together with `@teselia/phone` `1.0.2` and `@teselia/otp` `1.0.1`. VoiceOver testing is still pending (#27).
+
 **Before any release, run `pnpm pack` in each component** to catch packing errors: the first `pnpm release` for these versions failed because `@teselia/shared` had no `version` for `workspace:*` (#107).
 
 ## How we work
@@ -127,7 +133,7 @@ Summary: `<tes-otp>`, one real `<input>` drawn as cells (not one input per chara
 - Commits: Conventional Commits (`feat:`, `fix:`, `docs:`, `chore:`...).
 - Code style: self-documenting code with minimal or no comments. Prefer clear names and small functions; comment only a non-obvious *why* that code cannot express.
 - `main` is protected: every change lands through a pull request (squash merge only), and the `Verify` CI check (typecheck, builds, tests in Chromium/Firefox/WebKit) must pass with the branch up to date.
-- Roadmaps: phone #31 / `v1.0.0` and otp #84 / `otp v1.0.0`, both done. Pick the next open issue from the current roadmap, in order; when there is none, ask what comes next.
+- Roadmaps: phone #31 / `v1.0.0`, otp #84 / `otp v1.0.0` and password #126 / `password v1.0.0`, all done. Pick the next open issue from the current roadmap, in order; when there is none, ask what comes next.
 - Branching: trunk-based. `main` is the only long-lived branch and is always releasable. Work happens in short-lived branches named after the change (`feat/phone-combobox`, `chore/monorepo-scaffold`), merged into `main` through a pull request with squash merge. No `dev` branch.
 - TypeScript is pinned to `~6.0`: TypeScript 7 is the native (Go) compiler and ships no JavaScript API, which `vue-tsc` and declaration generators need. Revisit when the Vue tooling supports it.
 
