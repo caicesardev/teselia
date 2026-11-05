@@ -410,7 +410,7 @@ The same rules as the other components: no errors while typing; they appear on b
 - [x] Browser tests cover show/hide (including hiding before submit and on reset), requirements and announcements, Caps Lock, paste, form submission/reset/validity and events, in Chromium, Firefox and WebKit.
 - [x] axe reports zero violations in every rendered state (empty, typing, requirements met, invalid, revealed, Caps Lock, disabled, readonly).
 - [x] The manual testing matrix (§5.5) is completed, and results are on the docs page (#124). Still open, like phone and OTP: VoiceOver and the final component with iCloud Keychain on iOS (#27), and a password manager extension (Bitwarden or 1Password).
-- [x] Bundle size measured and published in the README and docs: 6.6 KB gzip on npm, 30 KB for the CDN build with Vue.
+- [x] Bundle size measured and published in the README and docs: 6.5 KB gzip on npm, 30 KB for the CDN build with Vue.
 - [x] `pnpm pack` succeeds before the release (#125).
 - [x] `@teselia/password@1.0.0` published to npm on 2026-11-05, after explicit approval (#125).
 

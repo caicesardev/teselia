@@ -45,7 +45,7 @@
   "unpkg": "./dist/tes-otp.iife.js",
   "jsdelivr": "./dist/tes-otp.iife.js",
   "scripts": {
-    "build": "vite build && vite build --mode iife && vue-tsc -p tsconfig.build.json && node ../../scripts/check-public-types.mjs",
+    "build": "vite build && vite build --mode iife && vue-tsc -p tsconfig.build.json && node ../../scripts/check-public-types.mjs && node ../../scripts/check-built-css.mjs",
     "typecheck": "vue-tsc --noEmit"
   },
   "peerDependencies": {

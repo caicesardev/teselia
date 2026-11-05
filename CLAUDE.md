@@ -126,6 +126,8 @@ Summary: `<tes-password>`, a native `<input>` in the **light DOM** (not shadow D
 
 **Before any release, run `pnpm pack` in each component** to catch packing errors: the first `pnpm release` for these versions failed because `@teselia/shared` had no `version` for `workspace:*` (#107).
 
+**Tests and docs run the source, not `dist`.** Builds set `build.cssTarget` from `scripts/build-targets.ts` (the supported browsers), and `scripts/check-built-css.mjs` fails the build if `light-dark()` is lowered: until phone 1.0.2, otp 1.0.1 and password 1.0.0, every published build shipped with invalid colors because of that. Before a release, also load the built IIFE in a plain HTML page and look at it.
+
 ## How we work
 
 - Break work into small issues (1–2 hours each) with acceptance criteria.
