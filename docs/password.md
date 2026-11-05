@@ -4,10 +4,6 @@ Accessible password input with a show/hide button and, for new passwords, requir
 
 Design decisions and the full accessibility specification are in the [design document](https://github.com/caicesardev/teselia/blob/main/design/password.md).
 
-::: warning Not published yet
-`@teselia/password` `1.0.0` is planned for **November 4, 2026**. The demos run the current code; the installation commands below will work from that release.
-:::
-
 ## Demo
 
 ### Signing in
