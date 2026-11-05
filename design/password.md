@@ -404,14 +404,14 @@ The same rules as the other components: no errors while typing; they appear on b
 
 ### Definition of done for `1.0.0`
 
-- [ ] Everything in §3 "In" is implemented.
-- [ ] The password manager spike is done and D2 is final, with results in the docs.
-- [ ] Unit tests cover the rules (lengths, Unicode letters, symbols in other scripts, `passwordrules` output).
-- [ ] Browser tests cover show/hide (including hiding before submit and on reset), requirements and announcements, Caps Lock, paste, form submission/reset/validity and events, in Chromium, Firefox and WebKit.
-- [ ] axe reports zero violations in every rendered state (empty, typing, requirements met, invalid, revealed, Caps Lock, disabled, readonly).
-- [ ] The manual testing matrix (§5.5) is completed, and results are on the docs page.
-- [ ] Bundle size measured and published in the README and docs.
-- [ ] `pnpm pack` succeeds before the release.
+- [x] Everything in §3 "In" is implemented.
+- [x] The password manager spike is done and D2 is final, with results in the docs.
+- [x] Unit tests cover the rules (lengths, Unicode letters, symbols in other scripts, `passwordrules` output).
+- [x] Browser tests cover show/hide (including hiding before submit and on reset), requirements and announcements, Caps Lock, paste, form submission/reset/validity and events, in Chromium, Firefox and WebKit.
+- [x] axe reports zero violations in every rendered state (empty, typing, requirements met, invalid, revealed, Caps Lock, disabled, readonly).
+- [x] The manual testing matrix (§5.5) is completed, and results are on the docs page (#124). Still open, like phone and OTP: VoiceOver and the final component with iCloud Keychain on iOS (#27), and a password manager extension (Bitwarden or 1Password).
+- [x] Bundle size measured and published in the README and docs: 6.6 KB gzip on npm, 30 KB for the CDN build with Vue.
+- [x] `pnpm pack` succeeds before the release (#125).
 - [ ] `@teselia/password@1.0.0` published to npm (only after explicit approval).
 
 ### Milestones

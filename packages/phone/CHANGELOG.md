@@ -1,5 +1,12 @@
 # @teselia/phone
 
+## 1.0.2
+
+### Patch Changes
+
+- 43bb79f: Clicking the chevron of a disabled field no longer opens the country list.
+- 43bb79f: A disabled field now looks disabled, whether through the `disabled` attribute or a disabled `<fieldset>`: both controls use the muted text color, a muted fill and a `not-allowed` cursor, and the chevron turns muted. In Windows high contrast mode they use the system `GrayText` color. Before, a disabled field looked exactly like an enabled one.
+
 ## 1.0.1
 
 ### Patch Changes

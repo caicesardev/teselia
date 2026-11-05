@@ -40,8 +40,8 @@ const components = [
     name: 'Password',
     tag: '<tes-password>',
     link: '/password',
-    status: 'Coming Nov 4',
-    released: false,
+    status: 'v1.0',
+    released: true,
     summary: 'Password input with a show button and live requirements that password managers can fill, save and generate.',
   },
 ]
