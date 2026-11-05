@@ -401,11 +401,13 @@ Manual testing with real devices and assistive technology:
 
 | What | Browser | Result |
 | --- | --- | --- |
-| Password managers: save, fill, generate | Chrome, Brave, Firefox, Safari (iOS) | Passed on the test page (above). Pending with the final component. |
-| Keyboard only | Firefox, Brave (Windows) | Pending |
-| NVDA | Firefox, Brave (Windows) | Pending |
+| Password managers: save, fill, generate | Chrome, Brave, Firefox (Windows) | Passed |
+| Password managers: save, fill, generate | Safari (iOS) | Passed on the test page (above). Not tested yet with the final component. |
+| Keyboard only | Firefox, Brave (Windows) | Passed |
+| NVDA | Firefox, Brave (Windows) | Passed. Typed characters are read as "star", like in a native password field. |
+| Going back in history does not restore the password | Firefox, Brave (Windows) | Passed |
 | VoiceOver | Safari (iOS) | Not tested yet |
-| High contrast mode | Edge (Windows) | Pending |
-| 200% and 400% zoom, 320px width, text spacing | Chrome | Pending |
+| High contrast mode | Edge (Windows) | Passed |
+| 200% and 400% zoom, 320px width, text spacing | Chrome | Passed |
 
 The full specification is in the [design document](https://github.com/caicesardev/teselia/blob/main/design/password.md#5-accessibility-specification).
