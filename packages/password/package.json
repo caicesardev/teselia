@@ -1,6 +1,6 @@
 {
   "name": "@teselia/password",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Accessible password input with a show/hide button and live requirements, shipped as a framework-agnostic Web Component. Works with password managers. WCAG 2.2 AA by default.",
   "keywords": [
     "password",

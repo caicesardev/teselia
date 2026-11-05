@@ -1,6 +1,6 @@
 {
   "name": "@teselia/otp",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Accessible one-time code input (OTP), shipped as a framework-agnostic Web Component. One real input drawn as cells, so paste, SMS autofill and screen readers work. WCAG 2.2 AA by default.",
   "keywords": [
     "otp",
