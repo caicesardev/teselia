@@ -44,7 +44,7 @@ The npm build keeps Vue as a peer dependency, so apps that already use Vue don't
 
 | Build | Size (gzip) |
 | --- | --- |
-| npm, in an app that already uses Vue | 6.6 KB |
+| npm, in an app that already uses Vue | 6.5 KB |
 | CDN, including Vue | 30 KB |
 
 Importing the package registers the `<tes-password>` element. If `tes-password` is already taken on your page, register it under another name:
