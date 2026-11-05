@@ -8,15 +8,19 @@ Each component is a small, single-purpose form input that works in plain HTML, V
 
 ## Components
 
-| Package | Element | Description |
-| --- | --- | --- |
-| [`@teselia/phone`](./packages/phone) | `<tes-phone>` | International phone input with country calling code. Submits E.164. |
+| Package | Element | Description | Docs |
+| --- | --- | --- | --- |
+| [`@teselia/phone`](./packages/phone) | `<tes-phone>` | International phone input with a searchable country selector. Formats as you type and submits E.164. | [Phone](https://teselia.caicesardev.com/phone) |
+| [`@teselia/otp`](./packages/otp) | `<tes-otp>` | One-time code input drawn as cells over one real field, so paste, SMS autofill and screen readers work. | [OTP](https://teselia.caicesardev.com/otp) |
+| [`@teselia/password`](./packages/password) | `<tes-password>` | Password input with a show/hide button and live requirements. Password managers can fill, save and generate passwords. | [Password](https://teselia.caicesardev.com/password) |
+
+Install one with `npm install @teselia/phone vue`, or load it from a CDN with `<script src="https://cdn.jsdelivr.net/npm/@teselia/phone@1"></script>`.
 
 ## Principles
 
 - **Accessible by default.** Designed against WCAG 2.2 AA, keyboard-first, with automated tests in Chromium, Firefox and WebKit plus axe-core.
-- **Native forms.** Form-associated custom elements: validation, reset, disabled fieldsets and autofill work like on built-in inputs.
-- **Themeable.** CSS custom properties, `::part()` and custom states, with light and dark defaults.
+- **Native forms.** Validation, reset, disabled fieldsets and autofill work like on built-in inputs. Phone and OTP are form-associated custom elements; password renders a native input in the light DOM so password managers work in every browser.
+- **Themeable.** Shared CSS custom properties with light and dark defaults, plus `::part()` or documented classes, and custom states.
 - **Documented decisions.** Each component has a design document in [`design/`](./design).
 
 ## Development
